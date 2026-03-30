@@ -140,7 +140,7 @@ const Index = () => {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((font, i) => (
-                <FontCard key={font.name} {...font} index={i} />
+                <FontCard key={font.name} {...font} uploadedImage={uploadedImage} index={i} />
               ))}
             </div>
           </section>

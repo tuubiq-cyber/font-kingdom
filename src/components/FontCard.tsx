@@ -9,8 +9,8 @@ interface FontCardProps {
   reason?: string;
   fileUrl?: string | null;
   license?: string | null;
-  previewImage?: string | null;
   category?: string;
+  uploadedImage?: string | null;
   index: number;
 }
 
@@ -33,8 +33,8 @@ const FontCard = ({
   reason,
   fileUrl,
   license,
-  previewImage,
   category,
+  uploadedImage,
   index,
 }: FontCardProps) => {
   const handleDownload = () => {
@@ -61,13 +61,13 @@ const FontCard = ({
       className="font-card opacity-0 animate-fade-up"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Preview image or fallback */}
+      {/* Show the user's uploaded image */}
       <div className="bg-muted rounded-lg mb-4 overflow-hidden">
-        {previewImage ? (
+        {uploadedImage ? (
           <img
-            src={previewImage}
-            alt={`معاينة خط ${nameAr}`}
-            className="w-full h-36 object-contain bg-white"
+            src={uploadedImage}
+            alt="الصورة المرفوعة"
+            className="w-full h-36 object-contain bg-muted"
             loading="lazy"
           />
         ) : (
@@ -80,7 +80,6 @@ const FontCard = ({
       </div>
 
       <div className="space-y-2.5">
-        {/* Font name + category badge */}
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">
             <h3 className="text-foreground font-semibold text-base truncate">{nameAr}</h3>
@@ -93,17 +92,14 @@ const FontCard = ({
           )}
         </div>
 
-        {/* License */}
         {license && (
           <p className="text-muted-foreground text-[11px]">الترخيص: {license}</p>
         )}
 
-        {/* Reason */}
         {reason && (
           <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-2">{reason}</p>
         )}
 
-        {/* Confidence bar */}
         <div className="flex items-center gap-2">
           <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
             <div
@@ -114,12 +110,11 @@ const FontCard = ({
           <span className="text-[10px] text-muted-foreground font-medium">{confidence}%</span>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-2 pt-1">
           <button
             onClick={handleDownload}
             disabled={!fileUrl}
-            className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
+            className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-xs py-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-3.5 h-3.5" />
             تحميل
@@ -127,7 +122,7 @@ const FontCard = ({
           <button
             onClick={handleTry}
             disabled={!fileUrl}
-            className="btn-outline flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
+            className="btn-outline flex-1 flex items-center justify-center gap-1.5 text-xs py-2 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <ExternalLink className="w-3.5 h-3.5" />
             تجربة
