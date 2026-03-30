@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -13,9 +14,11 @@ serve(async (req) => {
 
   try {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { imageBase64 } = await req.json();
     if (!imageBase64 || typeof imageBase64 !== "string") {
@@ -25,19 +28,40 @@ serve(async (req) => {
       );
     }
 
-    const systemPrompt = `You are an expert Arabic typography and font identification specialist. 
-When given an image containing Arabic text, analyze the letterforms, stroke weights, terminals, baselines, and overall style to identify the most likely Arabic fonts used.
+    // Step 1: Get all fonts from our database
+    const { data: dbFonts } = await supabase.from("fonts").select("name, name_ar, style, file_url, license, preview_image_url");
+    const fontNames = (dbFonts ?? []).map(f => f.name).join(", ");
 
-Return a JSON array of up to 5 font matches. Each object must have:
-- "name": the English name of the font
-- "nameAr": the Arabic name of the font (without diacritics)
-- "style": the weight/style variant (e.g. "Regular", "Bold", "Light")
-- "confidence": a number from 0 to 100 representing your confidence
-- "reason": a brief Arabic explanation of why this font matches (without diacritics)
+    if (!fontNames) {
+      return new Response(
+        JSON.stringify({ fonts: [], error: "لا توجد خطوط في قاعدة البيانات بعد" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
-Only return the JSON array, nothing else. If no Arabic text is found, return an empty array [].`;
+    const imageUrl = imageBase64.startsWith("data:")
+      ? imageBase64
+      : `data:image/png;base64,${imageBase64}`;
 
-    const response = await fetch(
+    // Step 2: Identify fonts AND extract the Arabic text from the image
+    const systemPrompt = `You are an expert Arabic typography and font identification specialist.
+You have access ONLY to these fonts: ${fontNames}.
+
+When given an image containing Arabic text:
+1. Extract the Arabic text visible in the image.
+2. Identify which of the available fonts best match the text style.
+
+Return a JSON object with:
+- "extractedText": the Arabic text found in the image (string)
+- "matches": an array of up to 5 font matches from the available fonts ONLY. Each object must have:
+  - "name": the exact English name of the font from the available list
+  - "confidence": a number from 0 to 100
+  - "reason": a brief Arabic explanation (without diacritics)
+
+Only return the JSON object, nothing else. If no Arabic text is found, return {"extractedText": "", "matches": []}.
+IMPORTANT: Only match fonts from the provided list. Do not suggest fonts outside this list.`;
+
+    const identifyResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
       {
         method: "POST",
@@ -52,18 +76,8 @@ Only return the JSON array, nothing else. If no Arabic text is found, return an 
             {
               role: "user",
               content: [
-                {
-                  type: "text",
-                  text: "حدد الخطوط العربية المستخدمة في هذه الصورة",
-                },
-                {
-                  type: "image_url",
-                  image_url: {
-                    url: imageBase64.startsWith("data:")
-                      ? imageBase64
-                      : `data:image/png;base64,${imageBase64}`,
-                  },
-                },
+                { type: "text", text: "حدد الخطوط العربية المستخدمة في هذه الصورة واستخرج النص" },
+                { type: "image_url", image_url: { url: imageUrl } },
               ],
             },
           ],
@@ -71,45 +85,101 @@ Only return the JSON array, nothing else. If no Arabic text is found, return an 
       }
     );
 
-    if (!response.ok) {
-      if (response.status === 429) {
+    if (!identifyResponse.ok) {
+      if (identifyResponse.status === 429) {
         return new Response(
           JSON.stringify({ error: "تم تجاوز الحد المسموح، يرجى المحاولة لاحقا" }),
           { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      if (response.status === 402) {
+      if (identifyResponse.status === 402) {
         return new Response(
           JSON.stringify({ error: "يرجى اضافة رصيد لاستخدام الذكاء الاصطناعي" }),
           { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      const text = await response.text();
-      console.error("AI gateway error:", response.status, text);
-      throw new Error(`AI gateway error: ${response.status}`);
+      const text = await identifyResponse.text();
+      console.error("AI gateway error:", identifyResponse.status, text);
+      throw new Error(`AI gateway error: ${identifyResponse.status}`);
     }
 
-    const data = await response.json();
-    const content = data.choices?.[0]?.message?.content ?? "[]";
+    const identifyData = await identifyResponse.json();
+    const content = identifyData.choices?.[0]?.message?.content ?? "{}";
 
-    // Extract JSON from response (handle markdown code blocks)
     let jsonStr = content.trim();
     const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (jsonMatch) {
-      jsonStr = jsonMatch[1].trim();
-    }
+    if (jsonMatch) jsonStr = jsonMatch[1].trim();
 
-    let fonts;
+    let parsed: { extractedText?: string; matches?: any[] };
     try {
-      fonts = JSON.parse(jsonStr);
+      parsed = JSON.parse(jsonStr);
     } catch {
       console.error("Failed to parse AI response:", content);
-      fonts = [];
+      parsed = { extractedText: "", matches: [] };
     }
 
-    return new Response(JSON.stringify({ fonts }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+    const extractedText = parsed.extractedText || "";
+    const matches = parsed.matches || [];
+
+    // Step 3: Build font results enriched with DB data
+    const dbMap = new Map((dbFonts ?? []).map(f => [f.name.toLowerCase(), f]));
+    
+    // Step 4: Generate preview images for each matched font using AI
+    const enrichedFonts = await Promise.all(
+      matches.map(async (match: any) => {
+        const dbFont = dbMap.get(match.name.toLowerCase());
+        let previewImageUrl = dbFont?.preview_image_url || null;
+
+        // Generate AI preview image with the extracted text in the identified font style
+        if (extractedText && match.name) {
+          try {
+            const previewPrompt = `Create a clean, minimal image showing the following Arabic text rendered in ${match.name} font style. The text should be large, centered, on a pure white background. Text to render: "${extractedText}". Make it look like a professional font specimen/preview card. No decorations, just the text.`;
+            
+            const imgResponse = await fetch(
+              "https://ai.gateway.lovable.dev/v1/chat/completions",
+              {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${LOVABLE_API_KEY}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  model: "google/gemini-2.5-flash-image",
+                  messages: [{ role: "user", content: previewPrompt }],
+                  modalities: ["image", "text"],
+                }),
+              }
+            );
+
+            if (imgResponse.ok) {
+              const imgData = await imgResponse.json();
+              const generatedImg = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+              if (generatedImg) {
+                previewImageUrl = generatedImg;
+              }
+            }
+          } catch (imgErr) {
+            console.error("Preview image generation failed for", match.name, imgErr);
+          }
+        }
+
+        return {
+          name: match.name,
+          nameAr: dbFont?.name_ar || match.name,
+          style: dbFont?.style || "Regular",
+          confidence: match.confidence || 0,
+          reason: match.reason || "",
+          fileUrl: dbFont?.file_url || null,
+          license: dbFont?.license || null,
+          previewImage: previewImageUrl,
+        };
+      })
+    );
+
+    return new Response(
+      JSON.stringify({ fonts: enrichedFonts, extractedText }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (e) {
     console.error("identify-font error:", e);
     return new Response(
