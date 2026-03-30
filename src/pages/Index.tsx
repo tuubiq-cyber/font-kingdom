@@ -14,6 +14,8 @@ interface FontResult {
   confidence: number;
   reason?: string;
   fileUrl?: string | null;
+  license?: string | null;
+  previewImage?: string | null;
 }
 
 const fileToBase64 = (file: File): Promise<string> =>
@@ -57,18 +59,10 @@ const Index = () => {
 
       const fonts: FontResult[] = data?.fonts ?? [];
 
-      // Try to match AI results with database fonts for download links
-      const { data: dbFonts } = await supabase.from("fonts").select("name, file_url");
-      const dbMap = new Map((dbFonts ?? []).map((f) => [f.name.toLowerCase(), f.file_url]));
-      const enriched = fonts.map((f) => ({
-        ...f,
-        fileUrl: dbMap.get(f.name.toLowerCase()) ?? null,
-      }));
-
-      if (enriched.length === 0) {
-        toast.info("لم يتم العثور على خطوط عربية في الصورة");
+      if (fonts.length === 0) {
+        toast.info("لم يتم العثور على خطوط مطابقة في قاعدة البيانات");
       }
-      setResults(enriched);
+      setResults(fonts);
     } catch (e) {
       console.error(e);
       const msg = e instanceof Error ? e.message : "حدث خطا غير متوقع";
