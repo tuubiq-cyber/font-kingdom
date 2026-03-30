@@ -1,59 +1,76 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import UploadZone from "@/components/UploadZone";
 import SearchBar from "@/components/SearchBar";
 import FontCard from "@/components/FontCard";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 
 interface FontResult {
   name: string;
   nameAr: string;
   style: string;
   confidence: number;
+  reason?: string;
 }
 
-const mockResults: FontResult[] = [
-  { name: "Adobe Arabic", nameAr: "ادوبي عربي", style: "Bold", confidence: 94 },
-  { name: "Droid Arabic Naskh", nameAr: "درويد نسخ", style: "Regular", confidence: 87 },
-  { name: "Tajawal", nameAr: "تجول", style: "Medium", confidence: 72 },
-];
-
-const searchResults: FontResult[] = [
-  { name: "Amiri", nameAr: "اميري", style: "Regular", confidence: 100 },
-  { name: "Lateef", nameAr: "لطيف", style: "Regular", confidence: 95 },
-];
+const fileToBase64 = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
 
 const Index = () => {
   const [results, setResults] = useState<FontResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleImageUpload = (file: File) => {
+  const identifyFont = async (file: File) => {
     setIsLoading(true);
     setResults([]);
-    setUploadedImage(URL.createObjectURL(file));
+    setErrorMsg(null);
+
+    const objectUrl = URL.createObjectURL(file);
+    setUploadedImage(objectUrl);
     setShowUpload(false);
 
-    setTimeout(() => {
-      setResults(mockResults);
+    try {
+      const base64 = await fileToBase64(file);
+
+      const { data, error } = await supabase.functions.invoke("identify-font", {
+        body: { imageBase64: base64 },
+      });
+
+      if (error) throw new Error(error.message);
+
+      if (data?.error) {
+        toast.error(data.error);
+        setErrorMsg(data.error);
+        return;
+      }
+
+      const fonts: FontResult[] = data?.fonts ?? [];
+      if (fonts.length === 0) {
+        toast.info("لم يتم العثور على خطوط عربية في الصورة");
+      }
+      setResults(fonts);
+    } catch (e) {
+      console.error(e);
+      const msg = e instanceof Error ? e.message : "حدث خطا غير متوقع";
+      toast.error(msg);
+      setErrorMsg(msg);
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
   };
 
   const handleSearch = (_query: string) => {
-    setIsLoading(true);
-    setResults([]);
-    setUploadedImage(null);
-
-    setTimeout(() => {
-      setResults(searchResults);
-      setIsLoading(false);
-    }, 1000);
-  };
-
-  const handleImageSearch = (file: File) => {
-    handleImageUpload(file);
+    toast.info("البحث بالكلمة المفتاحية قيد التطوير");
   };
 
   return (
@@ -61,10 +78,9 @@ const Index = () => {
       <Header />
 
       <main className="container max-w-4xl mx-auto px-4 pb-16 space-y-6">
-        {/* Search + Add button row */}
         <div className="flex items-center gap-2">
           <div className="flex-1">
-            <SearchBar onSearch={handleSearch} onImageSearch={handleImageSearch} />
+            <SearchBar onSearch={handleSearch} onImageSearch={identifyFont} />
           </div>
           <button
             onClick={() => setShowUpload(!showUpload)}
@@ -75,21 +91,20 @@ const Index = () => {
           </button>
         </div>
 
-        {/* Upload zone - toggleable */}
         {showUpload && (
           <div className="opacity-0 animate-scale-in">
-            <UploadZone onImageUpload={handleImageUpload} isLoading={isLoading} />
+            <UploadZone onImageUpload={identifyFont} isLoading={isLoading} />
           </div>
         )}
 
-        {/* Loading spinner when no upload zone visible */}
         {isLoading && !showUpload && (
-          <div className="flex justify-center py-8">
+          <div className="flex flex-col items-center gap-3 py-8">
             <div className="w-10 h-10 border-2 border-olive/30 border-t-olive rounded-full animate-spin" />
+            <p className="text-muted-foreground text-sm">جاري تحليل الصورة بالذكاء الاصطناعي...</p>
           </div>
         )}
 
-        {uploadedImage && (
+        {uploadedImage && !isLoading && (
           <div className="flex justify-center opacity-0 animate-scale-in">
             <div className="rounded-xl overflow-hidden border border-border/50 max-w-sm">
               <img
@@ -99,6 +114,12 @@ const Index = () => {
                 loading="lazy"
               />
             </div>
+          </div>
+        )}
+
+        {errorMsg && !isLoading && (
+          <div className="text-center py-4">
+            <p className="text-destructive text-sm">{errorMsg}</p>
           </div>
         )}
 
