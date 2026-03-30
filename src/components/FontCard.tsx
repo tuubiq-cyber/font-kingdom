@@ -1,4 +1,4 @@
-import { Download, Type } from "lucide-react";
+import { Download, Type, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 
 interface FontCardProps {
@@ -7,27 +7,28 @@ interface FontCardProps {
   style: string;
   confidence: number;
   reason?: string;
+  fileUrl?: string | null;
   index: number;
 }
 
-const toGoogleFontsUrl = (fontName: string) => {
-  const slug = fontName.replace(/\s+/g, "+");
-  return `https://fonts.google.com/specimen/${slug}`;
-};
-
-const toGoogleFontsDownload = (fontName: string) => {
-  const slug = fontName.replace(/\s+/g, "+");
-  return `https://fonts.google.com/download?family=${slug}`;
-};
-
-const FontCard = ({ name, nameAr, style, confidence, reason, index }: FontCardProps) => {
+const FontCard = ({ name, nameAr, style, confidence, reason, fileUrl, index }: FontCardProps) => {
   const handleDownload = () => {
-    window.open(toGoogleFontsDownload(name), "_blank");
-    toast.info("اذا لم يبدا التحميل، قد لا يكون الخط متاحا على Google Fonts");
+    if (fileUrl) {
+      const a = document.createElement("a");
+      a.href = fileUrl;
+      a.download = `${name}.${fileUrl.split(".").pop()}`;
+      a.click();
+    } else {
+      // Fallback to Google Fonts
+      const slug = name.replace(/\s+/g, "+");
+      window.open(`https://fonts.google.com/download?family=${slug}`, "_blank");
+      toast.info("اذا لم يبدا التحميل، قد لا يكون الخط متاحا على Google Fonts");
+    }
   };
 
   const handleTry = () => {
-    window.open(toGoogleFontsUrl(name), "_blank");
+    const slug = name.replace(/\s+/g, "+");
+    window.open(`https://fonts.google.com/specimen/${slug}`, "_blank");
   };
 
   return (
@@ -73,7 +74,7 @@ const FontCard = ({ name, nameAr, style, confidence, reason, index }: FontCardPr
             onClick={handleTry}
             className="btn-outline flex-1 flex items-center justify-center gap-2 text-sm"
           >
-            <Type className="w-4 h-4" />
+            {fileUrl ? <ExternalLink className="w-4 h-4" /> : <Type className="w-4 h-4" />}
             تجربة
           </button>
         </div>
