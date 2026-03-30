@@ -125,58 +125,19 @@ Only return the JSON object, nothing else. If no Arabic text is found, return {"
     // Step 3: Build font results enriched with DB data
     const dbMap = new Map((dbFonts ?? []).map(f => [f.name.toLowerCase(), f]));
     
-    // Step 4: Generate preview images for each matched font using AI
-    const enrichedFonts = await Promise.all(
-      matches.map(async (match: any) => {
-        const dbFont = dbMap.get(match.name.toLowerCase());
-        let previewImageUrl = dbFont?.preview_image_url || null;
-
-        // Generate AI preview image with the extracted text in the identified font style
-        if (extractedText && match.name) {
-          try {
-            const previewPrompt = `Create a clean, minimal image showing the following Arabic text rendered in ${match.name} font style. The text should be large, centered, on a pure white background. Text to render: "${extractedText}". Make it look like a professional font specimen/preview card. No decorations, just the text.`;
-            
-            const imgResponse = await fetch(
-              "https://ai.gateway.lovable.dev/v1/chat/completions",
-              {
-                method: "POST",
-                headers: {
-                  Authorization: `Bearer ${LOVABLE_API_KEY}`,
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  model: "google/gemini-2.5-flash-image",
-                  messages: [{ role: "user", content: previewPrompt }],
-                  modalities: ["image", "text"],
-                }),
-              }
-            );
-
-            if (imgResponse.ok) {
-              const imgData = await imgResponse.json();
-              const generatedImg = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-              if (generatedImg) {
-                previewImageUrl = generatedImg;
-              }
-            }
-          } catch (imgErr) {
-            console.error("Preview image generation failed for", match.name, imgErr);
-          }
-        }
-
-        return {
-          name: match.name,
-          nameAr: dbFont?.name_ar || match.nameAr || match.name,
-          style: dbFont?.style || match.style || "Regular",
-          confidence: match.confidence || 0,
-          reason: match.reason || "",
-          fileUrl: dbFont?.file_url || null,
-          license: dbFont?.license || null,
-          previewImage: previewImageUrl,
-          category: match.category || "modern",
-        };
-      })
-    );
+    const enrichedFonts = matches.map((match: any) => {
+      const dbFont = dbMap.get(match.name.toLowerCase());
+      return {
+        name: match.name,
+        nameAr: dbFont?.name_ar || match.nameAr || match.name,
+        style: dbFont?.style || match.style || "Regular",
+        confidence: match.confidence || 0,
+        reason: match.reason || "",
+        fileUrl: dbFont?.file_url || null,
+        license: dbFont?.license || null,
+        category: match.category || "modern",
+      };
+    });
 
     return new Response(
       JSON.stringify({ fonts: enrichedFonts, extractedText }),

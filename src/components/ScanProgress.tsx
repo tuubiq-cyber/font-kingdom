@@ -2,13 +2,12 @@ import { useEffect, useState } from "react";
 import { ScanLine, Sparkles, CheckCircle2 } from "lucide-react";
 
 interface ScanProgressProps {
-  stage: "uploading" | "analyzing" | "generating" | "done";
+  stage: "uploading" | "analyzing" | "done";
 }
 
 const stages = [
   { key: "uploading", label: "رفع الصورة", icon: ScanLine },
   { key: "analyzing", label: "تحليل الخطوط العربية", icon: Sparkles },
-  { key: "generating", label: "انشاء المعاينة", icon: CheckCircle2 },
 ];
 
 const ScanProgress = ({ stage }: ScanProgressProps) => {

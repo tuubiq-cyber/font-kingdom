@@ -16,10 +16,10 @@ interface FontResult {
   reason?: string;
   fileUrl?: string | null;
   license?: string | null;
-  previewImage?: string | null;
+  category?: string;
 }
 
-type ScanStage = "uploading" | "analyzing" | "generating" | "done";
+type ScanStage = "uploading" | "analyzing" | "done";
 
 const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -64,11 +64,7 @@ const Index = () => {
         return;
       }
 
-      setScanStage("generating");
       const fonts: FontResult[] = data?.fonts ?? [];
-
-      // Small delay to show the generating stage
-      await new Promise((r) => setTimeout(r, 600));
       setScanStage("done");
 
       if (fonts.length === 0) {
@@ -144,7 +140,7 @@ const Index = () => {
             </h2>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {results.map((font, i) => (
-                <FontCard key={font.name} {...font} index={i} />
+                <FontCard key={font.name} {...font} uploadedImage={uploadedImage} index={i} />
               ))}
             </div>
           </section>
