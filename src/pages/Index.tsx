@@ -13,6 +13,7 @@ interface FontResult {
   style: string;
   confidence: number;
   reason?: string;
+  fileUrl?: string | null;
 }
 
 const fileToBase64 = (file: File): Promise<string> =>
