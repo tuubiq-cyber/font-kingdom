@@ -8,10 +8,12 @@ interface FontCardProps {
   confidence: number;
   reason?: string;
   fileUrl?: string | null;
+  license?: string | null;
+  previewImage?: string | null;
   index: number;
 }
 
-const FontCard = ({ name, nameAr, style, confidence, reason, fileUrl, index }: FontCardProps) => {
+const FontCard = ({ name, nameAr, style, confidence, reason, fileUrl, license, previewImage, index }: FontCardProps) => {
   const handleDownload = () => {
     if (fileUrl) {
       const a = document.createElement("a");
@@ -19,16 +21,16 @@ const FontCard = ({ name, nameAr, style, confidence, reason, fileUrl, index }: F
       a.download = `${name}.${fileUrl.split(".").pop()}`;
       a.click();
     } else {
-      // Fallback to Google Fonts
-      const slug = name.replace(/\s+/g, "+");
-      window.open(`https://fonts.google.com/download?family=${slug}`, "_blank");
-      toast.info("اذا لم يبدا التحميل، قد لا يكون الخط متاحا على Google Fonts");
+      toast.error("ملف الخط غير متوفر حاليا");
     }
   };
 
   const handleTry = () => {
-    const slug = name.replace(/\s+/g, "+");
-    window.open(`https://fonts.google.com/specimen/${slug}`, "_blank");
+    if (fileUrl) {
+      window.open(fileUrl, "_blank");
+    } else {
+      toast.info("ملف الخط غير متوفر للتجربة");
+    }
   };
 
   return (
@@ -36,10 +38,21 @@ const FontCard = ({ name, nameAr, style, confidence, reason, fileUrl, index }: F
       className="font-card opacity-0 animate-fade-up"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      <div className="bg-muted rounded-lg p-6 mb-5">
-        <p className="text-2xl text-foreground text-center leading-relaxed" dir="rtl">
-          مملكة الخطوط العربية
-        </p>
+      <div className="bg-muted rounded-lg mb-5 overflow-hidden">
+        {previewImage ? (
+          <img
+            src={previewImage}
+            alt={`معاينة خط ${nameAr}`}
+            className="w-full h-40 object-contain bg-white"
+            loading="lazy"
+          />
+        ) : (
+          <div className="p-6">
+            <p className="text-2xl text-foreground text-center leading-relaxed" dir="rtl">
+              مملكة الخطوط العربية
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -47,6 +60,10 @@ const FontCard = ({ name, nameAr, style, confidence, reason, fileUrl, index }: F
           <h3 className="text-foreground font-semibold text-lg">{nameAr}</h3>
           <p className="text-muted-foreground text-sm">{name} · {style}</p>
         </div>
+
+        {license && (
+          <p className="text-muted-foreground text-xs">الترخيص: {license}</p>
+        )}
 
         {reason && (
           <p className="text-muted-foreground text-xs leading-relaxed">{reason}</p>
@@ -65,16 +82,18 @@ const FontCard = ({ name, nameAr, style, confidence, reason, fileUrl, index }: F
         <div className="flex gap-2 pt-1">
           <button
             onClick={handleDownload}
-            className="btn-primary flex-1 flex items-center justify-center gap-2 text-sm"
+            disabled={!fileUrl}
+            className="btn-primary flex-1 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Download className="w-4 h-4" />
             تحميل
           </button>
           <button
             onClick={handleTry}
-            className="btn-outline flex-1 flex items-center justify-center gap-2 text-sm"
+            disabled={!fileUrl}
+            className="btn-outline flex-1 flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {fileUrl ? <ExternalLink className="w-4 h-4" /> : <Type className="w-4 h-4" />}
+            <ExternalLink className="w-4 h-4" />
             تجربة
           </button>
         </div>

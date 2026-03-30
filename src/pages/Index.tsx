@@ -14,6 +14,8 @@ interface FontResult {
   confidence: number;
   reason?: string;
   fileUrl?: string | null;
+  license?: string | null;
+  previewImage?: string | null;
 }
 
 const fileToBase64 = (file: File): Promise<string> =>
