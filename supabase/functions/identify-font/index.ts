@@ -43,23 +43,24 @@ serve(async (req) => {
       ? imageBase64
       : `data:image/png;base64,${imageBase64}`;
 
-    // Step 2: Identify fonts AND extract the Arabic text from the image
-    const systemPrompt = `You are an expert Arabic typography and font identification specialist.
-You have access ONLY to these fonts: ${fontNames}.
+    // Step 2: Identify fonts from ALL web sources and extract text
+    const systemPrompt = `You are an expert Arabic typography and font identification specialist with deep knowledge of ALL Arabic fonts available across the web — including Google Fonts, Adobe Fonts, commercial foundries, open-source projects, and any other source.
 
 When given an image containing Arabic text:
 1. Extract the Arabic text visible in the image.
-2. Identify which of the available fonts best match the text style.
+2. Identify the most likely Arabic fonts used based on letterforms, stroke weights, terminals, and overall style.
 
 Return a JSON object with:
 - "extractedText": the Arabic text found in the image (string)
-- "matches": an array of up to 5 font matches from the available fonts ONLY. Each object must have:
-  - "name": the exact English name of the font from the available list
+- "matches": an array of up to 5 font matches. Each object must have:
+  - "name": the English name of the font
+  - "nameAr": the Arabic name of the font (without diacritics)
+  - "style": the weight/style variant (e.g. "Regular", "Bold", "Light")
   - "confidence": a number from 0 to 100
   - "reason": a brief Arabic explanation (without diacritics)
 
 Only return the JSON object, nothing else. If no Arabic text is found, return {"extractedText": "", "matches": []}.
-IMPORTANT: Only match fonts from the provided list. Do not suggest fonts outside this list.`;
+Search across ALL known Arabic fonts globally.`;
 
     const identifyResponse = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
