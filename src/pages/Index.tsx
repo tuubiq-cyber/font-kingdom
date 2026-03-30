@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import UploadZone from "@/components/UploadZone";
 import SearchBar from "@/components/SearchBar";
 import FontCard from "@/components/FontCard";
+import ScanProgress from "@/components/ScanProgress";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
@@ -18,6 +19,8 @@ interface FontResult {
   previewImage?: string | null;
 }
 
+type ScanStage = "uploading" | "analyzing" | "generating" | "done";
+
 const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -29,6 +32,7 @@ const fileToBase64 = (file: File): Promise<string> =>
 const Index = () => {
   const [results, setResults] = useState<FontResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [scanStage, setScanStage] = useState<ScanStage>("uploading");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -37,14 +41,17 @@ const Index = () => {
     setIsLoading(true);
     setResults([]);
     setErrorMsg(null);
+    setScanStage("uploading");
 
     const objectUrl = URL.createObjectURL(file);
     setUploadedImage(objectUrl);
     setShowUpload(false);
 
     try {
+      setScanStage("uploading");
       const base64 = await fileToBase64(file);
 
+      setScanStage("analyzing");
       const { data, error } = await supabase.functions.invoke("identify-font", {
         body: { imageBase64: base64 },
       });
@@ -57,10 +64,15 @@ const Index = () => {
         return;
       }
 
+      setScanStage("generating");
       const fonts: FontResult[] = data?.fonts ?? [];
 
+      // Small delay to show the generating stage
+      await new Promise((r) => setTimeout(r, 600));
+      setScanStage("done");
+
       if (fonts.length === 0) {
-        toast.info("لم يتم العثور على خطوط مطابقة في قاعدة البيانات");
+        toast.info("لم يتم العثور على خطوط عربية في الصورة");
       }
       setResults(fonts);
     } catch (e) {
@@ -69,7 +81,8 @@ const Index = () => {
       toast.error(msg);
       setErrorMsg(msg);
     } finally {
-      setIsLoading(false);
+      // Small delay before hiding progress
+      setTimeout(() => setIsLoading(false), 400);
     }
   };
 
@@ -102,10 +115,7 @@ const Index = () => {
         )}
 
         {isLoading && !showUpload && (
-          <div className="flex flex-col items-center gap-3 py-8">
-            <div className="w-10 h-10 border-2 border-olive/30 border-t-olive rounded-full animate-spin" />
-            <p className="text-muted-foreground text-sm">جاري تحليل الصورة بالذكاء الاصطناعي...</p>
-          </div>
+          <ScanProgress stage={scanStage} />
         )}
 
         {uploadedImage && !isLoading && (
