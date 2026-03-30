@@ -8,7 +8,6 @@ interface ScanProgressProps {
 const stages = [
   { key: "uploading", label: "رفع الصورة", icon: ScanLine },
   { key: "analyzing", label: "تحليل الخطوط العربية", icon: Sparkles },
-  { key: "generating", label: "انشاء المعاينة", icon: CheckCircle2 },
 ];
 
 const ScanProgress = ({ stage }: ScanProgressProps) => {

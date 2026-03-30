@@ -19,7 +19,7 @@ interface FontResult {
   category?: string;
 }
 
-type ScanStage = "uploading" | "analyzing" | "generating" | "done";
+type ScanStage = "uploading" | "analyzing" | "done";
 
 const fileToBase64 = (file: File): Promise<string> =>
   new Promise((resolve, reject) => {
