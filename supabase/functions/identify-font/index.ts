@@ -173,6 +173,7 @@ Only return the JSON object, nothing else. If no Arabic text is found, return {"
           fileUrl: dbFont?.file_url || null,
           license: dbFont?.license || null,
           previewImage: previewImageUrl,
+          category: match.category || "modern",
         };
       })
     );
