@@ -16,7 +16,7 @@ interface FontResult {
   reason?: string;
   fileUrl?: string | null;
   license?: string | null;
-  previewImage?: string | null;
+  category?: string;
 }
 
 type ScanStage = "uploading" | "analyzing" | "generating" | "done";
