@@ -30,14 +30,7 @@ serve(async (req) => {
 
     // Step 1: Get all fonts from our database
     const { data: dbFonts } = await supabase.from("fonts").select("name, name_ar, style, file_url, license, preview_image_url");
-    const fontNames = (dbFonts ?? []).map(f => f.name).join(", ");
-
-    if (!fontNames) {
-      return new Response(
-        JSON.stringify({ fonts: [], error: "لا توجد خطوط في قاعدة البيانات بعد" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const fontNames = (dbFonts ?? []).map(f => f.name);
 
     const imageUrl = imageBase64.startsWith("data:")
       ? imageBase64
