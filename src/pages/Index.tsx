@@ -64,11 +64,6 @@ const Index = () => {
         return;
       }
 
-      setScanStage("generating");
-      const fonts: FontResult[] = data?.fonts ?? [];
-
-      // Small delay to show the generating stage
-      await new Promise((r) => setTimeout(r, 600));
       setScanStage("done");
 
       if (fonts.length === 0) {
