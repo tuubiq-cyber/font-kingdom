@@ -166,8 +166,8 @@ Search across ALL known Arabic fonts globally.`;
 
         return {
           name: match.name,
-          nameAr: dbFont?.name_ar || match.name,
-          style: dbFont?.style || "Regular",
+          nameAr: dbFont?.name_ar || match.nameAr || match.name,
+          style: dbFont?.style || match.style || "Regular",
           confidence: match.confidence || 0,
           reason: match.reason || "",
           fileUrl: dbFont?.file_url || null,
