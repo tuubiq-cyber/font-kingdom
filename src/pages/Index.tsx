@@ -64,6 +64,7 @@ const Index = () => {
         return;
       }
 
+      const fonts: FontResult[] = data?.fonts ?? [];
       setScanStage("done");
 
       if (fonts.length === 0) {
