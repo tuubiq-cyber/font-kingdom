@@ -23,26 +23,41 @@ serve(async (req) => {
       );
     }
 
-    const prompt = `You are a font expert. Search for the Arabic font "${fontName}" across these major font platforms and provide REAL, verified download links.
+    const prompt = `You are a world-class Arabic font expert. Search for the font "${fontName}" across ALL of these major official font platforms. Return REAL, verified results ONLY.
 
-Platforms to search:
-- Google Fonts (fonts.google.com) — use googleapis.com CSS links
-- DaFont Arabic (dafontfree.io, dafonts.co)
-- Font Squirrel (fontsquirrel.com)
-- ArabFonts (arbfonts.com)
-- Fontspace (fontspace.com)
-- 1001fonts (1001fonts.com)
-- FontFace (fontface.me)
-- Arfonts (arfonts.net)
+OFFICIAL PLATFORMS TO SEARCH (ALL 20):
+1. Google Fonts — https://fonts.google.com (use googleapis.com CSS links for download)
+2. Adobe Fonts — https://fonts.adobe.com
+3. MyFonts — https://www.myfonts.com
+4. Font Squirrel — https://www.fontsquirrel.com
+5. DaFont — https://www.dafont.com
+6. Fontspace — https://www.fontspace.com
+7. 1001 Fonts — https://www.1001fonts.com
+8. ArabFonts (عرب فونتس) — https://arbfonts.com
+9. Arfonts — https://arfonts.net
+10. FontFace — https://fontface.me
+11. Behance — https://www.behance.net (font projects)
+12. Creative Market — https://creativemarket.com
+13. Envato Elements — https://elements.envato.com
+14. Font Spring — https://www.fontspring.com
+15. Urban Fonts — https://www.urbanfonts.com
+16. Abstract Fonts — https://www.abstractfonts.com
+17. FFonts — https://www.ffonts.net
+18. Arabic Typography — https://arabictypography.com
+19. Tasmeem — https://www.tasmeem.co
+20. Linotype — https://www.linotype.com
 
 ${extractedText ? `The text in the image reads: "${extractedText}"` : ""}
 
-IMPORTANT RULES:
-1. Only return fonts that ACTUALLY EXIST on these platforms
-2. For Google Fonts, use the format: https://fonts.googleapis.com/css2?family=FONTNAME&display=swap
-3. Provide the DIRECT download page URL for each platform
-4. Include similar/alternative Arabic fonts if the exact font is not found
-5. For each result include: file format (TTF/OTF/WOFF2), whether it's free or commercial
+CRITICAL RULES:
+1. Search ALL 20 platforms above — return a result for EACH platform where this font or a similar one exists
+2. Only return fonts that ACTUALLY EXIST — never fabricate URLs
+3. For Google Fonts: use https://fonts.googleapis.com/css2?family=FONTNAME&display=swap
+4. For each platform provide the DIRECT page URL where the user can download the font
+5. If the exact font is not found on a platform, suggest the closest SIMILAR Arabic font available there
+6. Mark exact matches vs similar suggestions clearly
+7. Include file format (TTF/OTF/WOFF2) and license type (free/commercial/personal)
+8. Return at least 10 results from different platforms
 
 Return ONLY a JSON object:
 {
@@ -53,7 +68,7 @@ Return ONLY a JSON object:
       "source": "Platform name",
       "sourceUrl": "Direct download page URL",
       "downloadUrl": "Direct file download URL if available",
-      "confidence": 90,
+      "confidence": 95,
       "description": "وصف مختصر بالعربية",
       "format": "TTF",
       "license": "free",
