@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Upload, Image as ImageIcon } from "lucide-react";
+import { validateImageUpload } from "@/lib/sanitize";
+import { toast } from "sonner";
 
 interface UploadZoneProps {
   onImageUpload: (file: File) => void;
