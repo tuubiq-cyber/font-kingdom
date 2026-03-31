@@ -53,7 +53,7 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png"
         className="hidden"
         onChange={handleChange}
       />
