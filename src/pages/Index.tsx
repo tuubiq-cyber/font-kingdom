@@ -7,7 +7,7 @@ import ColorPicker from "@/components/ColorPicker";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
 import WebFontResults from "@/components/WebFontResults";
-import { Send, ArrowRight, Bug } from "lucide-react";
+import { Send, ArrowRight, Bug, Image as ImageIcon, Search, Type } from "lucide-react";
 import { toast } from "sonner";
 import {
   normalizeImage,
@@ -36,7 +36,7 @@ interface FontResult {
   downloadUrl?: string | null;
 }
 
-type Step = "upload" | "crop" | "details" | "results";
+type Step = "home" | "upload" | "crop" | "details" | "results" | "nameSearch";
 type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "web" | "ranking";
 
 const stageLabels: Record<ScanStage, string> = {
@@ -57,7 +57,7 @@ const fileToBase64 = (blob: Blob): Promise<string> =>
   });
 
 const Index = () => {
-  const [step, setStep] = useState<Step>("upload");
+  const [step, setStep] = useState<Step>("home");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
@@ -244,7 +244,7 @@ const Index = () => {
   };
 
   const reset = () => {
-    setStep("upload");
+    setStep("home");
     setUploadedImage(null);
     setCroppedImage(null);
     setCroppedBlob(null);
@@ -254,6 +254,68 @@ const Index = () => {
     setResults([]);
     setWebResults([]);
     setErrorMsg(null);
+    setNameQuery("");
+    setNameResults([]);
+  };
+
+  const [nameQuery, setNameQuery] = useState("");
+  const [nameResults, setNameResults] = useState<FontResult[]>([]);
+  const [nameLoading, setNameLoading] = useState(false);
+
+  const handleNameSearch = async () => {
+    if (!nameQuery.trim()) return;
+    setNameLoading(true);
+    setNameResults([]);
+    try {
+      const { data, error } = await supabase
+        .from("fonts_library")
+        .select("*");
+      if (error) throw new Error(error.message);
+
+      const { data: allFontFiles } = await supabase
+        .from("font_files")
+        .select("*");
+
+      const fontFilesMap = new Map<string, FontFile[]>();
+      if (allFontFiles) {
+        for (const ff of allFontFiles) {
+          const list = fontFilesMap.get(ff.font_id) || [];
+          list.push({ weight: ff.weight, file_url: ff.file_url });
+          fontFilesMap.set(ff.font_id, list);
+        }
+      }
+
+      const q = nameQuery.trim().toLowerCase();
+      const matched = (data ?? [])
+        .filter((f: any) =>
+          f.font_name?.toLowerCase().includes(q) ||
+          f.font_name_ar?.includes(nameQuery.trim())
+        )
+        .map((f: any) => {
+          const files = fontFilesMap.get(f.id) || [];
+          return {
+            name: f.font_name,
+            nameAr: f.font_name_ar,
+            style: f.style,
+            confidence: 100,
+            isPerfectMatch: true,
+            reason: "مطابقة بالاسم",
+            fileUrl: files.length > 0 ? files[0].file_url : f.download_url,
+            license: f.license,
+            category: f.category,
+            previewImageUrl: f.preview_image_url,
+            fontFiles: files,
+            downloadUrl: f.download_url,
+          } as FontResult;
+        });
+
+      setNameResults(matched);
+      if (matched.length === 0) toast.info("لم يتم العثور على خط بهذا الاسم");
+    } catch (e) {
+      toast.error("حدث خطأ اثناء البحث");
+    } finally {
+      setNameLoading(false);
+    }
   };
 
   return (
@@ -261,7 +323,37 @@ const Index = () => {
       <Header />
 
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6">
-        {/* Step indicators */}
+        {/* Home: Two main buttons */}
+        {step === "home" && (
+          <div className="opacity-0 animate-scale-in space-y-6 pt-4">
+            <p className="text-center text-muted-foreground text-sm">اختر طريقة البحث عن الخط</p>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setStep("upload")}
+                className="font-card flex flex-col items-center gap-3 py-8 px-4 hover:border-primary/40 transition-colors cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                  <ImageIcon className="w-6 h-6 text-primary" />
+                </div>
+                <span className="text-foreground font-medium text-sm">بحث بالصورة</span>
+                <span className="text-muted-foreground text-xs text-center">ارفع صورة الخط للتعرف عليه</span>
+              </button>
+              <button
+                onClick={() => setStep("nameSearch")}
+                className="font-card flex flex-col items-center gap-3 py-8 px-4 hover:border-primary/40 transition-colors cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                  <Type className="w-6 h-6 text-secondary" />
+                </div>
+                <span className="text-foreground font-medium text-sm">بحث بالاسم</span>
+                <span className="text-muted-foreground text-xs text-center">ابحث عن خط بكتابة اسمه</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step indicators (only for image search flow) */}
+        {["upload", "crop", "details", "results"].includes(step) && (
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           {["رفع", "قص", "تفاصيل", "نتائج"].map((label, i) => {
             const steps: Step[] = ["upload", "crop", "details", "results"];
@@ -280,6 +372,7 @@ const Index = () => {
             );
           })}
         </div>
+        )}
 
         {/* Step 1: Upload */}
         {step === "upload" && (
@@ -390,6 +483,61 @@ const Index = () => {
                 بحث جديد
               </button>
             )}
+          </div>
+        )}
+
+        {/* Name Search */}
+        {step === "nameSearch" && (
+          <div className="space-y-6 opacity-0 animate-scale-in">
+            <div className="font-card space-y-4">
+              <label className="text-sm text-muted-foreground">ابحث عن خط بكتابة اسمه</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={nameQuery}
+                  onChange={(e) => setNameQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleNameSearch()}
+                  placeholder="مثال: Cairo أو القاهرة"
+                  className="flex-1 bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                />
+                <button
+                  onClick={handleNameSearch}
+                  disabled={nameLoading || !nameQuery.trim()}
+                  className="btn-primary px-4 py-2.5 flex items-center gap-2 text-sm"
+                >
+                  <Search className="w-4 h-4" />
+                  بحث
+                </button>
+              </div>
+            </div>
+
+            {nameLoading && (
+              <div className="flex justify-center py-8">
+                <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              </div>
+            )}
+
+            {!nameLoading && nameResults.length > 0 && (
+              <section className="space-y-4 opacity-0 animate-fade-up">
+                <h2 className="text-lg font-semibold text-foreground">نتائج البحث</h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {nameResults.map((font, i) => (
+                    <FontCard
+                      key={font.name}
+                      {...font}
+                      uploadedImage={null}
+                      typedText={nameQuery}
+                      index={i}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <button onClick={reset} className="btn-outline w-full flex items-center justify-center gap-2">
+              <ArrowRight className="w-4 h-4" />
+              العودة للرئيسية
+            </button>
           </div>
         )}
       </main>
