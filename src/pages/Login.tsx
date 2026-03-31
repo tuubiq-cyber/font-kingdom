@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Lock, UserPlus, Crown, ArrowRight, ShieldCheck } from "lucide-react";
+import { Lock, UserPlus, Crown, ArrowRight, ShieldCheck, Phone } from "lucide-react";
 import { Link } from "react-router-dom";
 import { loginRateLimiter, validatePassword, sanitizeEmail, isValidEmail } from "@/lib/security";
 
