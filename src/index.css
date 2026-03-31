@@ -68,7 +68,7 @@
 
 @layer components {
   .upload-zone {
-    @apply border-2 border-dashed border-olive/30 rounded-2xl p-12 
+    @apply border-2 border-dashed border-olive/30 rounded-2xl p-6 sm:p-10
            transition-all duration-300 ease-out cursor-pointer
            hover:border-olive/60 hover:bg-surface-elevated/50;
   }
