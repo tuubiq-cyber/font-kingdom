@@ -316,7 +316,7 @@ const Index = () => {
                 </div>
                 <button onClick={handleSubmitRequest} disabled={isLoading} className="btn-primary-interactive w-full flex items-center justify-center gap-2">
                   <Send className="w-4 h-4" />
-                  ارسال للتعرف اليدوي
+                  {t("sendForReview")}
                 </button>
               </div>
             )}
