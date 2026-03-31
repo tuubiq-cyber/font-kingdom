@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import AdminFonts from "./pages/AdminFonts";
 import FontTraining from "./pages/FontTraining";
+import ModelBrain from "./pages/ModelBrain";
 import AdminQueue from "./pages/AdminQueue";
 import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
