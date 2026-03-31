@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -17,6 +17,12 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
+
+interface FontRecord {
+  font_name: string;
+  download_url: string | null;
+  font_file_url: string | null;
+}
 
 interface QueueItem {
   id: string;
@@ -43,6 +49,54 @@ const AdminQueue = () => {
   const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
+  const [knownFonts, setKnownFonts] = useState<FontRecord[]>([]);
+
+  // Load previously resolved fonts for autocomplete
+  useEffect(() => {
+    const loadKnownFonts = async () => {
+      // From font_dataset
+      const { data: dataset } = await supabase
+        .from("font_dataset")
+        .select("font_name, metadata_json");
+      
+      // From resolved queue items
+      const { data: resolved } = await supabase
+        .from("manual_identification_queue")
+        .select("assigned_font_name, admin_download_url")
+        .eq("status", "resolved");
+
+      const fontsMap = new Map<string, FontRecord>();
+
+      dataset?.forEach((d: any) => {
+        const meta = d.metadata_json as any;
+        fontsMap.set(d.font_name, {
+          font_name: d.font_name,
+          download_url: meta?.download_url || null,
+          font_file_url: meta?.font_file_url || null,
+        });
+      });
+
+      resolved?.forEach((r: any) => {
+        if (r.assigned_font_name && !fontsMap.has(r.assigned_font_name)) {
+          fontsMap.set(r.assigned_font_name, {
+            font_name: r.assigned_font_name,
+            download_url: r.admin_download_url || null,
+            font_file_url: null,
+          });
+        }
+      });
+
+      setKnownFonts(Array.from(fontsMap.values()));
+    };
+    loadKnownFonts();
+  }, []);
+
+  const handleAutofill = (itemId: string, font: FontRecord) => {
+    setFontNameInput((p) => ({ ...p, [itemId]: font.font_name }));
+    if (font.download_url) {
+      setDownloadUrlInput((p) => ({ ...p, [itemId]: font.download_url! }));
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
@@ -234,6 +288,8 @@ const AdminQueue = () => {
                   downloadUrl={downloadUrlInput[item.id] || ""}
                   fontFile={fontFileInput[item.id] || null}
                   notes={notesInput[item.id] || ""}
+                  knownFonts={knownFonts}
+                  onAutofill={(f) => handleAutofill(item.id, f)}
                   onFontNameChange={(v) => setFontNameInput((p) => ({ ...p, [item.id]: v }))}
                   onDownloadUrlChange={(v) => setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))}
                   onFontFileChange={(f) => setFontFileInput((p) => ({ ...p, [item.id]: f }))}
@@ -274,6 +330,8 @@ const AdminQueue = () => {
                   downloadUrl={downloadUrlInput[item.id] || ""}
                   fontFile={fontFileInput[item.id] || null}
                   notes={notesInput[item.id] || ""}
+                  knownFonts={knownFonts}
+                  onAutofill={(f) => handleAutofill(item.id, f)}
                   onFontNameChange={(v) => setFontNameInput((p) => ({ ...p, [item.id]: v }))}
                   onDownloadUrlChange={(v) => setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))}
                   onFontFileChange={(f) => setFontFileInput((p) => ({ ...p, [item.id]: f }))}
@@ -368,6 +426,8 @@ interface QueueCardProps {
   downloadUrl: string;
   fontFile: File | null;
   notes: string;
+  knownFonts: FontRecord[];
+  onAutofill: (font: FontRecord) => void;
   onFontNameChange: (v: string) => void;
   onDownloadUrlChange: (v: string) => void;
   onFontFileChange: (f: File | null) => void;
@@ -384,6 +444,8 @@ const QueueCard = ({
   downloadUrl,
   fontFile,
   notes,
+  knownFonts,
+  onAutofill,
   onFontNameChange,
   onDownloadUrlChange,
   onFontFileChange,
@@ -394,6 +456,15 @@ const QueueCard = ({
   isCorrection,
 }: QueueCardProps) => {
   const fileInputId = `file-${item.id}`;
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const suggestions = useMemo(() => {
+    if (!fontName || fontName.length < 2) return [];
+    const q = fontName.toLowerCase();
+    return knownFonts
+      .filter((f) => f.font_name.toLowerCase().includes(q))
+      .slice(0, 5);
+  }, [fontName, knownFonts]);
 
   return (
     <div
@@ -429,13 +500,45 @@ const QueueCard = ({
           </div>
 
           <div className="space-y-2">
-            <input
-              type="text"
-              value={fontName}
-              onChange={(e) => onFontNameChange(e.target.value)}
-              placeholder="اسم الخط (مطلوب)"
-              className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-            />
+            {/* Font name with autocomplete */}
+            <div className="relative">
+              <input
+                type="text"
+                value={fontName}
+                onChange={(e) => {
+                  onFontNameChange(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                placeholder="اسم الخط (مطلوب)"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              />
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 z-10 mt-1 bg-card border border-border rounded-lg shadow-lg overflow-hidden">
+                  {suggestions.map((s) => (
+                    <button
+                      key={s.font_name}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={() => {
+                        onAutofill(s);
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full text-right px-3 py-2 text-sm text-foreground hover:bg-muted transition-colors flex items-center justify-between gap-2"
+                    >
+                      <span className="truncate">{s.font_name}</span>
+                      {s.download_url && (
+                        <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded shrink-0">
+                          يحتوي رابط
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center gap-1.5">
               <LinkIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
               <input
@@ -448,7 +551,7 @@ const QueueCard = ({
               />
             </div>
 
-            {/* Font file upload - separated input from label to fix click bug */}
+            {/* Font file upload */}
             <input
               id={fileInputId}
               type="file"
