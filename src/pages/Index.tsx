@@ -327,7 +327,7 @@ const Index = () => {
         {step === "submitting" && (
           <div className="flex flex-col items-center gap-4 py-12 animate-fade-in">
             <div className="w-12 h-12 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-            <p className="text-foreground font-medium text-sm">جاري ارسال طلبك للمشرفين...</p>
+            <p className="text-foreground font-medium text-sm">{t("submitting")}</p>
           </div>
         )}
 
