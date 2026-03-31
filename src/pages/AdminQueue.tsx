@@ -49,6 +49,54 @@ const AdminQueue = () => {
   const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
+  const [knownFonts, setKnownFonts] = useState<FontRecord[]>([]);
+
+  // Load previously resolved fonts for autocomplete
+  useEffect(() => {
+    const loadKnownFonts = async () => {
+      // From font_dataset
+      const { data: dataset } = await supabase
+        .from("font_dataset")
+        .select("font_name, metadata_json");
+      
+      // From resolved queue items
+      const { data: resolved } = await supabase
+        .from("manual_identification_queue")
+        .select("assigned_font_name, admin_download_url")
+        .eq("status", "resolved");
+
+      const fontsMap = new Map<string, FontRecord>();
+
+      dataset?.forEach((d: any) => {
+        const meta = d.metadata_json as any;
+        fontsMap.set(d.font_name, {
+          font_name: d.font_name,
+          download_url: meta?.download_url || null,
+          font_file_url: meta?.font_file_url || null,
+        });
+      });
+
+      resolved?.forEach((r: any) => {
+        if (r.assigned_font_name && !fontsMap.has(r.assigned_font_name)) {
+          fontsMap.set(r.assigned_font_name, {
+            font_name: r.assigned_font_name,
+            download_url: r.admin_download_url || null,
+            font_file_url: null,
+          });
+        }
+      });
+
+      setKnownFonts(Array.from(fontsMap.values()));
+    };
+    loadKnownFonts();
+  }, []);
+
+  const handleAutofill = (itemId: string, font: FontRecord) => {
+    setFontNameInput((p) => ({ ...p, [itemId]: font.font_name }));
+    if (font.download_url) {
+      setDownloadUrlInput((p) => ({ ...p, [itemId]: font.download_url! }));
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
