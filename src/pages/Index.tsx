@@ -260,13 +260,19 @@ const Index = () => {
 
   const [nameQuery, setNameQuery] = useState("");
   const [nameResults, setNameResults] = useState<FontResult[]>([]);
+  const [nameWebResults, setNameWebResults] = useState<WebFontMatch[]>([]);
   const [nameLoading, setNameLoading] = useState(false);
+  const [nameStage, setNameStage] = useState<"db" | "web" | "done">("db");
 
   const handleNameSearch = async () => {
     if (!nameQuery.trim()) return;
     setNameLoading(true);
     setNameResults([]);
+    setNameWebResults([]);
+    setNameStage("db");
+
     try {
+      // Phase 1: Internal database search
       const { data, error } = await supabase
         .from("fonts_library")
         .select("*");
@@ -310,7 +316,18 @@ const Index = () => {
         });
 
       setNameResults(matched);
-      if (matched.length === 0) toast.info("لم يتم العثور على خط بهذا الاسم");
+
+      // Phase 2: Web search
+      setNameStage("web");
+      try {
+        const webMatches = await searchFontOnWeb(nameQuery.trim(), "");
+        setNameWebResults(webMatches);
+      } catch (e) {
+        console.warn("Web name search failed:", e);
+      }
+
+      setNameStage("done");
+      if (matched.length === 0) toast.info("لم يتم العثور على الخط في مكتبتنا، تحقق من نتائج الويب");
     } catch (e) {
       toast.error("حدث خطأ اثناء البحث");
     } finally {
