@@ -16,8 +16,13 @@ export const useAdmin = () => {
     }
 
     const checkAdmin = async () => {
-      const { data, error } = await supabase.rpc("is_admin");
-      setIsAdmin(!error && data === true);
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      setIsAdmin(!error && !!data);
       setLoading(false);
     };
     checkAdmin();
