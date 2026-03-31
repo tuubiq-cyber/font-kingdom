@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import UploadZone from "@/components/UploadZone";
@@ -6,27 +6,52 @@ import ImageCropper from "@/components/ImageCropper";
 import ColorPicker from "@/components/ColorPicker";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
-import { Send, ArrowRight, Search, Bug } from "lucide-react";
+import { Send, ArrowRight, Bug } from "lucide-react";
 import { toast } from "sonner";
 import {
   normalizeImage,
-  normalizeReferenceImage,
-  compareImages,
+  generatePerceptualHash,
+  matchFont,
 } from "@/lib/imageProcessing";
+
+interface FontFile {
+  weight: string;
+  file_url: string;
+}
 
 interface FontResult {
   name: string;
   nameAr: string;
   style: string;
   confidence: number;
+  isPerfectMatch: boolean;
   reason?: string;
   fileUrl?: string | null;
   license?: string | null;
   category?: string;
   previewImageUrl?: string | null;
+  fontFiles: FontFile[];
+  downloadUrl?: string | null;
 }
 
 type Step = "upload" | "crop" | "details" | "results";
+type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "ranking";
+
+const stageLabels: Record<ScanStage, string> = {
+  normalizing: "تحليل الصورة وتحسينها",
+  hashing: "انشاء البصمة البصرية",
+  comparing: "مقارنة مع قاعدة البيانات",
+  ai: "تحليل بالذكاء الاصطناعي",
+  ranking: "ترتيب النتائج",
+};
+
+const fileToBase64 = (blob: Blob): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 
 const Index = () => {
   const [step, setStep] = useState<Step>("upload");
@@ -38,7 +63,7 @@ const Index = () => {
   const [bgColor, setBgColor] = useState("#ffffff");
   const [results, setResults] = useState<FontResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [scanStage, setScanStage] = useState<"normalizing" | "comparing" | "ranking">("normalizing");
+  const [scanStage, setScanStage] = useState<ScanStage>("normalizing");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleImageUpload = useCallback((file: File) => {
@@ -61,73 +86,76 @@ const Index = () => {
     setIsLoading(true);
     setErrorMsg(null);
     setStep("results");
-    setScanStage("normalizing");
 
     try {
-      // Step 1: Normalize the user's cropped image
+      // Phase 1: Normalize image
+      setScanStage("normalizing");
       const normalizedUser = await normalizeImage(croppedImage, textColor, bgColor);
-      setScanStage("comparing");
 
-      // Step 2: Fetch all fonts with reference images from database
+      // Phase 2: Generate perceptual hash
+      setScanStage("hashing");
+      const userHash = await generatePerceptualHash(croppedImage);
+
+      // Phase 3: Fetch fonts + font_files and run SSIM matching
+      setScanStage("comparing");
       const { data: dbFonts, error: dbError } = await supabase
         .from("fonts_library")
         .select("*");
-
       if (dbError) throw new Error(dbError.message);
 
-      const fonts = (dbFonts ?? []) as any[];
+      // Fetch all font files
+      const { data: allFontFiles } = await supabase
+        .from("font_files" as any)
+        .select("*") as any;
 
-      // Step 3: Compare against each font's reference image
-      const matchResults: FontResult[] = [];
-
-      for (const font of fonts) {
-        let score = 0;
-
-        if (font.reference_image_url) {
-          try {
-            const normalizedRef = await normalizeReferenceImage(font.reference_image_url);
-            score = compareImages(normalizedUser, normalizedRef);
-          } catch (e) {
-            console.warn(`Failed to process reference for ${font.font_name}:`, e);
-            score = 0;
-          }
-        } else if (font.preview_image_url) {
-          // Fallback to preview image if no reference
-          try {
-            const normalizedRef = await normalizeReferenceImage(font.preview_image_url);
-            score = compareImages(normalizedUser, normalizedRef);
-          } catch (e) {
-            console.warn(`Failed to process preview for ${font.font_name}:`, e);
-            score = 0;
-          }
-        }
-
-        if (score > 20) {
-          matchResults.push({
-            name: font.font_name,
-            nameAr: font.font_name_ar,
-            style: font.style,
-            confidence: score,
-            reason: `تطابق بصري ${score}% مع صورة المرجع`,
-            fileUrl: font.download_url,
-            license: font.license,
-            category: font.category,
-            previewImageUrl: font.preview_image_url,
-          });
+      const fontFilesMap = new Map<string, FontFile[]>();
+      if (allFontFiles) {
+        for (const ff of allFontFiles) {
+          const list = fontFilesMap.get(ff.font_id) || [];
+          list.push({ weight: ff.weight, file_url: ff.file_url });
+          fontFilesMap.set(ff.font_id, list);
         }
       }
 
-      setScanStage("ranking");
+      const fonts = (dbFonts ?? []) as any[];
+      const visualMatches: FontResult[] = [];
 
-      // Also use AI for additional matching
-      const fileToBase64 = (blob: Blob): Promise<string> =>
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
+      for (const font of fonts) {
+        const refUrl = font.reference_image_url || font.preview_image_url;
+        if (!refUrl) continue;
 
+        try {
+          const { ssim, hash, combined } = await matchFont(
+            normalizedUser,
+            userHash,
+            refUrl,
+            font.visual_features_hash
+          );
+
+          if (combined > 15) {
+            const files = fontFilesMap.get(font.id) || [];
+            visualMatches.push({
+              name: font.font_name,
+              nameAr: font.font_name_ar,
+              style: font.style,
+              confidence: combined,
+              isPerfectMatch: combined >= 95,
+              reason: `SSIM: ${ssim}% · بصمة: ${hash}%`,
+              fileUrl: files.length > 0 ? files[0].file_url : font.download_url,
+              license: font.license,
+              category: font.category,
+              previewImageUrl: font.preview_image_url,
+              fontFiles: files,
+              downloadUrl: font.download_url,
+            });
+          }
+        } catch (e) {
+          console.warn(`Match failed for ${font.font_name}:`, e);
+        }
+      }
+
+      // Phase 4: AI matching
+      setScanStage("ai");
       let aiResults: FontResult[] = [];
       if (croppedBlob) {
         try {
@@ -135,22 +163,25 @@ const Index = () => {
           const { data, error } = await supabase.functions.invoke("identify-font", {
             body: { imageBase64: base64, typedText, textColor, bgColor },
           });
-
           if (!error && data?.fonts) {
             aiResults = (data.fonts as any[]).map((f: any) => ({
               ...f,
+              isPerfectMatch: (f.confidence ?? 0) >= 95,
               previewImageUrl: null,
+              fontFiles: [],
+              downloadUrl: f.fileUrl,
             }));
           }
         } catch (e) {
-          console.warn("AI matching failed, using visual matching only:", e);
+          console.warn("AI matching failed:", e);
         }
       }
 
-      // Merge results: combine AI and visual scores
+      // Phase 5: Merge & rank
+      setScanStage("ranking");
       const merged = new Map<string, FontResult>();
 
-      for (const r of matchResults) {
+      for (const r of visualMatches) {
         merged.set(r.name.toLowerCase(), r);
       }
 
@@ -158,21 +189,21 @@ const Index = () => {
         const key = r.name.toLowerCase();
         const existing = merged.get(key);
         if (existing) {
-          // Average the scores, weighted toward the higher one
-          existing.confidence = Math.round(
-            Math.max(existing.confidence, r.confidence) * 0.7 +
-            Math.min(existing.confidence, r.confidence) * 0.3
-          );
-          if (r.reason) existing.reason = r.reason;
+          const hi = Math.max(existing.confidence, r.confidence);
+          const lo = Math.min(existing.confidence, r.confidence);
+          existing.confidence = Math.round(hi * 0.6 + lo * 0.4);
+          existing.isPerfectMatch = existing.confidence >= 95;
+          if (r.reason && !existing.reason?.includes("SSIM")) {
+            existing.reason = `${existing.reason} · ${r.reason}`;
+          }
         } else {
           merged.set(key, r);
         }
       }
 
-      // Sort by confidence
       const finalResults = Array.from(merged.values())
         .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, 6);
+        .slice(0, 8);
 
       if (finalResults.length === 0) {
         toast.info("لم يتم العثور على الخط في قاعدة البيانات");
@@ -277,12 +308,12 @@ const Index = () => {
         {step === "results" && (
           <div className="space-y-6">
             {isLoading && (
-              <ScanProgress
-                stage={
-                  scanStage === "normalizing" ? "analyzing" :
-                  scanStage === "comparing" ? "analyzing" : "analyzing"
-                }
-              />
+              <div className="space-y-3">
+                <ScanProgress stage="analyzing" />
+                <p className="text-center text-xs text-muted-foreground animate-pulse">
+                  {stageLabels[scanStage]}
+                </p>
+              </div>
             )}
 
             {!isLoading && errorMsg && (
@@ -296,7 +327,13 @@ const Index = () => {
                 <h2 className="text-lg font-semibold text-foreground">الخطوط المطابقة</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {results.map((font, i) => (
-                    <FontCard key={font.name} {...font} uploadedImage={croppedImage} index={i} />
+                    <FontCard
+                      key={font.name}
+                      {...font}
+                      uploadedImage={croppedImage}
+                      typedText={typedText}
+                      index={i}
+                    />
                   ))}
                 </div>
               </section>
