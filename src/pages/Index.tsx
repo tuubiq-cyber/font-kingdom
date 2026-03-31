@@ -15,11 +15,6 @@ import {
   matchFont,
 } from "@/lib/imageProcessing";
 import { searchMultipleFonts, type WebFontMatch } from "@/lib/webFontSearch";
-import {
-  normalizeImage,
-  generatePerceptualHash,
-  matchFont,
-} from "@/lib/imageProcessing";
 
 interface FontFile {
   weight: string;
