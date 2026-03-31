@@ -210,10 +210,10 @@ const Index = () => {
                 <Crown className="w-10 h-10 text-primary animate-gentle-float" />
               </div>
               <h1 className="text-foreground font-bold text-2xl leading-tight relative z-10">
-                مملكة الخطوط
+                {t("appName")}
               </h1>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto relative z-10">
-                ارفع صورة الخط او ابحث عنه بالاسم وسنجده لك
+                {t("appDesc")}
               </p>
             </div>
 
