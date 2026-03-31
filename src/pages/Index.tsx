@@ -357,7 +357,7 @@ const Index = () => {
                 <Scroll className="w-4 h-4" />
                 تتبع طلباتي
               </Link>
-              <button onClick={reset} className="btn-outline-interactive w-full flex items-center justify-center gap-2">
+              <button onClick={reset} className="btn-primary-interactive w-full flex items-center justify-center gap-2 py-3 font-bold rounded-xl cta-shimmer">
                 <ArrowRight className="w-4 h-4" />
                 ارسال طلب جديد
               </button>
