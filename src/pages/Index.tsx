@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import UploadZone from "@/components/UploadZone";
-import SearchBar from "@/components/SearchBar";
+import ImageCropper from "@/components/ImageCropper";
+import ColorPicker from "@/components/ColorPicker";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
-import { Plus, Send } from "lucide-react";
+import { Send, ArrowRight, Search } from "lucide-react";
 import { toast } from "sonner";
 
 interface FontResult {
@@ -19,9 +20,9 @@ interface FontResult {
   category?: string;
 }
 
-type ScanStage = "uploading" | "analyzing" | "done";
+type Step = "upload" | "crop" | "details" | "results";
 
-const fileToBase64 = (file: File): Promise<string> =>
+const fileToBase64 = (file: File | Blob): Promise<string> =>
   new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(reader.result as string);
@@ -30,36 +31,46 @@ const fileToBase64 = (file: File): Promise<string> =>
   });
 
 const Index = () => {
+  const [step, setStep] = useState<Step>("upload");
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [croppedImage, setCroppedImage] = useState<string | null>(null);
+  const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
+  const [typedText, setTypedText] = useState("");
+  const [textColor, setTextColor] = useState("#000000");
+  const [bgColor, setBgColor] = useState("#ffffff");
   const [results, setResults] = useState<FontResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [scanStage, setScanStage] = useState<ScanStage>("uploading");
-  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
-  const [showUpload, setShowUpload] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [extractedText, setExtractedText] = useState<string | null>(null);
 
-  const identifyFont = async (file: File) => {
-    setIsLoading(true);
+  const handleImageUpload = useCallback((file: File) => {
+    const url = URL.createObjectURL(file);
+    setUploadedImage(url);
+    setStep("crop");
     setResults([]);
     setErrorMsg(null);
-    setExtractedText(null);
-    setScanStage("uploading");
+  }, []);
 
-    const objectUrl = URL.createObjectURL(file);
-    setUploadedImage(objectUrl);
-    setShowUpload(false);
+  const handleCropComplete = useCallback((blob: Blob) => {
+    const url = URL.createObjectURL(blob);
+    setCroppedImage(url);
+    setCroppedBlob(blob);
+    setStep("details");
+  }, []);
+
+  const handleIdentify = async () => {
+    if (!croppedBlob) return;
+    setIsLoading(true);
+    setErrorMsg(null);
+    setStep("results");
 
     try {
-      setScanStage("uploading");
-      const base64 = await fileToBase64(file);
+      const base64 = await fileToBase64(croppedBlob);
 
-      setScanStage("analyzing");
       const { data, error } = await supabase.functions.invoke("identify-font", {
-        body: { imageBase64: base64 },
+        body: { imageBase64: base64, typedText, textColor, bgColor },
       });
 
       if (error) throw new Error(error.message);
-
       if (data?.error) {
         toast.error(data.error);
         setErrorMsg(data.error);
@@ -67,9 +78,6 @@ const Index = () => {
       }
 
       const fonts: FontResult[] = data?.fonts ?? [];
-      setExtractedText(data?.extractedText || null);
-      setScanStage("done");
-
       if (fonts.length === 0) {
         toast.info("لم يتم العثور على الخط في قاعدة البيانات");
       }
@@ -80,93 +88,137 @@ const Index = () => {
       toast.error(msg);
       setErrorMsg(msg);
     } finally {
-      // Small delay before hiding progress
       setTimeout(() => setIsLoading(false), 400);
     }
   };
 
-  const handleSearch = (_query: string) => {
-    toast.info("البحث بالكلمة المفتاحية قيد التطوير");
+  const reset = () => {
+    setStep("upload");
+    setUploadedImage(null);
+    setCroppedImage(null);
+    setCroppedBlob(null);
+    setTypedText("");
+    setTextColor("#000000");
+    setBgColor("#ffffff");
+    setResults([]);
+    setErrorMsg(null);
   };
 
   return (
     <div className="min-h-screen">
       <Header />
 
-      <main className="container max-w-4xl mx-auto px-4 pb-16 space-y-6">
-        <div className="flex items-center gap-2">
-          <div className="flex-1">
-            <SearchBar onSearch={handleSearch} onImageSearch={identifyFont} />
-          </div>
-          <button
-            onClick={() => setShowUpload(!showUpload)}
-            className={`btn-primary flex items-center gap-2 text-sm px-4 py-2.5 shrink-0 ${showUpload ? "bg-olive/70" : ""}`}
-          >
-            <Plus className="w-4 h-4" />
-            <span className="hidden sm:inline">اضافة ملف</span>
-          </button>
+      <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6">
+        {/* Step indicators */}
+        <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          {["رفع", "قص", "تفاصيل", "نتائج"].map((label, i) => {
+            const steps: Step[] = ["upload", "crop", "details", "results"];
+            const isActive = steps.indexOf(step) >= i;
+            return (
+              <div key={label} className="flex items-center gap-2">
+                {i > 0 && <div className={`w-8 h-px ${isActive ? "bg-primary" : "bg-border"}`} />}
+                <span
+                  className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                    isActive ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {label}
+                </span>
+              </div>
+            );
+          })}
         </div>
 
-        {showUpload && (
+        {/* Step 1: Upload */}
+        {step === "upload" && (
           <div className="opacity-0 animate-scale-in">
-            <UploadZone onImageUpload={identifyFont} isLoading={isLoading} />
+            <UploadZone onImageUpload={handleImageUpload} isLoading={false} />
           </div>
         )}
 
-        {isLoading && !showUpload && (
-          <ScanProgress stage={scanStage} />
+        {/* Step 2: Crop */}
+        {step === "crop" && uploadedImage && (
+          <div className="opacity-0 animate-scale-in">
+            <ImageCropper imageSrc={uploadedImage} onCropComplete={handleCropComplete} />
+          </div>
         )}
 
-        {uploadedImage && !isLoading && (
-          <div className="flex justify-center opacity-0 animate-scale-in">
-            <div className="rounded-xl overflow-hidden border border-border/50 max-w-sm">
-              <img
-                src={uploadedImage}
-                alt="الصورة المرفوعة"
-                className="w-full h-auto max-h-64 object-contain bg-muted"
-                loading="lazy"
-              />
+        {/* Step 3: Details */}
+        {step === "details" && (
+          <div className="space-y-5 opacity-0 animate-scale-in">
+            {croppedImage && (
+              <div className="flex justify-center">
+                <div className="rounded-xl overflow-hidden border border-border max-w-xs">
+                  <img src={croppedImage} alt="الجزء المقصوص" className="w-full h-auto max-h-40 object-contain bg-muted" />
+                </div>
+              </div>
+            )}
+
+            <div className="font-card space-y-4">
+              <div className="space-y-1">
+                <label className="text-sm text-muted-foreground">اكتب النص الظاهر في الصورة</label>
+                <input
+                  type="text"
+                  value={typedText}
+                  onChange={(e) => setTypedText(e.target.value)}
+                  placeholder="مثال: مملكة الخطوط"
+                  className="w-full bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                />
+              </div>
+
+              <ColorPicker label="لون النص" value={textColor} onChange={setTextColor} />
+              <ColorPicker label="لون الخلفية" value={bgColor} onChange={setBgColor} />
             </div>
+
+            <button onClick={handleIdentify} className="btn-primary w-full flex items-center justify-center gap-2">
+              <Search className="w-4 h-4" />
+              بحث عن الخط
+            </button>
           </div>
         )}
 
-        {errorMsg && !isLoading && (
-          <div className="text-center py-4">
-            <p className="text-destructive text-sm">{errorMsg}</p>
-          </div>
-        )}
+        {/* Step 4: Results */}
+        {step === "results" && (
+          <div className="space-y-6">
+            {isLoading && <ScanProgress stage="analyzing" />}
 
-        {results.length > 0 && (
-          <section className="space-y-4">
-            <h2 className="text-lg font-semibold text-foreground">
-              الخطوط المطابقة
-            </h2>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map((font, i) => (
-                <FontCard key={font.name} {...font} uploadedImage={uploadedImage} index={i} />
-              ))}
-            </div>
-          </section>
-        )}
+            {!isLoading && errorMsg && (
+              <div className="text-center py-4">
+                <p className="text-destructive text-sm">{errorMsg}</p>
+              </div>
+            )}
 
-        {results.length === 0 && !isLoading && uploadedImage && !errorMsg && (
-          <div className="text-center py-8 space-y-4 opacity-0 animate-fade-up">
-            <p className="text-muted-foreground text-sm">
-              لم يتم العثور على الخط في مكتبتنا
-            </p>
-            <a
-              href="https://t.me/fontskingdom"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-primary inline-flex items-center gap-2 text-sm px-6 py-3"
-            >
-              <Send className="w-4 h-4" />
-              اطلب الخط عبر تيليجرام
-            </a>
-            {extractedText && (
-              <p className="text-muted-foreground text-xs mt-2">
-                النص المستخرج: {extractedText}
-              </p>
+            {!isLoading && results.length > 0 && (
+              <section className="space-y-4 opacity-0 animate-fade-up">
+                <h2 className="text-lg font-semibold text-foreground">الخطوط المطابقة</h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {results.map((font, i) => (
+                    <FontCard key={font.name} {...font} uploadedImage={croppedImage} index={i} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {!isLoading && results.length === 0 && !errorMsg && (
+              <div className="text-center py-8 space-y-4 opacity-0 animate-fade-up">
+                <p className="text-muted-foreground text-sm">لم يتم العثور على الخط في مكتبتنا</p>
+                <a
+                  href="https://t.me/fontskingdom"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary inline-flex items-center gap-2 text-sm px-6 py-3"
+                >
+                  <Send className="w-4 h-4" />
+                  اطلب الخط عبر تيليجرام
+                </a>
+              </div>
+            )}
+
+            {!isLoading && (
+              <button onClick={reset} className="btn-outline w-full flex items-center justify-center gap-2">
+                <ArrowRight className="w-4 h-4" />
+                بحث جديد
+              </button>
             )}
           </div>
         )}
