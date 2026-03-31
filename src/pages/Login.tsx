@@ -139,6 +139,35 @@ const Login = () => {
     }
   };
 
+  const handlePhoneSendOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!phone || phone.length < 10) {
+      toast.error("أدخل رقم هاتف صالح");
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithOtp({ phone });
+    if (error) {
+      toast.error(error.message);
+    } else {
+      setOtpSent(true);
+      toast.success("تم إرسال رمز التحقق");
+    }
+    setLoading(false);
+  };
+
+  const handlePhoneVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: "sms" });
+    if (error) {
+      toast.error("رمز التحقق غير صحيح");
+    } else {
+      navigate("/");
+    }
+    setLoading(false);
+  };
+
   const passwordValidation = isSignUp && password.length > 0 ? validatePassword(password) : null;
 
   return (
