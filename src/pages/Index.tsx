@@ -148,6 +148,28 @@ const Index = () => {
             </div>
           </section>
         )}
+
+        {results.length === 0 && !isLoading && uploadedImage && !errorMsg && (
+          <div className="text-center py-8 space-y-4 opacity-0 animate-fade-up">
+            <p className="text-muted-foreground text-sm">
+              لم يتم العثور على الخط في مكتبتنا
+            </p>
+            <a
+              href="https://t.me/fontskingdom"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary inline-flex items-center gap-2 text-sm px-6 py-3"
+            >
+              <Send className="w-4 h-4" />
+              اطلب الخط عبر تيليجرام
+            </a>
+            {extractedText && (
+              <p className="text-muted-foreground text-xs mt-2">
+                النص المستخرج: {extractedText}
+              </p>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
