@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import UploadZone from "@/components/UploadZone";
+import UsageCounter from "@/components/UsageCounter";
 import ImageCropper from "@/components/ImageCropper";
 import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Type } from "lucide-react";
 import { toast } from "sonner";
@@ -221,6 +222,9 @@ const Index = () => {
                 <span>{visitorCount.toLocaleString("ar-SA")} زائر</span>
               </div>
             </div>
+
+            {/* Usage Counter */}
+            <UsageCounter />
 
             {/* Features */}
             <div className="grid grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
