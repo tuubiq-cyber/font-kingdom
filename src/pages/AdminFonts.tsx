@@ -46,6 +46,7 @@ const AdminFonts = () => {
   const [tags, setTags] = useState("");
   const [fontFiles, setFontFiles] = useState<{ file: File; weight: string }[]>([]);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const weights = ["Thin", "ExtraLight", "Light", "Regular", "Medium", "SemiBold", "Bold", "ExtraBold", "Black"];
