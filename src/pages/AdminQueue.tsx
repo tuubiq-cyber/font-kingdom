@@ -42,6 +42,7 @@ const AdminQueue = () => {
   const [downloadUrlInput, setDownloadUrlInput] = useState<Record<string, string>>({});
   const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [notesInput, setNotesInput] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
