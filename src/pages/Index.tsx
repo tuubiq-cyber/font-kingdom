@@ -36,6 +36,7 @@ const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [extractedText, setExtractedText] = useState<string | null>(null);
 
   const identifyFont = async (file: File) => {
     setIsLoading(true);
