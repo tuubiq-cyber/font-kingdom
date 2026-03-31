@@ -199,6 +199,17 @@ const Login = () => {
                 className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
                 required
               />
+           </div>
+          )}
+
+          {!isSignUp && (
+            <div className="text-left">
+              <Link
+                to="/forgot-password"
+                className="text-xs text-primary/70 hover:text-primary transition-colors"
+              >
+                نسيت كلمة المرور؟
+              </Link>
             </div>
           )}
 

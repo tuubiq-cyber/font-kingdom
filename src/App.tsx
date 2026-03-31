@@ -11,6 +11,8 @@ import AdminQueue from "./pages/AdminQueue";
 import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import AdminRoute from "./components/AdminRoute";
 import useNotifications from "./hooks/useNotifications";
 
@@ -36,6 +38,8 @@ const App = () => (
             <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
             <Route path="/my-requests" element={<MyRequests />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </NotificationProvider>
