@@ -369,6 +369,7 @@ const Index = () => {
               <WebFontResults results={webResults} />
             )}
 
+            {!isLoading && results.length === 0 && webResults.length === 0 && !errorMsg && (
               <div className="text-center py-8 space-y-4 opacity-0 animate-fade-up">
                 <p className="text-muted-foreground text-sm">لم يتم العثور على الخط في مكتبتنا</p>
                 <a
