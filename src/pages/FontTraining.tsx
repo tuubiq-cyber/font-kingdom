@@ -129,6 +129,10 @@ const FontTraining = () => {
             <Link to="/admin/queue" className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
               طابور المراجعة
             </Link>
+            <Link to="/admin/brain" className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
+              <Brain className="w-4 h-4" />
+              عقل النموذج
+            </Link>
             <button onClick={signOut} className="btn-outline flex items-center gap-2 text-sm px-4 py-2 text-destructive">
               <LogOut className="w-4 h-4" />
             </button>
