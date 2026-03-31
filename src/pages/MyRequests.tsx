@@ -33,6 +33,7 @@ interface RequestItem {
 }
 
 const MyRequests = () => {
+  const { user } = useAuth();
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
@@ -40,14 +41,18 @@ const MyRequests = () => {
   const [rejectMessage, setRejectMessage] = useState("");
 
   useEffect(() => {
-    // Get or create anonymous user ID from localStorage
+    if (user?.id) {
+      setUserId(user.id);
+      return;
+    }
+    // Fallback for anonymous users
     let id = localStorage.getItem("kingdom_user_id");
     if (!id) {
       id = crypto.randomUUID();
       localStorage.setItem("kingdom_user_id", id);
     }
     setUserId(id);
-  }, []);
+  }, [user]);
 
   const fetchRequests = async () => {
     if (!userId) return;
