@@ -251,25 +251,69 @@ const AdminFonts = () => {
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-1">
-              <label className="text-sm text-muted-foreground">ملف الخط (TTF, OTF, WOFF)</label>
-              <input
-                type="file"
-                accept=".ttf,.otf,.woff,.woff2"
-                onChange={(e) => setFontFile(e.target.files?.[0] ?? null)}
-                className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
-              />
+          {/* Font files with weights */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <label className="text-sm text-muted-foreground">ملفات الخط (TTF, OTF, WOFF)</label>
+              <button
+                type="button"
+                onClick={() => setFontFiles([...fontFiles, { file: null as any, weight: "Regular" }])}
+                className="text-xs text-primary hover:underline flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" />
+                اضافة ملف
+              </button>
             </div>
-            <div className="space-y-1">
-              <label className="text-sm text-muted-foreground">صورة معاينة (مهمة للمطابقة)</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setPreviewFile(e.target.files?.[0] ?? null)}
-                className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
-              />
-            </div>
+            {fontFiles.map((ff, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <select
+                  value={ff.weight}
+                  onChange={(e) => {
+                    const updated = [...fontFiles];
+                    updated[idx] = { ...updated[idx], weight: e.target.value };
+                    setFontFiles(updated);
+                  }}
+                  className="bg-muted border border-border rounded-lg px-2 py-2 text-sm text-foreground w-28 focus:outline-none focus:ring-1 focus:ring-primary/50"
+                >
+                  {weights.map((w) => (
+                    <option key={w} value={w}>{w}</option>
+                  ))}
+                </select>
+                <input
+                  type="file"
+                  accept=".ttf,.otf,.woff,.woff2"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const updated = [...fontFiles];
+                      updated[idx] = { ...updated[idx], file };
+                      setFontFiles(updated);
+                    }
+                  }}
+                  className="flex-1 text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
+                />
+                <button
+                  type="button"
+                  onClick={() => setFontFiles(fontFiles.filter((_, i) => i !== idx))}
+                  className="text-muted-foreground hover:text-destructive p-1"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+            {fontFiles.length === 0 && (
+              <p className="text-xs text-muted-foreground/60 text-center py-2">اضغط "اضافة ملف" لرفع اوزان الخط</p>
+            )}
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm text-muted-foreground">صورة معاينة (مهمة للمطابقة)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setPreviewFile(e.target.files?.[0] ?? null)}
+              className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
+            />
           </div>
 
           <button type="submit" disabled={submitting} className="btn-primary w-full flex items-center justify-center gap-2">
