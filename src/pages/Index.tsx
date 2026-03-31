@@ -77,7 +77,8 @@ const Index = () => {
   }, []);
 
   const handleNameSearch = async () => {
-    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+    const cleaned = sanitizeText(searchQuery);
+    if (!cleaned || cleaned.length < 2) {
       toast.error("ادخل حرفين على الاقل");
       return;
     }
