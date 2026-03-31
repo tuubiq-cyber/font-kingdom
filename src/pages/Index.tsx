@@ -229,6 +229,23 @@ const Index = () => {
         .sort((a, b) => b.confidence - a.confidence)
         .slice(0, 8);
 
+      // Fallback: if best score < 85%, queue for manual review
+      const bestScore = finalResults.length > 0 ? finalResults[0].confidence : 0;
+      if (bestScore < 85 && croppedBlob) {
+        try {
+          const imageUrl = await uploadImageForReview(croppedBlob);
+          if (imageUrl) {
+            await supabase.from("manual_identification_queue").insert({
+              user_uploaded_image: imageUrl,
+              status: "pending",
+            } as any);
+            toast.info("الخط غير معروف في مملكتنا بعد. تم ارسال طلبك للمراجعة اليدوية", { duration: 5000 });
+          }
+        } catch (e) {
+          console.warn("Failed to queue for manual review:", e);
+        }
+      }
+
       if (finalResults.length === 0 && webMatches.length === 0) {
         toast.info("لم يتم العثور على الخط في قاعدة البيانات");
       }
@@ -240,6 +257,20 @@ const Index = () => {
       setErrorMsg(msg);
     } finally {
       setTimeout(() => setIsLoading(false), 400);
+    }
+  };
+
+  const uploadImageForReview = async (blob: Blob): Promise<string | null> => {
+    try {
+      const ext = "png";
+      const path = `queue/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("fonts").upload(path, blob);
+      if (error) throw error;
+      const { data } = supabase.storage.from("fonts").getPublicUrl(path);
+      return data.publicUrl;
+    } catch (e) {
+      console.warn("Upload for review failed:", e);
+      return null;
     }
   };
 
