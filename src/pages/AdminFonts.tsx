@@ -105,6 +105,7 @@ const AdminFonts = () => {
         license,
         download_url: null,
         preview_image_url: previewUrl,
+        reference_image_url: referenceUrl,
         tags: tagsArr.length > 0 ? tagsArr : null,
       } as any).select("id").single();
 
