@@ -6,6 +6,7 @@ import ImageCropper from "@/components/ImageCropper";
 import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Type } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
+import { useAuth } from "@/hooks/useAuth";
 
 type Step = "home" | "upload" | "crop" | "submitting" | "done" | "name-sent";
 
