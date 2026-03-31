@@ -96,11 +96,7 @@ const Index = () => {
     }
     setSubmittingName(true);
     try {
-      let uid = localStorage.getItem("kingdom_user_id");
-      if (!uid) {
-        uid = crypto.randomUUID();
-        localStorage.setItem("kingdom_user_id", uid);
-      }
+      const uid = getUserId();
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: "text_query",
