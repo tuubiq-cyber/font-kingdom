@@ -11,6 +11,7 @@ import AdminQueue from "./pages/AdminQueue";
 import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
