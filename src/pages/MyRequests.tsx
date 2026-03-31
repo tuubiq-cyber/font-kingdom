@@ -70,37 +70,15 @@ const MyRequests = () => {
     if (userId) fetchRequests();
   }, [userId]);
 
-  // Realtime subscription
+  // Polling for updates (secure alternative to Realtime)
   useEffect(() => {
     if (!userId) return;
 
-    const channel = supabase
-      .channel("my-requests")
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "manual_identification_queue",
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          const updated = payload.new as unknown as RequestItem;
-          setRequests((prev) =>
-            prev.map((r) => (r.id === updated.id ? updated : r))
-          );
-          if (updated.status === "resolved" && updated.assigned_font_name) {
-            toast.success(`تم التعرف على خطك: ${updated.assigned_font_name}`, {
-              duration: 6000,
-            });
-          }
-        }
-      )
-      .subscribe();
+    const interval = setInterval(() => {
+      fetchRequests();
+    }, 15000); // Poll every 15 seconds
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => clearInterval(interval);
   }, [userId]);
 
   const handleConfirm = async (item: RequestItem, confirmed: boolean) => {
