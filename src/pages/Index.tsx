@@ -42,13 +42,14 @@ interface FontResult {
 }
 
 type Step = "upload" | "crop" | "details" | "results";
-type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "ranking";
+type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "web" | "ranking";
 
 const stageLabels: Record<ScanStage, string> = {
   normalizing: "تحليل الصورة وتحسينها",
   hashing: "انشاء البصمة البصرية",
   comparing: "مقارنة مع قاعدة البيانات",
   ai: "تحليل بالذكاء الاصطناعي",
+  web: "بحث عالمي عبر الويب",
   ranking: "ترتيب النتائج",
 };
 
