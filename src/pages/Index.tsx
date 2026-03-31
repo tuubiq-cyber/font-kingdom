@@ -5,7 +5,7 @@ import UploadZone from "@/components/UploadZone";
 import SearchBar from "@/components/SearchBar";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
-import { Plus } from "lucide-react";
+import { Plus, Send } from "lucide-react";
 import { toast } from "sonner";
 
 interface FontResult {
@@ -36,11 +36,13 @@ const Index = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [extractedText, setExtractedText] = useState<string | null>(null);
 
   const identifyFont = async (file: File) => {
     setIsLoading(true);
     setResults([]);
     setErrorMsg(null);
+    setExtractedText(null);
     setScanStage("uploading");
 
     const objectUrl = URL.createObjectURL(file);
@@ -65,10 +67,11 @@ const Index = () => {
       }
 
       const fonts: FontResult[] = data?.fonts ?? [];
+      setExtractedText(data?.extractedText || null);
       setScanStage("done");
 
       if (fonts.length === 0) {
-        toast.info("لم يتم العثور على خطوط عربية في الصورة");
+        toast.info("لم يتم العثور على الخط في قاعدة البيانات");
       }
       setResults(fonts);
     } catch (e) {
@@ -144,6 +147,28 @@ const Index = () => {
               ))}
             </div>
           </section>
+        )}
+
+        {results.length === 0 && !isLoading && uploadedImage && !errorMsg && (
+          <div className="text-center py-8 space-y-4 opacity-0 animate-fade-up">
+            <p className="text-muted-foreground text-sm">
+              لم يتم العثور على الخط في مكتبتنا
+            </p>
+            <a
+              href="https://t.me/fontskingdom"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary inline-flex items-center gap-2 text-sm px-6 py-3"
+            >
+              <Send className="w-4 h-4" />
+              اطلب الخط عبر تيليجرام
+            </a>
+            {extractedText && (
+              <p className="text-muted-foreground text-xs mt-2">
+                النص المستخرج: {extractedText}
+              </p>
+            )}
+          </div>
         )}
       </main>
     </div>
