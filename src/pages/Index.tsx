@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import UploadZone from "@/components/UploadZone";
@@ -7,7 +8,7 @@ import ColorPicker from "@/components/ColorPicker";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
 import WebFontResults from "@/components/WebFontResults";
-import { Send, ArrowRight, Bug, Image as ImageIcon, Search, Type } from "lucide-react";
+import { Send, ArrowRight, Bug, Image as ImageIcon, Search, Type, Scroll } from "lucide-react";
 import { toast } from "sonner";
 import {
   normalizeImage,
@@ -286,11 +287,17 @@ const Index = () => {
         try {
           const imageUrl = await uploadImageForReview(croppedBlob);
           if (imageUrl) {
+            let uid = localStorage.getItem("kingdom_user_id");
+            if (!uid) {
+              uid = crypto.randomUUID();
+              localStorage.setItem("kingdom_user_id", uid);
+            }
             await supabase.from("manual_identification_queue").insert({
               user_uploaded_image: imageUrl,
               status: "pending",
+              user_id: uid,
             } as any);
-            toast.info("خطاطو المملكة يحللون هذا الخط النادر...", { duration: 5000 });
+            toast.info("خطاطو المملكة يحللون هذا الخط النادر... تابع طلبك من صفحة طلباتي", { duration: 5000 });
           }
         } catch (e) {
           console.warn("Failed to queue for manual review:", e);
@@ -449,6 +456,15 @@ const Index = () => {
                 <span className="text-muted-foreground text-xs text-center">ابحث عن خط بكتابة اسمه</span>
               </button>
             </div>
+
+            {/* My Requests link */}
+            <Link
+              to="/my-requests"
+              className="flex items-center justify-center gap-2 text-muted-foreground text-xs hover:text-primary transition-colors py-2"
+            >
+              <Scroll className="w-3.5 h-3.5" />
+              تتبع طلباتي السابقة
+            </Link>
           </div>
         )}
 
