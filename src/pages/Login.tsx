@@ -254,11 +254,77 @@ const Login = () => {
         {/* Divider */}
         <div className="flex items-center gap-3">
           <div className="flex-1 h-px bg-border/30" />
-          <span className="text-[11px] text-muted-foreground/60 px-2">أو بالبريد الإلكتروني</span>
+          <span className="text-[11px] text-muted-foreground/60 px-2">أو</span>
           <div className="flex-1 h-px bg-border/30" />
         </div>
 
-        {/* Form */}
+        {/* Auth mode toggle: Email vs Phone */}
+        <div className="flex bg-card border border-border/30 rounded-lg p-0.5 gap-0.5">
+          <button
+            type="button"
+            onClick={() => { setAuthMode("email"); setOtpSent(false); }}
+            className={`flex-1 py-2 rounded-md text-xs font-medium transition-all ${authMode === "email" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            البريد الإلكتروني
+          </button>
+          <button
+            type="button"
+            onClick={() => { setAuthMode("phone"); setOtpSent(false); }}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-medium transition-all ${authMode === "phone" ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+          >
+            <Phone className="w-3.5 h-3.5" />
+            رقم الهاتف
+          </button>
+        </div>
+
+        {/* Phone Auth Form */}
+        {authMode === "phone" ? (
+          <form onSubmit={otpSent ? handlePhoneVerifyOtp : handlePhoneSendOtp} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground font-medium">رقم الهاتف</label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                dir="ltr"
+                placeholder="+966 5xxxxxxxx"
+                className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
+                required
+                disabled={otpSent}
+              />
+            </div>
+            {otpSent && (
+              <div className="space-y-1.5 animate-fade-in">
+                <label className="text-xs text-muted-foreground font-medium">رمز التحقق</label>
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  dir="ltr"
+                  placeholder="123456"
+                  maxLength={6}
+                  className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200 text-center tracking-[0.5em] font-mono text-lg"
+                  required
+                />
+              </div>
+            )}
+            <button
+              type="submit"
+              disabled={loading}
+              className="btn-primary-interactive w-full flex items-center justify-center gap-2 py-3.5 text-sm font-bold rounded-xl cta-shimmer"
+            >
+              {loading ? (
+                <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+              ) : otpSent ? "تأكيد الرمز" : "إرسال رمز التحقق"}
+            </button>
+            {otpSent && (
+              <button type="button" onClick={() => setOtpSent(false)} className="w-full text-xs text-muted-foreground hover:text-foreground transition-colors py-1">
+                تغيير رقم الهاتف
+              </button>
+            )}
+          </form>
+        ) : (
+        /* Email Form */
         <form
           onSubmit={isSignUp ? handleSignUp : handleLogin}
           className="space-y-4"
