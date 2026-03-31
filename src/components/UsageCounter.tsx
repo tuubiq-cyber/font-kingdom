@@ -8,6 +8,7 @@ const WINDOW_HOURS = 5;
 
 const UsageCounter = () => {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const [remaining, setRemaining] = useState<number | null>(null);
   const [nextReset, setNextReset] = useState<string>("");
 
