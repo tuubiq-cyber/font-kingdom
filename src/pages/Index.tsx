@@ -311,7 +311,7 @@ const Index = () => {
               <div className="space-y-4 animate-scale-in">
                 <div className="flex justify-center">
                   <div className="rounded-xl overflow-hidden border border-border max-w-xs">
-                    <img src={croppedImage} alt="الجزء المقصوص" className="w-full h-auto max-h-40 object-contain bg-muted" />
+                    <img src={croppedImage} alt={t("croppedImage")} className="w-full h-auto max-h-40 object-contain bg-muted" />
                   </div>
                 </div>
                 <button onClick={handleSubmitRequest} disabled={isLoading} className="btn-primary-interactive w-full flex items-center justify-center gap-2">
