@@ -485,6 +485,61 @@ const Index = () => {
             )}
           </div>
         )}
+
+        {/* Name Search */}
+        {step === "nameSearch" && (
+          <div className="space-y-6 opacity-0 animate-scale-in">
+            <div className="font-card space-y-4">
+              <label className="text-sm text-muted-foreground">ابحث عن خط بكتابة اسمه</label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={nameQuery}
+                  onChange={(e) => setNameQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleNameSearch()}
+                  placeholder="مثال: Cairo أو القاهرة"
+                  className="flex-1 bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                />
+                <button
+                  onClick={handleNameSearch}
+                  disabled={nameLoading || !nameQuery.trim()}
+                  className="btn-primary px-4 py-2.5 flex items-center gap-2 text-sm"
+                >
+                  <Search className="w-4 h-4" />
+                  بحث
+                </button>
+              </div>
+            </div>
+
+            {nameLoading && (
+              <div className="flex justify-center py-8">
+                <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              </div>
+            )}
+
+            {!nameLoading && nameResults.length > 0 && (
+              <section className="space-y-4 opacity-0 animate-fade-up">
+                <h2 className="text-lg font-semibold text-foreground">نتائج البحث</h2>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {nameResults.map((font, i) => (
+                    <FontCard
+                      key={font.name}
+                      {...font}
+                      uploadedImage={null}
+                      typedText={nameQuery}
+                      index={i}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <button onClick={reset} className="btn-outline w-full flex items-center justify-center gap-2">
+              <ArrowRight className="w-4 h-4" />
+              العودة للرئيسية
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
