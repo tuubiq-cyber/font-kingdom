@@ -236,7 +236,7 @@ const Index = () => {
 
               <button
                 onClick={() => setShowSearch(!showSearch)}
-                className="btn-outline-interactive w-full flex items-center justify-center gap-3 py-3 text-sm font-medium rounded-xl"
+                className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-3 text-sm font-bold rounded-xl cta-shimmer"
               >
                 <Search className="w-4 h-4" />
                 البحث عن خط بالاسم
