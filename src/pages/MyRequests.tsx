@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import Header from "@/components/Header";
 import {
   Clock,
   CheckCircle,
@@ -11,6 +10,8 @@ import {
   ExternalLink,
   ArrowRight,
   Scroll,
+  MessageSquare,
+  Send,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
@@ -32,6 +33,8 @@ const MyRequests = () => {
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectMessage, setRejectMessage] = useState("");
 
   useEffect(() => {
     // Get or create anonymous user ID from localStorage
@@ -120,7 +123,7 @@ const MyRequests = () => {
 
         toast.success("شكرا لتأكيدك! تمت اضافة الخط لارشيف المملكة");
       } else {
-        // User rejects - send back to admin with correction flag
+        // User rejects - send back to admin with correction flag + message
         await supabase
           .from("manual_identification_queue")
           .update({
@@ -133,7 +136,9 @@ const MyRequests = () => {
           } as any)
           .eq("id", item.id);
 
-        toast.info("تم اعادة الطلب للمراجعة مجددا");
+        setRejectingId(null);
+        setRejectMessage("");
+        toast.info("تم اعادة الطلب للمراجعة مع ملاحظاتك");
       }
 
       fetchRequests();
@@ -151,7 +156,7 @@ const MyRequests = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      
 
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-8 pt-4">
         <div className="flex items-center justify-between">
@@ -234,22 +239,53 @@ const MyRequests = () => {
                               <p className="text-muted-foreground text-xs">
                                 هل هذا هو الخط الصحيح؟
                               </p>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleConfirm(item, true)}
-                                  className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
-                                >
-                                  <ThumbsUp className="w-3.5 h-3.5" />
-                                  نعم، هذا هو الخط
-                                </button>
-                                <button
-                                  onClick={() => handleConfirm(item, false)}
-                                  className="btn-outline flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
-                                >
-                                  <ThumbsDown className="w-3.5 h-3.5" />
-                                  لا، ليس هو
-                                </button>
-                              </div>
+
+                              {rejectingId === item.id ? (
+                                <div className="space-y-2">
+                                  <textarea
+                                    value={rejectMessage}
+                                    onChange={(e) => setRejectMessage(e.target.value)}
+                                    placeholder="اوصف المشكلة للادارة (مثلا: الخط مختلف، اريد خط اعرض...)"
+                                    rows={3}
+                                    className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
+                                  />
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleConfirm(item, false)}
+                                      className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
+                                    >
+                                      <Send className="w-3.5 h-3.5" />
+                                      ارسال للادارة
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setRejectingId(null);
+                                        setRejectMessage("");
+                                      }}
+                                      className="btn-outline flex items-center justify-center gap-1.5 text-xs py-2 px-3"
+                                    >
+                                      الغاء
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleConfirm(item, true)}
+                                    className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
+                                  >
+                                    <ThumbsUp className="w-3.5 h-3.5" />
+                                    نعم، هذا هو الخط
+                                  </button>
+                                  <button
+                                    onClick={() => setRejectingId(item.id)}
+                                    className="btn-outline flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    لا، ليس هو
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           ) : null}
 
