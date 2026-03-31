@@ -6,6 +6,7 @@ import ImageCropper from "@/components/ImageCropper";
 import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Type } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
+import { useAuth } from "@/hooks/useAuth";
 
 type Step = "home" | "upload" | "crop" | "submitting" | "done" | "name-sent";
 
@@ -46,6 +47,7 @@ const PulsingRings = () => (
 );
 
 const Index = () => {
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>("home");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
@@ -59,6 +61,16 @@ const Index = () => {
 
   // Visitor count
   const [visitorCount, setVisitorCount] = useState(0);
+
+  const getUserId = () => {
+    if (user?.id) return user.id;
+    let id = localStorage.getItem("kingdom_user_id");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("kingdom_user_id", id);
+    }
+    return id;
+  };
 
   useEffect(() => {
     const trackVisit = async () => {
@@ -84,11 +96,7 @@ const Index = () => {
     }
     setSubmittingName(true);
     try {
-      let uid = localStorage.getItem("kingdom_user_id");
-      if (!uid) {
-        uid = crypto.randomUUID();
-        localStorage.setItem("kingdom_user_id", uid);
-      }
+      const uid = getUserId();
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: "text_query",
@@ -142,11 +150,7 @@ const Index = () => {
       const imageUrl = await uploadImageForReview(croppedBlob);
       if (!imageUrl) throw new Error("فشل رفع الصورة");
 
-      let uid = localStorage.getItem("kingdom_user_id");
-      if (!uid) {
-        uid = crypto.randomUUID();
-        localStorage.setItem("kingdom_user_id", uid);
-      }
+      const uid = getUserId();
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: imageUrl,
