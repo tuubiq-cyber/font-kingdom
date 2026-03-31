@@ -196,7 +196,7 @@ const Index = () => {
                 مملكة الخطوط
               </h1>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto relative z-10">
-                لا تعرف اسم الخط؟ ارفع صورته وسيتولى المشرفون التعرف عليه وارسال النتيجة اليك
+                ارفع صورة الخط او ابحث عنه بالاسم وسنجده لك
               </p>
             </div>
 
