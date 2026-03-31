@@ -47,6 +47,48 @@ export type Database = {
         }
         Relationships: []
       }
+      fonts_library: {
+        Row: {
+          category: string
+          created_at: string
+          download_url: string | null
+          font_name: string
+          font_name_ar: string
+          id: string
+          license: string | null
+          preview_image_url: string | null
+          style: string
+          tags: string[] | null
+          visual_features_hash: string | null
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          download_url?: string | null
+          font_name: string
+          font_name_ar: string
+          id?: string
+          license?: string | null
+          preview_image_url?: string | null
+          style?: string
+          tags?: string[] | null
+          visual_features_hash?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          download_url?: string | null
+          font_name?: string
+          font_name_ar?: string
+          id?: string
+          license?: string | null
+          preview_image_url?: string | null
+          style?: string
+          tags?: string[] | null
+          visual_features_hash?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

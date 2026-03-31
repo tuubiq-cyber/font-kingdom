@@ -20,7 +20,7 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { imageBase64 } = await req.json();
+    const { imageBase64, typedText, textColor, bgColor } = await req.json();
     if (!imageBase64 || typeof imageBase64 !== "string") {
       return new Response(
         JSON.stringify({ error: "imageBase64 is required" }),
@@ -28,16 +28,34 @@ serve(async (req) => {
       );
     }
 
-    // Step 1: Get all fonts from our database
-    const { data: dbFonts } = await supabase.from("fonts").select("name, name_ar, style, file_url, license, preview_image_url");
-    const fontNames = (dbFonts ?? []).map(f => f.name);
+    // Get all fonts from fonts_library
+    const { data: dbFonts } = await supabase
+      .from("fonts_library")
+      .select("font_name, font_name_ar, style, category, download_url, license, preview_image_url, tags");
+
+    const fonts = dbFonts ?? [];
+    if (fonts.length === 0) {
+      return new Response(
+        JSON.stringify({ fonts: [], extractedText: typedText || "" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     const imageUrl = imageBase64.startsWith("data:")
       ? imageBase64
       : `data:image/png;base64,${imageBase64}`;
 
-    // Step 2: Identify fonts - only match against our database fonts
-    const fontList = (dbFonts ?? []).map(f => `- ${f.name} (${f.name_ar}), style: ${f.style}`).join("\n");
+    const fontList = fonts
+      .map((f) => `- ${f.font_name} (${f.font_name_ar}), category: ${f.category}, style: ${f.style}, tags: ${(f.tags ?? []).join(", ")}`)
+      .join("\n");
+
+    const extraContext = [
+      typedText ? `The user says the text in the image reads: "${typedText}"` : "",
+      textColor ? `Text color: ${textColor}` : "",
+      bgColor ? `Background color: ${bgColor}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     const systemPrompt = `You are a world-class Arabic typography expert. You must identify which font from the following list best matches the Arabic text in the image.
 
@@ -46,10 +64,12 @@ ${fontList}
 
 IMPORTANT: You may ONLY match fonts from the list above. Do NOT suggest any font not in this list.
 
+${extraContext}
+
 When given an image containing Arabic text:
 1. Extract ALL Arabic text visible in the image accurately.
 2. Analyze letterforms: stroke weight, contrast, terminals, dot shapes, letter proportions, connection style.
-3. Match ONLY against the fonts listed above.
+3. Compare against each font in the list and find the best matches.
 
 Return a JSON object with:
 - "extractedText": the complete Arabic text found in the image (string)
@@ -59,7 +79,7 @@ Return a JSON object with:
   - "style": the style from the list
   - "confidence": a number from 0 to 100
   - "reason": a brief Arabic explanation of why this font matches (without diacritics)
-  - "category": one of "naskh", "kufi", "thuluth", "diwani", "ruqah", "nastaliq", "modern", "display"
+  - "category": the category from the list
 
 If no font from the list matches well (confidence below 40), return an empty matches array.
 Only return the JSON object, nothing else. If no Arabic text is found, return {"extractedText": "", "matches": []}.`;
@@ -124,20 +144,20 @@ Only return the JSON object, nothing else. If no Arabic text is found, return {"
     const extractedText = parsed.extractedText || "";
     const matches = parsed.matches || [];
 
-    // Step 3: Build font results enriched with DB data
-    const dbMap = new Map((dbFonts ?? []).map(f => [f.name.toLowerCase(), f]));
-    
+    // Enrich with DB data
+    const dbMap = new Map(fonts.map((f) => [f.font_name.toLowerCase(), f]));
+
     const enrichedFonts = matches.map((match: any) => {
       const dbFont = dbMap.get(match.name.toLowerCase());
       return {
         name: match.name,
-        nameAr: dbFont?.name_ar || match.nameAr || match.name,
+        nameAr: dbFont?.font_name_ar || match.nameAr || match.name,
         style: dbFont?.style || match.style || "Regular",
         confidence: match.confidence || 0,
         reason: match.reason || "",
-        fileUrl: dbFont?.file_url || null,
+        fileUrl: dbFont?.download_url || null,
         license: dbFont?.license || null,
-        category: match.category || "modern",
+        category: dbFont?.category || match.category || "modern",
       };
     });
 

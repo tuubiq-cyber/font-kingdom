@@ -1,49 +1,69 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, ArrowRight } from "lucide-react";
+import { Plus, Trash2, ArrowRight, LogOut } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface FontRow {
   id: string;
-  name: string;
-  name_ar: string;
+  font_name: string;
+  font_name_ar: string;
+  category: string;
   style: string;
   license: string | null;
-  file_url: string | null;
+  download_url: string | null;
   preview_image_url: string | null;
+  visual_features_hash: string | null;
+  tags: string[] | null;
   created_at: string;
 }
 
+const categories = [
+  { value: "naskh", label: "نسخ" },
+  { value: "kufi", label: "كوفي" },
+  { value: "thuluth", label: "ثلث" },
+  { value: "diwani", label: "ديواني" },
+  { value: "ruqah", label: "رقعة" },
+  { value: "nastaliq", label: "نستعليق" },
+  { value: "modern", label: "حديث" },
+  { value: "display", label: "عرض" },
+];
+
 const AdminFonts = () => {
+  const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
   const [fonts, setFonts] = useState<FontRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Form state
-  const [name, setName] = useState("");
-  const [nameAr, setNameAr] = useState("");
+  const [fontName, setFontName] = useState("");
+  const [fontNameAr, setFontNameAr] = useState("");
+  const [category, setCategory] = useState("modern");
   const [style, setStyle] = useState("Regular");
   const [license, setLicense] = useState("مجاني");
+  const [tags, setTags] = useState("");
   const [fontFile, setFontFile] = useState<File | null>(null);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!authLoading && !user) navigate("/login");
+  }, [user, authLoading, navigate]);
+
   const fetchFonts = async () => {
     const { data, error } = await supabase
-      .from("fonts")
+      .from("fonts_library")
       .select("*")
       .order("created_at", { ascending: false });
-    if (error) {
-      toast.error("خطا في جلب الخطوط");
-    } else {
-      setFonts(data ?? []);
-    }
+    if (error) toast.error("خطا في جلب الخطوط");
+    else setFonts((data as unknown as FontRow[]) ?? []);
     setLoading(false);
   };
 
   useEffect(() => {
-    fetchFonts();
-  }, []);
+    if (user) fetchFonts();
+  }, [user]);
 
   const uploadFile = async (file: File, folder: string) => {
     const ext = file.name.split(".").pop();
@@ -56,39 +76,44 @@ const AdminFonts = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !nameAr) {
+    if (!fontName || !fontNameAr) {
       toast.error("يرجى تعبئة الاسم بالعربي والانجليزي");
       return;
     }
     setSubmitting(true);
 
     try {
-      let fileUrl: string | null = null;
+      let downloadUrl: string | null = null;
       let previewUrl: string | null = null;
 
-      if (fontFile) {
-        fileUrl = await uploadFile(fontFile, "files");
-      }
-      if (previewFile) {
-        previewUrl = await uploadFile(previewFile, "previews");
-      }
+      if (fontFile) downloadUrl = await uploadFile(fontFile, "files");
+      if (previewFile) previewUrl = await uploadFile(previewFile, "previews");
 
-      const { error } = await supabase.from("fonts").insert({
-        name,
-        name_ar: nameAr,
+      const tagsArr = tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean);
+
+      const { error } = await supabase.from("fonts_library").insert({
+        font_name: fontName,
+        font_name_ar: fontNameAr,
+        category,
         style,
         license,
-        file_url: fileUrl,
+        download_url: downloadUrl,
         preview_image_url: previewUrl,
-      });
+        tags: tagsArr.length > 0 ? tagsArr : null,
+      } as any);
 
       if (error) throw error;
 
       toast.success("تم اضافة الخط بنجاح");
-      setName("");
-      setNameAr("");
+      setFontName("");
+      setFontNameAr("");
+      setCategory("modern");
       setStyle("Regular");
       setLicense("مجاني");
+      setTags("");
       setFontFile(null);
       setPreviewFile(null);
       fetchFonts();
@@ -101,32 +126,45 @@ const AdminFonts = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("fonts").delete().eq("id", id);
-    if (error) {
-      toast.error("خطا في حذف الخط");
-    } else {
+    const { error } = await supabase.from("fonts_library").delete().eq("id", id);
+    if (error) toast.error("خطا في حذف الخط");
+    else {
       toast.success("تم حذف الخط");
       setFonts((prev) => prev.filter((f) => f.id !== id));
     }
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
   return (
     <div className="min-h-screen">
       <header className="py-6 border-b border-border">
         <div className="container max-w-3xl mx-auto px-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-foreground">ادارة الخطوط</h1>
-          <Link to="/" className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
-            <ArrowRight className="w-4 h-4" />
-            الرئيسية
-          </Link>
+          <h1 className="text-xl font-bold text-foreground">ادارة مكتبة الخطوط</h1>
+          <div className="flex items-center gap-2">
+            <Link to="/" className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
+              <ArrowRight className="w-4 h-4" />
+              الرئيسية
+            </Link>
+            <button onClick={signOut} className="btn-outline flex items-center gap-2 text-sm px-4 py-2 text-destructive">
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </header>
 
       <main className="container max-w-3xl mx-auto px-4 py-8 space-y-8">
-        {/* Add Font Form */}
         <form onSubmit={handleSubmit} className="font-card space-y-4">
           <h2 className="text-foreground font-semibold flex items-center gap-2">
-            <Plus className="w-5 h-5 text-olive" />
+            <Plus className="w-5 h-5 text-primary" />
             اضافة خط جديد
           </h2>
 
@@ -135,29 +173,43 @@ const AdminFonts = () => {
               <label className="text-sm text-muted-foreground">الاسم بالانجليزي</label>
               <input
                 type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
+                value={fontName}
+                onChange={(e) => setFontName(e.target.value)}
                 placeholder="e.g. Amiri"
                 dir="ltr"
-                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-olive/50"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
               />
             </div>
             <div className="space-y-1">
               <label className="text-sm text-muted-foreground">الاسم بالعربي</label>
               <input
                 type="text"
-                value={nameAr}
-                onChange={(e) => setNameAr(e.target.value)}
+                value={fontNameAr}
+                onChange={(e) => setFontNameAr(e.target.value)}
                 placeholder="مثال: اميري"
-                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-olive/50"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
               />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm text-muted-foreground">التصنيف</label>
+              <select
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              >
+                {categories.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="space-y-1">
               <label className="text-sm text-muted-foreground">النوع</label>
               <select
                 value={style}
                 onChange={(e) => setStyle(e.target.value)}
-                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-olive/50"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
               >
                 <option>Regular</option>
                 <option>Bold</option>
@@ -173,7 +225,17 @@ const AdminFonts = () => {
                 value={license}
                 onChange={(e) => setLicense(e.target.value)}
                 placeholder="مجاني / تجاري / SIL"
-                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-olive/50"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm text-muted-foreground">الوسوم (مفصولة بفاصلة)</label>
+              <input
+                type="text"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="خط يدوي, ديكوري, عناوين"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
               />
             </div>
           </div>
@@ -185,27 +247,23 @@ const AdminFonts = () => {
                 type="file"
                 accept=".ttf,.otf,.woff,.woff2"
                 onChange={(e) => setFontFile(e.target.files?.[0] ?? null)}
-                className="w-full text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-olive file:text-teal-deep file:text-sm file:font-medium file:cursor-pointer"
+                className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-sm text-muted-foreground">صورة معاينة (اختياري)</label>
+              <label className="text-sm text-muted-foreground">صورة معاينة (مهمة للمطابقة)</label>
               <input
                 type="file"
                 accept="image/*"
                 onChange={(e) => setPreviewFile(e.target.files?.[0] ?? null)}
-                className="w-full text-sm text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-olive file:text-teal-deep file:text-sm file:font-medium file:cursor-pointer"
+                className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={submitting}
-            className="btn-primary w-full flex items-center justify-center gap-2"
-          >
+          <button type="submit" disabled={submitting} className="btn-primary w-full flex items-center justify-center gap-2">
             {submitting ? (
-              <div className="w-4 h-4 border-2 border-teal-deep/30 border-t-teal-deep rounded-full animate-spin" />
+              <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
             ) : (
               <>
                 <Plus className="w-4 h-4" />
@@ -215,35 +273,30 @@ const AdminFonts = () => {
           </button>
         </form>
 
-        {/* Fonts List */}
         <section className="space-y-3">
-          <h2 className="text-foreground font-semibold">
-            الخطوط المسجلة ({fonts.length})
-          </h2>
-
+          <h2 className="text-foreground font-semibold">الخطوط المسجلة ({fonts.length})</h2>
           {loading ? (
             <div className="flex justify-center py-8">
-              <div className="w-8 h-8 border-2 border-olive/30 border-t-olive rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
             </div>
           ) : fonts.length === 0 ? (
-            <p className="text-muted-foreground text-sm text-center py-8">
-              لم تتم اضافة اي خطوط بعد
-            </p>
+            <p className="text-muted-foreground text-sm text-center py-8">لم تتم اضافة اي خطوط بعد</p>
           ) : (
             <div className="space-y-2">
               {fonts.map((font) => (
-                <div
-                  key={font.id}
-                  className="flex items-center justify-between bg-card border border-border/50 rounded-lg px-4 py-3"
-                >
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground font-medium text-sm truncate">
-                      {font.name_ar} — {font.name}
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      {font.style} · {font.license ?? "—"}
-                      {font.file_url && " · ملف مرفق"}
-                    </p>
+                <div key={font.id} className="flex items-center justify-between bg-card border border-border/50 rounded-lg px-4 py-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    {font.preview_image_url && (
+                      <img src={font.preview_image_url} alt={font.font_name_ar} className="w-10 h-10 rounded object-cover bg-muted" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-foreground font-medium text-sm truncate">
+                        {font.font_name_ar} — {font.font_name}
+                      </p>
+                      <p className="text-muted-foreground text-xs">
+                        {categories.find((c) => c.value === font.category)?.label ?? font.category} · {font.style} · {font.license ?? "—"}
+                      </p>
+                    </div>
                   </div>
                   <button
                     onClick={() => handleDelete(font.id)}
