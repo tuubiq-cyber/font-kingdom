@@ -16,6 +16,7 @@ interface FontRow {
   download_url: string | null;
   preview_image_url: string | null;
   visual_features_hash: string | null;
+  reference_image_url: string | null;
   tags: string[] | null;
   created_at: string;
 }
@@ -45,6 +46,7 @@ const AdminFonts = () => {
   const [tags, setTags] = useState("");
   const [fontFiles, setFontFiles] = useState<{ file: File; weight: string }[]>([]);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
+  const [referenceFile, setReferenceFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const weights = ["Thin", "ExtraLight", "Light", "Regular", "Medium", "SemiBold", "Bold", "ExtraBold", "Black"];
@@ -86,7 +88,9 @@ const AdminFonts = () => {
 
     try {
       let previewUrl: string | null = null;
+      let referenceUrl: string | null = null;
       if (previewFile) previewUrl = await uploadFile(previewFile, "previews");
+      if (referenceFile) referenceUrl = await uploadFile(referenceFile, "references");
 
       const tagsArr = tags
         .split(",")
@@ -101,6 +105,7 @@ const AdminFonts = () => {
         license,
         download_url: null,
         preview_image_url: previewUrl,
+        reference_image_url: referenceUrl,
         tags: tagsArr.length > 0 ? tagsArr : null,
       } as any).select("id").single();
 
@@ -126,6 +131,8 @@ const AdminFonts = () => {
       setLicense("مجاني");
       setTags("");
       setFontFiles([]);
+      setPreviewFile(null);
+      setReferenceFile(null);
       setPreviewFile(null);
       fetchFonts();
     } catch (err) {
@@ -307,13 +314,24 @@ const AdminFonts = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">صورة معاينة (مهمة للمطابقة)</label>
+            <label className="text-sm text-muted-foreground">صورة معاينة</label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setPreviewFile(e.target.files?.[0] ?? null)}
               className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
             />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm text-muted-foreground">صورة مرجعية للمطابقة (كلمة "مملكة" او "الخط" بهذا الخط)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setReferenceFile(e.target.files?.[0] ?? null)}
+              className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
+            />
+            <p className="text-[11px] text-muted-foreground/60">ارفع صورة نص مكتوب بهذا الخط لتحسين دقة المطابقة البصرية</p>
           </div>
 
           <button type="submit" disabled={submitting} className="btn-primary w-full flex items-center justify-center gap-2">

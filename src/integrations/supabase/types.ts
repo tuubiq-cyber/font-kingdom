@@ -89,6 +89,7 @@ export type Database = {
           id: string
           license: string | null
           preview_image_url: string | null
+          reference_image_url: string | null
           style: string
           tags: string[] | null
           visual_features_hash: string | null
@@ -102,6 +103,7 @@ export type Database = {
           id?: string
           license?: string | null
           preview_image_url?: string | null
+          reference_image_url?: string | null
           style?: string
           tags?: string[] | null
           visual_features_hash?: string | null
@@ -115,6 +117,7 @@ export type Database = {
           id?: string
           license?: string | null
           preview_image_url?: string | null
+          reference_image_url?: string | null
           style?: string
           tags?: string[] | null
           visual_features_hash?: string | null
