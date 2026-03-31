@@ -466,6 +466,7 @@ const Index = () => {
               تتبع طلباتي السابقة
             </Link>
           </div>
+        )}
 
         {/* Step indicators (only for image search flow) */}
         {["upload", "crop", "details", "results"].includes(step) && (
