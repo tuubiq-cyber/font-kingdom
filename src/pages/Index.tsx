@@ -181,7 +181,27 @@ const Index = () => {
         }
       }
 
-      // Phase 5: Merge & rank
+      // Phase 5: Web search via Puter.js + Perplexity
+      setScanStage("web");
+      let webMatches: WebFontMatch[] = [];
+      try {
+        const fontNamesToSearch = [
+          ...aiResults.map((r) => r.name),
+          ...visualMatches.map((r) => r.name),
+        ].filter(Boolean);
+
+        if (fontNamesToSearch.length > 0) {
+          webMatches = await searchMultipleFonts(
+            [...new Set(fontNamesToSearch)],
+            typedText || ""
+          );
+        }
+      } catch (e) {
+        console.warn("Web search failed:", e);
+      }
+      setWebResults(webMatches);
+
+      // Phase 6: Merge & rank
       setScanStage("ranking");
       const merged = new Map<string, FontResult>();
 
@@ -209,7 +229,7 @@ const Index = () => {
         .sort((a, b) => b.confidence - a.confidence)
         .slice(0, 8);
 
-      if (finalResults.length === 0) {
+      if (finalResults.length === 0 && webMatches.length === 0) {
         toast.info("لم يتم العثور على الخط في قاعدة البيانات");
       }
       setResults(finalResults);
