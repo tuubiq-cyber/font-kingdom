@@ -62,14 +62,12 @@ const Index = () => {
   // Visitor count
   const [visitorCount, setVisitorCount] = useState(0);
 
-  const getUserId = () => {
-    if (user?.id) return user.id;
-    let id = localStorage.getItem("kingdom_user_id");
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem("kingdom_user_id", id);
+  const requireAuth = () => {
+    if (!user?.id) {
+      toast.error("يجب تسجيل الدخول اولاً لإرسال طلب");
+      return null;
     }
-    return id;
+    return user.id;
   };
 
   useEffect(() => {
@@ -96,13 +94,16 @@ const Index = () => {
     }
     setSubmittingName(true);
     try {
-      const uid = getUserId();
+      const uid = requireAuth();
+      if (!uid) return;
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: "text_query",
         status: "pending",
         user_id: uid,
         query_text: cleaned,
+        is_notified: false,
+        needs_correction: false,
       } as any);
 
       if (error) throw error;
@@ -150,12 +151,15 @@ const Index = () => {
       const imageUrl = await uploadImageForReview(croppedBlob);
       if (!imageUrl) throw new Error("فشل رفع الصورة");
 
-      const uid = getUserId();
+      const uid = requireAuth();
+      if (!uid) { setStep("crop"); setIsLoading(false); return; }
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: imageUrl,
         status: "pending",
         user_id: uid,
+        is_notified: false,
+        needs_correction: false,
       } as any);
 
       if (error) throw error;
