@@ -125,7 +125,7 @@ const AdminFonts = () => {
       setStyle("Regular");
       setLicense("مجاني");
       setTags("");
-      setFontFile(null);
+      setFontFiles([]);
       setPreviewFile(null);
       fetchFonts();
     } catch (err) {
