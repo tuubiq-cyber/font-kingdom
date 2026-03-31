@@ -36,7 +36,7 @@ interface FontResult {
   downloadUrl?: string | null;
 }
 
-type Step = "upload" | "crop" | "details" | "results";
+type Step = "home" | "upload" | "crop" | "details" | "results" | "nameSearch";
 type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "web" | "ranking";
 
 const stageLabels: Record<ScanStage, string> = {
