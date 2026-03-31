@@ -123,7 +123,7 @@ const MyRequests = () => {
 
         toast.success("شكرا لتأكيدك! تمت اضافة الخط لارشيف المملكة");
       } else {
-        // User rejects - send back to admin with correction flag
+        // User rejects - send back to admin with correction flag + message
         await supabase
           .from("manual_identification_queue")
           .update({
@@ -136,7 +136,9 @@ const MyRequests = () => {
           } as any)
           .eq("id", item.id);
 
-        toast.info("تم اعادة الطلب للمراجعة مجددا");
+        setRejectingId(null);
+        setRejectMessage("");
+        toast.info("تم اعادة الطلب للمراجعة مع ملاحظاتك");
       }
 
       fetchRequests();
