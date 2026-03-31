@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import UploadZone from "@/components/UploadZone";
 import ImageCropper from "@/components/ImageCropper";
@@ -7,6 +7,7 @@ import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Sea
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
 import { useAuth } from "@/hooks/useAuth";
+import { useDailyLimit } from "@/hooks/useDailyLimit";
 
 type Step = "home" | "upload" | "crop" | "submitting" | "done" | "name-sent";
 
@@ -48,6 +49,8 @@ const PulsingRings = () => (
 
 const Index = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const { checkAndConsume } = useDailyLimit();
   const [step, setStep] = useState<Step>("home");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
@@ -65,6 +68,7 @@ const Index = () => {
   const requireAuth = () => {
     if (!user?.id) {
       toast.error("يجب تسجيل الدخول اولاً لإرسال طلب");
+      navigate("/login");
       return null;
     }
     return user.id;
@@ -96,6 +100,9 @@ const Index = () => {
     try {
       const uid = requireAuth();
       if (!uid) return;
+
+      const allowed = await checkAndConsume(uid, "name_search");
+      if (!allowed) return;
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: "text_query",
@@ -148,11 +155,14 @@ const Index = () => {
     setIsLoading(true);
     setStep("submitting");
     try {
-      const imageUrl = await uploadImageForReview(croppedBlob);
-      if (!imageUrl) throw new Error("فشل رفع الصورة");
-
       const uid = requireAuth();
       if (!uid) { setStep("crop"); setIsLoading(false); return; }
+
+      const allowed = await checkAndConsume(uid, "image_identification");
+      if (!allowed) { setStep("crop"); setIsLoading(false); return; }
+
+      const imageUrl = await uploadImageForReview(croppedBlob);
+      if (!imageUrl) throw new Error("فشل رفع الصورة");
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: imageUrl,
@@ -239,7 +249,7 @@ const Index = () => {
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Upload className="w-5 h-5" />
-                ارسال طلب تعرف على خط
+                معرفة الخط بواسطة الصورة
               </button>
 
               <button
@@ -247,7 +257,7 @@ const Index = () => {
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Search className="w-5 h-5" />
-                البحث عن خط بالاسم
+                معرفة الخط بواسطة الاسم
               </button>
 
               <Link
