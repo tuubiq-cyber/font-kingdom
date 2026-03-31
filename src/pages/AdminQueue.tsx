@@ -480,12 +480,18 @@ const QueueCard = ({
         </div>
       )}
       <div className="flex items-start gap-3">
-        <img
-          src={item.user_uploaded_image}
-          alt="صورة المستخدم"
-          className="w-20 h-20 rounded-lg object-cover bg-muted cursor-pointer border border-border hover:border-primary/50 transition-colors"
-          onClick={onPreview}
-        />
+        {item.query_text ? (
+          <div className="w-20 h-20 rounded-lg bg-muted border border-border flex items-center justify-center">
+            <Type className="w-6 h-6 text-muted-foreground" />
+          </div>
+        ) : (
+          <img
+            src={item.user_uploaded_image}
+            alt="صورة المستخدم"
+            className="w-20 h-20 rounded-lg object-cover bg-muted cursor-pointer border border-border hover:border-primary/50 transition-colors"
+            onClick={onPreview}
+          />
+        )}
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground text-xs">
