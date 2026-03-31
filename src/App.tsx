@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import AdminFonts from "./pages/AdminFonts";
 import FontTraining from "./pages/FontTraining";
 import AdminQueue from "./pages/AdminQueue";
+import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/admin" element={<AdminFonts />} />
           <Route path="/train" element={<FontTraining />} />
           <Route path="/admin/queue" element={<AdminQueue />} />
+          <Route path="/my-requests" element={<MyRequests />} />
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
@@ -30,5 +32,3 @@ const App = () => (
     </TooltipProvider>
   </QueryClientProvider>
 );
-
-export default App;
