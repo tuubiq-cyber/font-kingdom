@@ -166,8 +166,8 @@ const Index = () => {
                 />
               </div>
 
-              <ColorPicker label="لون النص" value={textColor} onChange={setTextColor} />
-              <ColorPicker label="لون الخلفية" value={bgColor} onChange={setBgColor} />
+              <ColorPicker label="لون النص" value={textColor} onChange={setTextColor} imageSrc={croppedImage!} />
+              <ColorPicker label="لون الخلفية" value={bgColor} onChange={setBgColor} imageSrc={croppedImage!} />
             </div>
 
             <button onClick={handleIdentify} className="btn-primary w-full flex items-center justify-center gap-2">
