@@ -57,7 +57,7 @@ const fileToBase64 = (blob: Blob): Promise<string> =>
   });
 
 const Index = () => {
-  const [step, setStep] = useState<Step>("upload");
+  const [step, setStep] = useState<Step>("home");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
   const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
