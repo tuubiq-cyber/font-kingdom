@@ -507,6 +507,13 @@ const QueueCard = ({
             </button>
           </div>
 
+          {item.query_text && (
+            <div className="bg-muted/50 border border-border/30 rounded-lg px-3 py-2">
+              <p className="text-[10px] text-muted-foreground mb-1">استفسار نصي:</p>
+              <p className="text-foreground text-sm font-medium">{item.query_text}</p>
+            </div>
+          )}
+
           <div className="space-y-2">
             {/* Font name with autocomplete */}
             <div className="relative">
