@@ -277,7 +277,7 @@ const Index = () => {
             <div className="animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
               <Link
                 to="/my-requests"
-                className="flex items-center justify-center gap-2 text-muted-foreground text-xs hover:text-primary transition-colors py-2"
+                className="btn-primary-interactive w-full flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl cta-shimmer"
               >
                 <Scroll className="w-3.5 h-3.5" />
                 تتبع طلباتي السابقة
