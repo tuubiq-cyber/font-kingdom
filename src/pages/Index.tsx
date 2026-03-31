@@ -65,6 +65,7 @@ const Index = () => {
   const [textColor, setTextColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#ffffff");
   const [results, setResults] = useState<FontResult[]>([]);
+  const [webResults, setWebResults] = useState<WebFontMatch[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [scanStage, setScanStage] = useState<ScanStage>("normalizing");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
