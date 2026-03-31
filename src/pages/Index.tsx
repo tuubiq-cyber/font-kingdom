@@ -223,6 +223,9 @@ const Index = () => {
               </div>
             </div>
 
+            {/* Usage Counter */}
+            <UsageCounter />
+
             {/* Features */}
             <div className="grid grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
               {[
