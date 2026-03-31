@@ -120,11 +120,13 @@ const FontCard = ({
       className="font-card opacity-0 animate-fade-up relative"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Perfect match badge */}
-      {isPerfectMatch && (
-        <div className="absolute -top-2 -right-2 z-10 bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg">
+      {/* Match type badge */}
+      {(isPerfectMatch || matchLabel) && (
+        <div className={`absolute -top-2 -right-2 z-10 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg ${
+          isPerfectMatch ? "bg-green-500" : "bg-primary"
+        }`}>
           <Crown className="w-3 h-3" />
-          تطابق تام
+          {isPerfectMatch ? "تطابق حاسم" : matchLabel}
         </div>
       )}
 
