@@ -269,11 +269,20 @@ const Index = () => {
 
       const finalResults = Array.from(merged.values())
         .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, 8);
+        .slice(0, 8)
+        .map((r) => ({
+          ...r,
+          isPerfectMatch: r.confidence >= 90,
+          reason: r.confidence >= 90
+            ? `تطابق حاسم · ${r.reason || ""}`
+            : r.confidence >= 70
+            ? `اقتراح قريب · ${r.reason || ""}`
+            : r.reason,
+        }));
 
-      // Fallback: if best score < 85%, queue for manual review
+      // Fallback: if best score < 70%, queue for manual review
       const bestScore = finalResults.length > 0 ? finalResults[0].confidence : 0;
-      if (bestScore < 85 && croppedBlob) {
+      if (bestScore < 70 && croppedBlob) {
         try {
           const imageUrl = await uploadImageForReview(croppedBlob);
           if (imageUrl) {
@@ -281,7 +290,7 @@ const Index = () => {
               user_uploaded_image: imageUrl,
               status: "pending",
             } as any);
-            toast.info("الخط غير معروف في مملكتنا بعد. تم ارسال طلبك للمراجعة اليدوية", { duration: 5000 });
+            toast.info("خطاطو المملكة يحللون هذا الخط النادر...", { duration: 5000 });
           }
         } catch (e) {
           console.warn("Failed to queue for manual review:", e);
