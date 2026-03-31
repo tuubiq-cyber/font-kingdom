@@ -255,7 +255,7 @@ const Index = () => {
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Upload className="w-5 h-5" />
-                معرفة الخط بواسطة الصورة
+                {t("identifyByImage")}
               </button>
 
               <button
@@ -263,7 +263,7 @@ const Index = () => {
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Search className="w-5 h-5" />
-                معرفة الخط بواسطة الاسم
+                {t("identifyByName")}
               </button>
 
               <Link
@@ -271,7 +271,7 @@ const Index = () => {
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Scroll className="w-5 h-5" />
-                سجل طلباتي
+                {t("myRequests")}
               </Link>
             </div>
           </div>
