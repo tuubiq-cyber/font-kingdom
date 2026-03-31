@@ -11,6 +11,8 @@ import AdminQueue from "./pages/AdminQueue";
 import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 import AdminRoute from "./components/AdminRoute";
 import useNotifications from "./hooks/useNotifications";
 
