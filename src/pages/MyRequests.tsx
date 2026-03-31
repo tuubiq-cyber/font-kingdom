@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
+import { useAuth } from "@/hooks/useAuth";
 
 interface RequestItem {
   id: string;
