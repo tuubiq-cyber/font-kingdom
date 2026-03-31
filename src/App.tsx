@@ -15,6 +15,7 @@ import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminRoute from "./components/AdminRoute";
+import AuthGuard from "./components/AuthGuard";
 import useNotifications from "./hooks/useNotifications";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 
@@ -34,13 +35,13 @@ const App = () => (
         <NotificationProvider>
           <LanguageSwitcher />
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/admin" element={<AdminRoute><AdminFonts /></AdminRoute>} />
-            <Route path="/train" element={<AdminRoute><FontTraining /></AdminRoute>} />
-            <Route path="/admin/brain" element={<AdminRoute><ModelBrain /></AdminRoute>} />
-            <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
-            <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
-            <Route path="/my-requests" element={<MyRequests />} />
+            <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
+            <Route path="/admin" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
+            <Route path="/train" element={<AuthGuard><AdminRoute><FontTraining /></AdminRoute></AuthGuard>} />
+            <Route path="/admin/brain" element={<AuthGuard><AdminRoute><ModelBrain /></AdminRoute></AuthGuard>} />
+            <Route path="/admin/queue" element={<AuthGuard><AdminRoute><AdminQueue /></AdminRoute></AuthGuard>} />
+            <Route path="/admin/security" element={<AuthGuard><AdminRoute><SecurityDashboard /></AdminRoute></AuthGuard>} />
+            <Route path="/my-requests" element={<AuthGuard><MyRequests /></AuthGuard>} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
