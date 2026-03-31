@@ -252,6 +252,7 @@ const Index = () => {
     setTextColor("#000000");
     setBgColor("#ffffff");
     setResults([]);
+    setWebResults([]);
     setErrorMsg(null);
   };
 
