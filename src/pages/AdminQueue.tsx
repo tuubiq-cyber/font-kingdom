@@ -11,6 +11,7 @@ import {
   Send,
   Eye,
   Link as LinkIcon,
+  FileUp,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -38,6 +39,7 @@ const AdminQueue = () => {
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [fontNameInput, setFontNameInput] = useState<Record<string, string>>({});
   const [downloadUrlInput, setDownloadUrlInput] = useState<Record<string, string>>({});
+  const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,6 +85,20 @@ const AdminQueue = () => {
     };
   }, [user]);
 
+  const uploadFontFile = async (file: File, fontName: string): Promise<string | null> => {
+    try {
+      const ext = file.name.split('.').pop() || 'ttf';
+      const path = `font-files/${fontName.replace(/\s+/g, '_')}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("fonts").upload(path, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from("fonts").getPublicUrl(path);
+      return data.publicUrl;
+    } catch (e) {
+      console.warn("Font file upload failed:", e);
+      return null;
+    }
+  };
+
   const handleResolve = async (item: QueueItem) => {
     const name = fontNameInput[item.id]?.trim();
     if (!name) {
@@ -93,13 +109,23 @@ const AdminQueue = () => {
     setResolvingId(item.id);
     try {
       const downloadUrl = downloadUrlInput[item.id]?.trim() || null;
+      const fontFile = fontFileInput[item.id] || null;
+
+      // Upload font file if provided
+      let fontFileUrl: string | null = null;
+      if (fontFile) {
+        fontFileUrl = await uploadFontFile(fontFile, name);
+        if (!fontFileUrl) {
+          toast.warning("فشل رفع ملف الخط، سيتم المتابعة بدونه");
+        }
+      }
 
       const { error: updateError } = await supabase
         .from("manual_identification_queue")
         .update({
           status: "resolved",
           assigned_font_name: name,
-          admin_download_url: downloadUrl,
+          admin_download_url: fontFileUrl || downloadUrl,
           resolved_by: user!.id,
           resolved_at: new Date().toISOString(),
           needs_correction: false,
@@ -120,7 +146,11 @@ const AdminQueue = () => {
       await supabase.from("font_dataset").insert({
         font_name: name,
         sample_image_url: item.user_uploaded_image,
-        metadata_json: { source: "manual_review", download_url: downloadUrl },
+        metadata_json: {
+          source: "manual_review",
+          download_url: downloadUrl,
+          font_file_url: fontFileUrl,
+        },
         visual_hash: visualHash,
         verified_by_admin: true,
       } as any);
@@ -198,11 +228,15 @@ const AdminQueue = () => {
                   item={item}
                   fontName={fontNameInput[item.id] || ""}
                   downloadUrl={downloadUrlInput[item.id] || ""}
+                  fontFile={fontFileInput[item.id] || null}
                   onFontNameChange={(v) =>
                     setFontNameInput((p) => ({ ...p, [item.id]: v }))
                   }
                   onDownloadUrlChange={(v) =>
                     setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))
+                  }
+                  onFontFileChange={(f) =>
+                    setFontFileInput((p) => ({ ...p, [item.id]: f }))
                   }
                   onResolve={() => handleResolve(item)}
                   resolving={resolvingId === item.id}
@@ -238,11 +272,15 @@ const AdminQueue = () => {
                   item={item}
                   fontName={fontNameInput[item.id] || ""}
                   downloadUrl={downloadUrlInput[item.id] || ""}
+                  fontFile={fontFileInput[item.id] || null}
                   onFontNameChange={(v) =>
                     setFontNameInput((p) => ({ ...p, [item.id]: v }))
                   }
                   onDownloadUrlChange={(v) =>
                     setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))
+                  }
+                  onFontFileChange={(f) =>
+                    setFontFileInput((p) => ({ ...p, [item.id]: f }))
                   }
                   onResolve={() => handleResolve(item)}
                   resolving={resolvingId === item.id}
@@ -332,8 +370,10 @@ interface QueueCardProps {
   item: QueueItem;
   fontName: string;
   downloadUrl: string;
+  fontFile: File | null;
   onFontNameChange: (v: string) => void;
   onDownloadUrlChange: (v: string) => void;
+  onFontFileChange: (f: File | null) => void;
   onResolve: () => void;
   resolving: boolean;
   onPreview: () => void;
@@ -344,8 +384,10 @@ const QueueCard = ({
   item,
   fontName,
   downloadUrl,
+  fontFile,
   onFontNameChange,
   onDownloadUrlChange,
+  onFontFileChange,
   onResolve,
   resolving,
   onPreview,
@@ -388,7 +430,7 @@ const QueueCard = ({
             type="text"
             value={fontName}
             onChange={(e) => onFontNameChange(e.target.value)}
-            placeholder="اسم الخط المحدد"
+            placeholder="اسم الخط (مطلوب)"
             className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
           <div className="flex items-center gap-1.5">
@@ -397,11 +439,36 @@ const QueueCard = ({
               type="url"
               value={downloadUrl}
               onChange={(e) => onDownloadUrlChange(e.target.value)}
-              placeholder="رابط التحميل المباشر (اختياري)"
+              placeholder="رابط التحميل (اختياري)"
               dir="ltr"
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
             />
           </div>
+          {/* Font file upload */}
+          <label className="flex items-center gap-2 cursor-pointer bg-muted border border-border rounded-lg px-3 py-2 hover:border-primary/30 transition-colors">
+            <FileUp className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="text-sm text-muted-foreground flex-1 truncate">
+              {fontFile ? fontFile.name : "ارفق ملف الخط (اختياري)"}
+            </span>
+            <input
+              type="file"
+              accept=".ttf,.otf,.woff,.woff2,.zip"
+              className="hidden"
+              onChange={(e) => onFontFileChange(e.target.files?.[0] || null)}
+            />
+            {fontFile && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onFontFileChange(null);
+                }}
+                className="text-xs text-destructive hover:text-destructive/80"
+              >
+                حذف
+              </button>
+            )}
+          </label>
         </div>
 
         <button
