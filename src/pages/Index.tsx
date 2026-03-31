@@ -99,7 +99,7 @@ const Index = () => {
                 مملكة الخطوط
               </h1>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
-                لا تعرف اسم الخط؟ ارفع صورته وسيتولى خطاطو المملكة التعرف عليه وارسال النتيجة اليك
+                لا تعرف اسم الخط؟ ارفع صورته وسيتولى المشرفون التعرف عليه وارسال النتيجة اليك
               </p>
             </div>
 
@@ -220,7 +220,7 @@ const Index = () => {
               </div>
               <h2 className="text-foreground font-bold text-lg">تم ارسال طلبك بنجاح</h2>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
-                سيقوم خطاطو المملكة بالتعرف على الخط واشعارك بالنتيجة. يمكنك متابعة حالة طلبك من صفحة طلباتي.
+                سيقوم المشرفون بالتعرف على الخط واشعارك بالنتيجة. يمكنك متابعة حالة طلبك من صفحة طلباتي.
               </p>
             </div>
 
