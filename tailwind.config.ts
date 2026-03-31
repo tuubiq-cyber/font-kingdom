@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         arabic: ["Tajawal", "Noto Sans Arabic", "sans-serif"],
+        serif: ["Georgia", "Cambria", "Times New Roman", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",

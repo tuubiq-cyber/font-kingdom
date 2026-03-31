@@ -15,6 +15,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminRoute from "./components/AdminRoute";
 import useNotifications from "./hooks/useNotifications";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <NotificationProvider>
+          <LanguageSwitcher />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<AdminRoute><AdminFonts /></AdminRoute>} />

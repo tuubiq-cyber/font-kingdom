@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
 import { useAuth } from "@/hooks/useAuth";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
+import { useTranslation } from "react-i18next";
 
 type Step = "home" | "upload" | "crop" | "submitting" | "done" | "name-sent";
 
@@ -52,6 +53,7 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { checkAndConsume } = useDailyLimit();
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>("home");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
@@ -68,7 +70,7 @@ const Index = () => {
 
   const requireAuth = () => {
     if (!user?.id) {
-      toast.error("يجب تسجيل الدخول اولاً لإرسال طلب");
+      toast.error(t("mustLoginFirst"));
       navigate("/login");
       return null;
     }
@@ -94,7 +96,7 @@ const Index = () => {
   const handleNameSearch = async () => {
     const cleaned = sanitizeText(searchQuery);
     if (!cleaned || cleaned.length < 2) {
-      toast.error("ادخل حرفين على الاقل");
+      toast.error(t("enterTwoChars"));
       return;
     }
     setSubmittingName(true);
@@ -117,10 +119,10 @@ const Index = () => {
       if (error) throw error;
       setStep("name-sent");
       setSearchQuery("");
-      toast.success("تم ارسال طلبك! سيتم الرد عليه من قبل المشرفين");
+      toast.success(t("querySentSuccess"));
     } catch (e) {
       console.error(e);
-      toast.error("حدث خطا اثناء الارسال");
+      toast.error(t("sendError"));
     } finally {
       setSubmittingName(false);
     }
@@ -163,7 +165,7 @@ const Index = () => {
       if (!allowed) { setStep("crop"); setIsLoading(false); return; }
 
       const imageUrl = await uploadImageForReview(croppedBlob);
-      if (!imageUrl) throw new Error("فشل رفع الصورة");
+      if (!imageUrl) throw new Error(t("uploadFailed"));
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: imageUrl,
@@ -175,10 +177,10 @@ const Index = () => {
 
       if (error) throw error;
       setStep("done");
-      toast.success("تم ارسال طلبك بنجاح!");
+      toast.success(t("requestSentSuccess"));
     } catch (e) {
       console.error(e);
-      toast.error(e instanceof Error ? e.message : "حدث خطا غير متوقع");
+      toast.error(e instanceof Error ? e.message : t("unexpectedError"));
       setStep("crop");
     } finally {
       setIsLoading(false);
@@ -208,10 +210,10 @@ const Index = () => {
                 <Crown className="w-10 h-10 text-primary animate-gentle-float" />
               </div>
               <h1 className="text-foreground font-bold text-2xl leading-tight relative z-10">
-                مملكة الخطوط
+                {t("appName")}
               </h1>
               <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto relative z-10">
-                ارفع صورة الخط او ابحث عنه بالاسم وسنجده لك
+                {t("appDesc")}
               </p>
             </div>
 
@@ -219,7 +221,7 @@ const Index = () => {
             <div className="flex items-center justify-center gap-2 animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border/30 text-xs text-muted-foreground visitor-badge">
                 <Users className="w-3.5 h-3.5 text-primary" />
-                <span>{visitorCount.toLocaleString("ar-SA")} زائر</span>
+                <span><span className="font-serif">{visitorCount.toLocaleString("en-US")}</span> {t("visitors")}</span>
               </div>
             </div>
 
@@ -229,9 +231,9 @@ const Index = () => {
             {/* Features */}
             <div className="grid grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
               {[
-                { icon: Upload, label: "ارفع صورة", delay: 0 },
-                { icon: Eye, label: "نحلل الخط", delay: 0.1 },
-                { icon: Feather, label: "نرسل النتيجة", delay: 0.2 },
+                { icon: Upload, label: t("uploadImage"), delay: 0 },
+                { icon: Eye, label: t("analyzeFont"), delay: 0.1 },
+                { icon: Feather, label: t("sendResult"), delay: 0.2 },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -253,7 +255,7 @@ const Index = () => {
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Upload className="w-5 h-5" />
-                معرفة الخط بواسطة الصورة
+                {t("identifyByImage")}
               </button>
 
               <button
@@ -261,7 +263,7 @@ const Index = () => {
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Search className="w-5 h-5" />
-                معرفة الخط بواسطة الاسم
+                {t("identifyByName")}
               </button>
 
               <Link
@@ -269,7 +271,7 @@ const Index = () => {
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Scroll className="w-5 h-5" />
-                سجل طلباتي
+                {t("myRequests")}
               </Link>
             </div>
           </div>
@@ -278,7 +280,7 @@ const Index = () => {
         {/* Step indicators */}
         {["upload", "crop"].includes(step) && (
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground animate-fade-in">
-            {["رفع", "قص", "ارسال"].map((label, i) => {
+            {[t("stepUpload"), t("stepCrop"), t("stepSend")].map((label, i) => {
               const steps = ["upload", "crop", "submitting"];
               const currentIdx = step === "crop" && croppedBlob ? 2 : steps.indexOf(step);
               const isActive = currentIdx >= i;
@@ -309,12 +311,12 @@ const Index = () => {
               <div className="space-y-4 animate-scale-in">
                 <div className="flex justify-center">
                   <div className="rounded-xl overflow-hidden border border-border max-w-xs">
-                    <img src={croppedImage} alt="الجزء المقصوص" className="w-full h-auto max-h-40 object-contain bg-muted" />
+                    <img src={croppedImage} alt={t("croppedImage")} className="w-full h-auto max-h-40 object-contain bg-muted" />
                   </div>
                 </div>
                 <button onClick={handleSubmitRequest} disabled={isLoading} className="btn-primary-interactive w-full flex items-center justify-center gap-2">
                   <Send className="w-4 h-4" />
-                  ارسال للتعرف اليدوي
+                  {t("sendForReview")}
                 </button>
               </div>
             )}
@@ -325,7 +327,7 @@ const Index = () => {
         {step === "submitting" && (
           <div className="flex flex-col items-center gap-4 py-12 animate-fade-in">
             <div className="w-12 h-12 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-            <p className="text-foreground font-medium text-sm">جاري ارسال طلبك للمشرفين...</p>
+            <p className="text-foreground font-medium text-sm">{t("submitting")}</p>
           </div>
         )}
 
@@ -336,19 +338,19 @@ const Index = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 animate-scale-in">
                 <CheckCircle className="w-10 h-10 text-primary" />
               </div>
-              <h2 className="text-foreground font-bold text-lg">تم ارسال طلبك بنجاح</h2>
+              <h2 className="text-foreground font-bold text-lg">{t("requestSentTitle")}</h2>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
-                سيقوم المشرفون بالتعرف على الخط واشعارك بالنتيجة. يمكنك متابعة حالة طلبك من صفحة طلباتي.
+                {t("requestSentDesc")}
               </p>
             </div>
             <div className="flex flex-col gap-3">
               <Link to="/my-requests" className="btn-primary-interactive w-full flex items-center justify-center gap-2">
                 <Scroll className="w-4 h-4" />
-                تتبع طلباتي
+                {t("trackRequests")}
               </Link>
               <button onClick={reset} className="btn-primary-interactive w-full flex items-center justify-center gap-2 py-3 font-bold rounded-xl cta-shimmer">
                 <ArrowRight className="w-4 h-4" />
-                ارسال طلب جديد
+                {t("newRequest")}
               </button>
             </div>
           </div>
@@ -361,19 +363,19 @@ const Index = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 animate-scale-in">
                 <Type className="w-10 h-10 text-primary" />
               </div>
-              <h2 className="text-foreground font-bold text-lg">تم ارسال استفسارك</h2>
+              <h2 className="text-foreground font-bold text-lg">{t("querySentTitle")}</h2>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
-                سيقوم المشرفون بالبحث عن الخط المطلوب وارسال الرد اليك
+                {t("querySentDesc")}
               </p>
             </div>
             <div className="flex flex-col gap-3">
               <Link to="/my-requests" className="btn-primary-interactive w-full flex items-center justify-center gap-2">
                 <Scroll className="w-4 h-4" />
-                تتبع طلباتي
+                {t("trackRequests")}
               </Link>
               <button onClick={reset} className="btn-primary-interactive w-full flex items-center justify-center gap-2 py-3 font-bold rounded-xl cta-shimmer">
                 <ArrowRight className="w-4 h-4" />
-                العودة للرئيسية
+                {t("backToHome")}
               </button>
             </div>
           </div>
