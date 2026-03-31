@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import AdminFonts from "./pages/AdminFonts";
 import FontTraining from "./pages/FontTraining";
+import ModelBrain from "./pages/ModelBrain";
 import AdminQueue from "./pages/AdminQueue";
 import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/admin" element={<AdminFonts />} />
           <Route path="/train" element={<FontTraining />} />
+          <Route path="/admin/brain" element={<ModelBrain />} />
           <Route path="/admin/queue" element={<AdminQueue />} />
           <Route path="/my-requests" element={<MyRequests />} />
           <Route path="/login" element={<Login />} />
