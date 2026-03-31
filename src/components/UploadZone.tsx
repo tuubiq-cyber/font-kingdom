@@ -23,7 +23,11 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
       e.preventDefault();
       setIsDragging(false);
       const file = e.dataTransfer.files?.[0];
-      if (file?.type.startsWith("image/")) onImageUpload(file);
+      if (file?.type.startsWith("image/")) {
+        const err = validateImageUpload(file);
+        if (err) { toast.error(err); return; }
+        onImageUpload(file);
+      }
     },
     [onImageUpload]
   );
