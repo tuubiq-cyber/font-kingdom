@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
 import { useAuth } from "@/hooks/useAuth";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
+import { useTranslation } from "react-i18next";
 
 type Step = "home" | "upload" | "crop" | "submitting" | "done" | "name-sent";
 

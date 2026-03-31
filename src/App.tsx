@@ -31,6 +31,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <NotificationProvider>
+          <LanguageSwitcher />
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/admin" element={<AdminRoute><AdminFonts /></AdminRoute>} />
