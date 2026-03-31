@@ -60,9 +60,15 @@ export async function searchFontOnWeb(
 اذا لم تجد نتائج اعد مصفوفة فارغة. لا تخترع روابط غير موجودة.`;
 
   try {
-    const response = await window.puter.ai.chat(prompt, {
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Web search timeout")), 15000)
+    );
+
+    const searchPromise = window.puter.ai.chat(prompt, {
       model: "perplexity/sonar",
     });
+
+    const response = await Promise.race([searchPromise, timeoutPromise]);
 
     let jsonStr = typeof response === "string" ? response : String(response);
     const jsonMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
