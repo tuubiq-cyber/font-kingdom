@@ -93,6 +93,17 @@ const AdminFonts = () => {
       if (previewFile) previewUrl = await uploadFile(previewFile, "previews");
       if (referenceFile) referenceUrl = await uploadFile(referenceFile, "references");
 
+      // Auto-generate perceptual hash from reference image
+      let visualHash: string | null = null;
+      if (referenceUrl) {
+        try {
+          visualHash = await generatePerceptualHash(referenceUrl);
+          toast.info("تم انشاء البصمة البصرية تلقائيا");
+        } catch (e) {
+          console.warn("Failed to generate hash:", e);
+        }
+      }
+
       const tagsArr = tags
         .split(",")
         .map((t) => t.trim())
@@ -107,6 +118,7 @@ const AdminFonts = () => {
         download_url: null,
         preview_image_url: previewUrl,
         reference_image_url: referenceUrl,
+        visual_features_hash: visualHash,
         tags: tagsArr.length > 0 ? tagsArr : null,
       } as any).select("id").single();
 
