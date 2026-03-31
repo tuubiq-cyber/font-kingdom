@@ -8,7 +8,7 @@ import ColorPicker from "@/components/ColorPicker";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
 import WebFontResults from "@/components/WebFontResults";
-import { Send, ArrowRight, Bug, Image as ImageIcon, Search, Type } from "lucide-react";
+import { Send, ArrowRight, Bug, Image as ImageIcon, Search, Type, Scroll } from "lucide-react";
 import { toast } from "sonner";
 import {
   normalizeImage,
