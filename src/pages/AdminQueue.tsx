@@ -370,8 +370,10 @@ interface QueueCardProps {
   item: QueueItem;
   fontName: string;
   downloadUrl: string;
+  fontFile: File | null;
   onFontNameChange: (v: string) => void;
   onDownloadUrlChange: (v: string) => void;
+  onFontFileChange: (f: File | null) => void;
   onResolve: () => void;
   resolving: boolean;
   onPreview: () => void;
@@ -382,8 +384,10 @@ const QueueCard = ({
   item,
   fontName,
   downloadUrl,
+  fontFile,
   onFontNameChange,
   onDownloadUrlChange,
+  onFontFileChange,
   onResolve,
   resolving,
   onPreview,
@@ -426,7 +430,7 @@ const QueueCard = ({
             type="text"
             value={fontName}
             onChange={(e) => onFontNameChange(e.target.value)}
-            placeholder="اسم الخط المحدد"
+            placeholder="اسم الخط (مطلوب)"
             className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
           />
           <div className="flex items-center gap-1.5">
@@ -435,11 +439,36 @@ const QueueCard = ({
               type="url"
               value={downloadUrl}
               onChange={(e) => onDownloadUrlChange(e.target.value)}
-              placeholder="رابط التحميل المباشر (اختياري)"
+              placeholder="رابط التحميل (اختياري)"
               dir="ltr"
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
             />
           </div>
+          {/* Font file upload */}
+          <label className="flex items-center gap-2 cursor-pointer bg-muted border border-border rounded-lg px-3 py-2 hover:border-primary/30 transition-colors">
+            <FileUp className="w-4 h-4 text-muted-foreground shrink-0" />
+            <span className="text-sm text-muted-foreground flex-1 truncate">
+              {fontFile ? fontFile.name : "ارفق ملف الخط (اختياري)"}
+            </span>
+            <input
+              type="file"
+              accept=".ttf,.otf,.woff,.woff2,.zip"
+              className="hidden"
+              onChange={(e) => onFontFileChange(e.target.files?.[0] || null)}
+            />
+            {fontFile && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onFontFileChange(null);
+                }}
+                className="text-xs text-destructive hover:text-destructive/80"
+              >
+                حذف
+              </button>
+            )}
+          </label>
         </div>
 
         <button
