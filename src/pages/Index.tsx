@@ -456,8 +456,16 @@ const Index = () => {
                 <span className="text-muted-foreground text-xs text-center">ابحث عن خط بكتابة اسمه</span>
               </button>
             </div>
+
+            {/* My Requests link */}
+            <Link
+              to="/my-requests"
+              className="flex items-center justify-center gap-2 text-muted-foreground text-xs hover:text-primary transition-colors py-2"
+            >
+              <Scroll className="w-3.5 h-3.5" />
+              تتبع طلباتي السابقة
+            </Link>
           </div>
-        )}
 
         {/* Step indicators (only for image search flow) */}
         {["upload", "crop", "details", "results"].includes(step) && (
