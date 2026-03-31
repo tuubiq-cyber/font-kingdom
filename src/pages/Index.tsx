@@ -42,6 +42,7 @@ const Index = () => {
     setIsLoading(true);
     setResults([]);
     setErrorMsg(null);
+    setExtractedText(null);
     setScanStage("uploading");
 
     const objectUrl = URL.createObjectURL(file);
