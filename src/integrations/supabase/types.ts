@@ -210,6 +210,24 @@ export type Database = {
           },
         ]
       }
+      site_visits: {
+        Row: {
+          id: string
+          visited_at: string
+          visitor_id: string | null
+        }
+        Insert: {
+          id?: string
+          visited_at?: string
+          visitor_id?: string | null
+        }
+        Update: {
+          id?: string
+          visited_at?: string
+          visitor_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
