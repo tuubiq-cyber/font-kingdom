@@ -367,9 +367,11 @@ interface QueueCardProps {
   fontName: string;
   downloadUrl: string;
   fontFile: File | null;
+  notes: string;
   onFontNameChange: (v: string) => void;
   onDownloadUrlChange: (v: string) => void;
   onFontFileChange: (f: File | null) => void;
+  onNotesChange: (v: string) => void;
   onResolve: () => void;
   resolving: boolean;
   onPreview: () => void;
@@ -381,109 +383,132 @@ const QueueCard = ({
   fontName,
   downloadUrl,
   fontFile,
+  notes,
   onFontNameChange,
   onDownloadUrlChange,
   onFontFileChange,
+  onNotesChange,
   onResolve,
   resolving,
   onPreview,
   isCorrection,
-}: QueueCardProps) => (
-  <div
-    className={`font-card space-y-3 ${
-      isCorrection ? "border-destructive/30 bg-destructive/5" : ""
-    }`}
-  >
-    {isCorrection && (
-      <div className="flex items-center gap-1.5 text-xs text-destructive">
-        <AlertTriangle className="w-3.5 h-3.5" />
-        المستخدم لم يوافق على النتيجة السابقة - يرجى اعادة التحقق
-      </div>
-    )}
-    <div className="flex items-start gap-3">
-      <img
-        src={item.user_uploaded_image}
-        alt="صورة المستخدم"
-        className="w-20 h-20 rounded-lg object-cover bg-muted cursor-pointer border border-border hover:border-primary/50 transition-colors"
-        onClick={onPreview}
-      />
-      <div className="flex-1 space-y-2">
-        <div className="flex items-center justify-between">
-          <p className="text-muted-foreground text-xs">
-            {new Date(item.created_at).toLocaleDateString("ar-SA")} ·{" "}
-            {new Date(item.created_at).toLocaleTimeString("ar-SA")}
-          </p>
-          <button
-            onClick={onPreview}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-        </div>
+}: QueueCardProps) => {
+  const fileInputId = `file-${item.id}`;
 
-        <div className="space-y-2">
-          <input
-            type="text"
-            value={fontName}
-            onChange={(e) => onFontNameChange(e.target.value)}
-            placeholder="اسم الخط (مطلوب)"
-            className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-          />
-          <div className="flex items-center gap-1.5">
-            <LinkIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+  return (
+    <div
+      className={`font-card space-y-3 ${
+        isCorrection ? "border-destructive/30 bg-destructive/5" : ""
+      }`}
+    >
+      {isCorrection && (
+        <div className="flex items-center gap-1.5 text-xs text-destructive">
+          <AlertTriangle className="w-3.5 h-3.5" />
+          المستخدم لم يوافق على النتيجة السابقة - يرجى اعادة التحقق
+        </div>
+      )}
+      <div className="flex items-start gap-3">
+        <img
+          src={item.user_uploaded_image}
+          alt="صورة المستخدم"
+          className="w-20 h-20 rounded-lg object-cover bg-muted cursor-pointer border border-border hover:border-primary/50 transition-colors"
+          onClick={onPreview}
+        />
+        <div className="flex-1 space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-muted-foreground text-xs">
+              {new Date(item.created_at).toLocaleDateString("ar-SA")} ·{" "}
+              {new Date(item.created_at).toLocaleTimeString("ar-SA")}
+            </p>
+            <button
+              onClick={onPreview}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-2">
             <input
-              type="url"
-              value={downloadUrl}
-              onChange={(e) => onDownloadUrlChange(e.target.value)}
-              placeholder="رابط التحميل (اختياري)"
-              dir="ltr"
+              type="text"
+              value={fontName}
+              onChange={(e) => onFontNameChange(e.target.value)}
+              placeholder="اسم الخط (مطلوب)"
               className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
             />
-          </div>
-          {/* Font file upload */}
-          <label className="flex items-center gap-2 cursor-pointer bg-muted border border-border rounded-lg px-3 py-2 hover:border-primary/30 transition-colors">
-            <FileUp className="w-4 h-4 text-muted-foreground shrink-0" />
-            <span className="text-sm text-muted-foreground flex-1 truncate">
-              {fontFile ? fontFile.name : "ارفق ملف الخط (اختياري)"}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <LinkIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              <input
+                type="url"
+                value={downloadUrl}
+                onChange={(e) => onDownloadUrlChange(e.target.value)}
+                placeholder="رابط التحميل (اختياري)"
+                dir="ltr"
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              />
+            </div>
+
+            {/* Font file upload - separated input from label to fix click bug */}
             <input
+              id={fileInputId}
               type="file"
               accept=".ttf,.otf,.woff,.woff2,.zip"
               className="hidden"
-              onChange={(e) => onFontFileChange(e.target.files?.[0] || null)}
+              onChange={(e) => {
+                onFontFileChange(e.target.files?.[0] || null);
+                e.target.value = "";
+              }}
             />
-            {fontFile && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onFontFileChange(null);
-                }}
-                className="text-xs text-destructive hover:text-destructive/80"
+            <div className="flex items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2 hover:border-primary/30 transition-colors">
+              <FileUp className="w-4 h-4 text-muted-foreground shrink-0" />
+              <span
+                className="text-sm text-muted-foreground flex-1 truncate cursor-pointer"
+                onClick={() => document.getElementById(fileInputId)?.click()}
               >
-                حذف
-              </button>
-            )}
-          </label>
-        </div>
+                {fontFile ? fontFile.name : "ارفق ملف الخط (اختياري)"}
+              </span>
+              {fontFile && (
+                <button
+                  type="button"
+                  onClick={() => onFontFileChange(null)}
+                  className="text-xs text-destructive hover:text-destructive/80"
+                >
+                  حذف
+                </button>
+              )}
+            </div>
 
-        <button
-          onClick={onResolve}
-          disabled={resolving}
-          className="btn-primary w-full py-2 text-sm flex items-center justify-center gap-1.5"
-        >
-          {resolving ? (
-            <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-          ) : (
-            <>
-              <Send className="w-4 h-4" />
-              ارسال النتيجة للمستخدم
-            </>
-          )}
-        </button>
+            {/* Notes */}
+            <div className="flex items-start gap-1.5">
+              <MessageSquare className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-2.5" />
+              <textarea
+                value={notes}
+                onChange={(e) => onNotesChange(e.target.value)}
+                placeholder="ملاحظات للمستخدم (اختياري)"
+                rows={2}
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={onResolve}
+            disabled={resolving}
+            className="btn-primary w-full py-2 text-sm flex items-center justify-center gap-1.5"
+          >
+            {resolving ? (
+              <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                ارسال النتيجة للمستخدم
+              </>
+            )}
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default AdminQueue;
