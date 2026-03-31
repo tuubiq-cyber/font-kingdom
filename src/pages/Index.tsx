@@ -150,9 +150,58 @@ const Index = () => {
         }
       }
 
-      // Phase 4: AI matching
-      setScanStage("ai");
-      let aiResults: FontResult[] = [];
+      // Phase 4: Search font_dataset (training data)
+      setScanStage("dataset");
+      try {
+        const { data: datasetFonts } = await supabase
+          .from("font_dataset")
+          .select("*")
+          .eq("verified_by_admin", true);
+
+        if (datasetFonts && datasetFonts.length > 0) {
+          for (const ds of datasetFonts) {
+            if (!ds.visual_hash && !ds.sample_image_url) continue;
+
+            let similarity = 0;
+            if (ds.visual_hash) {
+              similarity = hashSimilarity(userHash, ds.visual_hash);
+            } else if (ds.sample_image_url) {
+              try {
+                const { combined } = await matchFont(normalizedUser, userHash, ds.sample_image_url, null);
+                similarity = combined;
+              } catch { /* skip */ }
+            }
+
+            if (similarity > 15) {
+              const meta = (ds.metadata_json as any) || {};
+              const key = ds.font_name.toLowerCase();
+              const existing = visualMatches.find((m) => m.name.toLowerCase() === key);
+              if (existing) {
+                existing.confidence = Math.max(existing.confidence, similarity);
+              } else {
+                visualMatches.push({
+                  name: ds.font_name,
+                  nameAr: ds.font_name,
+                  style: meta.category || "عام",
+                  confidence: similarity,
+                  isPerfectMatch: similarity >= 90,
+                  reason: `ارشيف المملكة · بصمة: ${similarity}%`,
+                  fileUrl: meta.download_url || null,
+                  license: "مجاني",
+                  category: meta.category || "modern",
+                  previewImageUrl: ds.sample_image_url,
+                  fontFiles: [],
+                  downloadUrl: meta.download_url || null,
+                });
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Dataset search failed:", e);
+      }
+
+      // Phase 5: AI matching
       if (croppedBlob) {
         try {
           const base64 = await fileToBase64(croppedBlob);
