@@ -142,7 +142,9 @@ const Index = () => {
 
   const uploadImageForReview = async (blob: Blob): Promise<string | null> => {
     try {
-      const path = `queue/${crypto.randomUUID()}.png`;
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      if (!userId) return null;
+      const path = `queue/${userId}/${crypto.randomUUID()}.png`;
       const { error } = await supabase.storage.from("fonts").upload(path, blob);
       if (error) throw error;
       const { data } = supabase.storage.from("fonts").getPublicUrl(path);
