@@ -16,6 +16,7 @@ interface FontRow {
   download_url: string | null;
   preview_image_url: string | null;
   visual_features_hash: string | null;
+  reference_image_url: string | null;
   tags: string[] | null;
   created_at: string;
 }
