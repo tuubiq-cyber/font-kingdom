@@ -53,6 +53,7 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { checkAndConsume } = useDailyLimit();
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>("home");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
