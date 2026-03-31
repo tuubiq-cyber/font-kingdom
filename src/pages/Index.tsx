@@ -119,7 +119,7 @@ const Index = () => {
       if (error) throw error;
       setStep("name-sent");
       setSearchQuery("");
-      toast.success("تم ارسال طلبك! سيتم الرد عليه من قبل المشرفين");
+      toast.success(t("querySentSuccess"));
     } catch (e) {
       console.error(e);
       toast.error("حدث خطا اثناء الارسال");
