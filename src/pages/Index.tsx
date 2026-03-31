@@ -5,7 +5,7 @@ import UploadZone from "@/components/UploadZone";
 import SearchBar from "@/components/SearchBar";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
-import { Plus } from "lucide-react";
+import { Plus, Send } from "lucide-react";
 import { toast } from "sonner";
 
 interface FontResult {
