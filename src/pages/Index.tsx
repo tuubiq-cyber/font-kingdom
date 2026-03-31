@@ -277,6 +277,19 @@ const Index = () => {
           </div>
         )}
 
+        {/* Back button for inner steps */}
+        {["upload", "crop"].includes(step) && (
+          <div className="flex items-center pt-4 animate-fade-in">
+            <button
+              onClick={reset}
+              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-muted"
+            >
+              <ArrowRight className="w-4 h-4" />
+              {t("back")}
+            </button>
+          </div>
+        )}
+
         {/* Step indicators */}
         {["upload", "crop"].includes(step) && (
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground animate-fade-in">
