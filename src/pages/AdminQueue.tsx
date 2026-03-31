@@ -228,11 +228,15 @@ const AdminQueue = () => {
                   item={item}
                   fontName={fontNameInput[item.id] || ""}
                   downloadUrl={downloadUrlInput[item.id] || ""}
+                  fontFile={fontFileInput[item.id] || null}
                   onFontNameChange={(v) =>
                     setFontNameInput((p) => ({ ...p, [item.id]: v }))
                   }
                   onDownloadUrlChange={(v) =>
                     setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))
+                  }
+                  onFontFileChange={(f) =>
+                    setFontFileInput((p) => ({ ...p, [item.id]: f }))
                   }
                   onResolve={() => handleResolve(item)}
                   resolving={resolvingId === item.id}
