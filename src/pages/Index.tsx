@@ -363,19 +363,19 @@ const Index = () => {
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 animate-scale-in">
                 <Type className="w-10 h-10 text-primary" />
               </div>
-              <h2 className="text-foreground font-bold text-lg">تم ارسال استفسارك</h2>
+              <h2 className="text-foreground font-bold text-lg">{t("querySentTitle")}</h2>
               <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
-                سيقوم المشرفون بالبحث عن الخط المطلوب وارسال الرد اليك
+                {t("querySentDesc")}
               </p>
             </div>
             <div className="flex flex-col gap-3">
               <Link to="/my-requests" className="btn-primary-interactive w-full flex items-center justify-center gap-2">
                 <Scroll className="w-4 h-4" />
-                تتبع طلباتي
+                {t("trackRequests")}
               </Link>
               <button onClick={reset} className="btn-primary-interactive w-full flex items-center justify-center gap-2 py-3 font-bold rounded-xl cta-shimmer">
                 <ArrowRight className="w-4 h-4" />
-                العودة للرئيسية
+                {t("backToHome")}
               </button>
             </div>
           </div>
