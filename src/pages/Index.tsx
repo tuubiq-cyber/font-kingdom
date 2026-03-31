@@ -96,7 +96,7 @@ const Index = () => {
   const handleNameSearch = async () => {
     const cleaned = sanitizeText(searchQuery);
     if (!cleaned || cleaned.length < 2) {
-      toast.error("ادخل حرفين على الاقل");
+      toast.error(t("enterTwoChars"));
       return;
     }
     setSubmittingName(true);
