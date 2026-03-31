@@ -77,7 +77,7 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
                 اسحب الصورة هنا او اضغط للرفع
               </p>
               <p className="text-muted-foreground text-sm">
-                PNG, JPG, WEBP — حتى 10 ميغابايت
+                JPG, PNG — حتى 5 ميغابايت
               </p>
             </div>
           </>
