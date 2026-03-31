@@ -122,7 +122,7 @@ const Index = () => {
       toast.success(t("querySentSuccess"));
     } catch (e) {
       console.error(e);
-      toast.error("حدث خطا اثناء الارسال");
+      toast.error(t("sendError"));
     } finally {
       setSubmittingName(false);
     }
