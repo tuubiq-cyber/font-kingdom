@@ -94,13 +94,16 @@ const Index = () => {
     }
     setSubmittingName(true);
     try {
-      const uid = getUserId();
+      const uid = requireAuth();
+      if (!uid) return;
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: "text_query",
         status: "pending",
         user_id: uid,
         query_text: cleaned,
+        is_notified: false,
+        needs_correction: false,
       } as any);
 
       if (error) throw error;
