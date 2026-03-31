@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import UploadZone from "@/components/UploadZone";
 import ImageCropper from "@/components/ImageCropper";
-import { Send, ArrowRight, Upload, Scroll, CheckCircle } from "lucide-react";
+import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye } from "lucide-react";
 import { toast } from "sonner";
 
 type Step = "home" | "upload" | "crop" | "submitting" | "done";
@@ -89,46 +89,72 @@ const Index = () => {
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6">
         {/* Home */}
         {step === "home" && (
-          <div className="opacity-0 animate-scale-in space-y-6 pt-4">
-            <p className="text-center text-muted-foreground text-sm">
-              ارفع صورة الخط وسيتولى خطاطو المملكة التعرف عليه
-            </p>
-
-            <button
-              onClick={() => setStep("upload")}
-              className="font-card w-full flex flex-col items-center gap-4 py-10 px-4 hover:border-primary/40 transition-colors cursor-pointer"
-            >
-              <div className="w-16 h-16 rounded-2xl bg-muted flex items-center justify-center">
-                <Upload className="w-7 h-7 text-primary" />
+          <div className="space-y-8 pt-6">
+            {/* Hero Section */}
+            <div className="text-center space-y-4 animate-fade-in">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-2 animate-scale-in">
+                <Crown className="w-10 h-10 text-primary" />
               </div>
-              <span className="text-foreground font-semibold text-base">ارسال طلب تعرف على خط</span>
-              <span className="text-muted-foreground text-xs text-center max-w-xs">
-                ارفع صورة واضحة تحتوي على النص المكتوب بالخط المطلوب وسيقوم فريقنا بالتعرف عليه
-              </span>
-            </button>
+              <h1 className="text-foreground font-bold text-2xl leading-tight">
+                مملكة الخطوط
+              </h1>
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+                لا تعرف اسم الخط؟ ارفع صورته وسيتولى خطاطو المملكة التعرف عليه وارسال النتيجة اليك
+              </p>
+            </div>
 
-            <Link
-              to="/my-requests"
-              className="flex items-center justify-center gap-2 text-muted-foreground text-xs hover:text-primary transition-colors py-2"
-            >
-              <Scroll className="w-3.5 h-3.5" />
-              تتبع طلباتي السابقة
-            </Link>
+            {/* Features */}
+            <div className="grid grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
+              {[
+                { icon: Upload, label: "ارفع صورة" },
+                { icon: Eye, label: "نحلل الخط" },
+                { icon: Feather, label: "نرسل النتيجة" },
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col items-center gap-2 py-4 px-2 rounded-xl bg-card border border-border/30">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <item.icon className="w-5 h-5 text-primary" />
+                  </div>
+                  <span className="text-foreground text-xs font-medium">{item.label}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA Button */}
+            <div className="animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
+              <button
+                onClick={() => setStep("upload")}
+                className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl"
+              >
+                <Upload className="w-5 h-5" />
+                ارسال طلب تعرف على خط
+              </button>
+            </div>
+
+            {/* My Requests Link */}
+            <div className="animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
+              <Link
+                to="/my-requests"
+                className="flex items-center justify-center gap-2 text-muted-foreground text-xs hover:text-primary transition-colors py-2"
+              >
+                <Scroll className="w-3.5 h-3.5" />
+                تتبع طلباتي السابقة
+              </Link>
+            </div>
           </div>
         )}
 
         {/* Step indicators */}
         {["upload", "crop"].includes(step) && (
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground animate-fade-in">
             {["رفع", "قص", "ارسال"].map((label, i) => {
               const steps = ["upload", "crop", "submitting"];
               const currentIdx = step === "crop" && croppedBlob ? 2 : steps.indexOf(step);
               const isActive = currentIdx >= i;
               return (
                 <div key={label} className="flex items-center gap-2">
-                  {i > 0 && <div className={`w-8 h-px ${isActive ? "bg-primary" : "bg-border"}`} />}
+                  {i > 0 && <div className={`w-8 h-px transition-colors duration-300 ${isActive ? "bg-primary" : "bg-border"}`} />}
                   <span
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-colors ${
+                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-300 ${
                       isActive ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
                     }`}
                   >
@@ -142,18 +168,18 @@ const Index = () => {
 
         {/* Step 1: Upload */}
         {step === "upload" && (
-          <div className="opacity-0 animate-scale-in">
+          <div className="animate-fade-in">
             <UploadZone onImageUpload={handleImageUpload} isLoading={false} />
           </div>
         )}
 
         {/* Step 2: Crop */}
         {step === "crop" && uploadedImage && (
-          <div className="opacity-0 animate-scale-in space-y-4">
+          <div className="animate-fade-in space-y-4">
             <ImageCropper imageSrc={uploadedImage} onCropComplete={handleCropComplete} />
 
             {croppedImage && (
-              <div className="space-y-4">
+              <div className="space-y-4 animate-scale-in">
                 <div className="flex justify-center">
                   <div className="rounded-xl overflow-hidden border border-border max-w-xs">
                     <img
@@ -167,7 +193,7 @@ const Index = () => {
                 <button
                   onClick={handleSubmitRequest}
                   disabled={isLoading}
-                  className="btn-primary w-full flex items-center justify-center gap-2"
+                  className="btn-primary-interactive w-full flex items-center justify-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   ارسال للتعرف اليدوي
@@ -179,19 +205,21 @@ const Index = () => {
 
         {/* Submitting */}
         {step === "submitting" && (
-          <div className="flex flex-col items-center gap-4 py-12 opacity-0 animate-scale-in">
-            <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <div className="flex flex-col items-center gap-4 py-12 animate-fade-in">
+            <div className="w-12 h-12 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
             <p className="text-foreground font-medium text-sm">جاري ارسال طلبك لخطاطي المملكة...</p>
           </div>
         )}
 
         {/* Done */}
         {step === "done" && (
-          <div className="space-y-6 opacity-0 animate-scale-in">
+          <div className="space-y-6 animate-fade-in">
             <div className="text-center py-8 space-y-4">
-              <CheckCircle className="w-14 h-14 text-primary mx-auto" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 animate-scale-in">
+                <CheckCircle className="w-10 h-10 text-primary" />
+              </div>
               <h2 className="text-foreground font-bold text-lg">تم ارسال طلبك بنجاح</h2>
-              <p className="text-muted-foreground text-sm max-w-sm mx-auto">
+              <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
                 سيقوم خطاطو المملكة بالتعرف على الخط واشعارك بالنتيجة. يمكنك متابعة حالة طلبك من صفحة طلباتي.
               </p>
             </div>
@@ -199,14 +227,14 @@ const Index = () => {
             <div className="flex flex-col gap-3">
               <Link
                 to="/my-requests"
-                className="btn-primary w-full flex items-center justify-center gap-2"
+                className="btn-primary-interactive w-full flex items-center justify-center gap-2"
               >
                 <Scroll className="w-4 h-4" />
                 تتبع طلباتي
               </Link>
               <button
                 onClick={reset}
-                className="btn-outline w-full flex items-center justify-center gap-2"
+                className="btn-outline-interactive w-full flex items-center justify-center gap-2"
               >
                 <ArrowRight className="w-4 h-4" />
                 ارسال طلب جديد
