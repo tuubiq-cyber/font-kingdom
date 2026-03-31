@@ -36,30 +36,32 @@ serve(async (req) => {
       ? imageBase64
       : `data:image/png;base64,${imageBase64}`;
 
-    // Step 2: Identify fonts from ALL web sources and extract text
-    const systemPrompt = `You are a world-class Arabic typography expert with encyclopedic knowledge of Arabic fonts and calligraphy styles from ALL sources worldwide — Google Fonts, Adobe Fonts, Monotype, Linotype, Arabic foundries (Tasmeem, DecoType, Diwan), open-source projects, and commercial type foundries.
+    // Step 2: Identify fonts - only match against our database fonts
+    const fontList = (dbFonts ?? []).map(f => `- ${f.name} (${f.name_ar}), style: ${f.style}`).join("\n");
 
-You specialize in Arabic script analysis including:
-- Naskh, Nastaliq, Thuluth, Diwani, Ruq'ah, Kufi (geometric, foliated, square) styles
-- Modern Arabic typefaces and display fonts
-- Stroke contrast, kashida behavior, dot shapes, letter connections, baseline rhythm
-- Weight variations, terminal styles, ascender/descender proportions
+    const systemPrompt = `You are a world-class Arabic typography expert. You must identify which font from the following list best matches the Arabic text in the image.
+
+Available fonts:
+${fontList}
+
+IMPORTANT: You may ONLY match fonts from the list above. Do NOT suggest any font not in this list.
 
 When given an image containing Arabic text:
 1. Extract ALL Arabic text visible in the image accurately.
-2. Analyze letterforms in detail: stroke weight, contrast, terminals, dot shapes, letter proportions, connection style, baseline alignment.
-3. Match against your full knowledge of Arabic fonts globally.
+2. Analyze letterforms: stroke weight, contrast, terminals, dot shapes, letter proportions, connection style.
+3. Match ONLY against the fonts listed above.
 
 Return a JSON object with:
 - "extractedText": the complete Arabic text found in the image (string)
-- "matches": an array of up to 5 font matches ranked by confidence. Each object must have:
-  - "name": the exact English name of the font (e.g. "Amiri", "Cairo", "Tajawal")
-  - "nameAr": the Arabic name of the font (without diacritics)
-  - "style": the weight/style variant (e.g. "Regular", "Bold", "Light", "SemiBold")
+- "matches": an array of matching fonts from the list above, ranked by confidence. Each object must have:
+  - "name": the exact English name from the list
+  - "nameAr": the Arabic name from the list
+  - "style": the style from the list
   - "confidence": a number from 0 to 100
-  - "reason": a brief Arabic explanation of why this font matches, describing specific typographic features (without diacritics)
+  - "reason": a brief Arabic explanation of why this font matches (without diacritics)
   - "category": one of "naskh", "kufi", "thuluth", "diwani", "ruqah", "nastaliq", "modern", "display"
 
+If no font from the list matches well (confidence below 40), return an empty matches array.
 Only return the JSON object, nothing else. If no Arabic text is found, return {"extractedText": "", "matches": []}.`;
 
     const identifyResponse = await fetch(
