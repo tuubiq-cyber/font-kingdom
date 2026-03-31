@@ -38,6 +38,7 @@ const AdminQueue = () => {
   const [resolvingId, setResolvingId] = useState<string | null>(null);
   const [fontNameInput, setFontNameInput] = useState<Record<string, string>>({});
   const [downloadUrlInput, setDownloadUrlInput] = useState<Record<string, string>>({});
+  const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
