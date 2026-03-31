@@ -94,7 +94,7 @@ const Index = () => {
         user_uploaded_image: "text_query",
         status: "pending",
         user_id: uid,
-        query_text: searchQuery.trim(),
+        query_text: cleaned,
       } as any);
 
       if (error) throw error;
