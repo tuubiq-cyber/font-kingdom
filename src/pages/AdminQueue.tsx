@@ -233,15 +233,11 @@ const AdminQueue = () => {
                   fontName={fontNameInput[item.id] || ""}
                   downloadUrl={downloadUrlInput[item.id] || ""}
                   fontFile={fontFileInput[item.id] || null}
-                  onFontNameChange={(v) =>
-                    setFontNameInput((p) => ({ ...p, [item.id]: v }))
-                  }
-                  onDownloadUrlChange={(v) =>
-                    setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))
-                  }
-                  onFontFileChange={(f) =>
-                    setFontFileInput((p) => ({ ...p, [item.id]: f }))
-                  }
+                  notes={notesInput[item.id] || ""}
+                  onFontNameChange={(v) => setFontNameInput((p) => ({ ...p, [item.id]: v }))}
+                  onDownloadUrlChange={(v) => setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))}
+                  onFontFileChange={(f) => setFontFileInput((p) => ({ ...p, [item.id]: f }))}
+                  onNotesChange={(v) => setNotesInput((p) => ({ ...p, [item.id]: v }))}
                   onResolve={() => handleResolve(item)}
                   resolving={resolvingId === item.id}
                   onPreview={() => setPreviewImage(item.user_uploaded_image)}
