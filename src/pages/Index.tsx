@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import UploadZone from "@/components/UploadZone";
 import UsageCounter from "@/components/UsageCounter";
 import ImageCropper from "@/components/ImageCropper";
-import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Type } from "lucide-react";
+import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Type, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
 import { useAuth } from "@/hooks/useAuth";
