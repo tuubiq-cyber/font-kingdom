@@ -107,9 +107,13 @@ const FontCard = ({
 
   const primaryUrl = fontFiles.length > 0 ? fontFiles[0].file_url : fileUrl || downloadUrl;
   const confidenceColor =
-    confidence >= 95 ? "bg-green-500" :
+    confidence >= 90 ? "bg-green-500" :
     confidence >= 70 ? "bg-olive" :
     confidence >= 40 ? "bg-sand" : "bg-muted-foreground";
+
+  const matchLabel =
+    confidence >= 90 ? "تطابق حاسم" :
+    confidence >= 70 ? "اقتراح قريب" : null;
 
   return (
     <div
