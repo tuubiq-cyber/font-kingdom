@@ -35,6 +35,7 @@ interface QueueItem {
   created_at: string;
   resolved_at: string | null;
   user_id: string | null;
+  query_text: string | null;
 }
 
 const AdminQueue = () => {

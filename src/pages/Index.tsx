@@ -3,10 +3,46 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import UploadZone from "@/components/UploadZone";
 import ImageCropper from "@/components/ImageCropper";
-import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Download, ExternalLink } from "lucide-react";
+import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Type } from "lucide-react";
 import { toast } from "sonner";
 
-type Step = "home" | "upload" | "crop" | "submitting" | "done";
+type Step = "home" | "upload" | "crop" | "submitting" | "done" | "name-sent";
+
+const FloatingParticles = () => (
+  <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    {[...Array(6)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute rounded-full bg-primary/5"
+        style={{
+          width: `${20 + i * 15}px`,
+          height: `${20 + i * 15}px`,
+          left: `${10 + i * 15}%`,
+          top: `${15 + (i % 3) * 25}%`,
+          animation: `float-particle ${6 + i * 2}s ease-in-out infinite alternate`,
+          animationDelay: `${i * 0.8}s`,
+        }}
+      />
+    ))}
+  </div>
+);
+
+const PulsingRings = () => (
+  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+    {[...Array(3)].map((_, i) => (
+      <div
+        key={i}
+        className="absolute rounded-full border border-primary/10"
+        style={{
+          width: `${120 + i * 80}px`,
+          height: `${120 + i * 80}px`,
+          animation: `pulse-ring ${4 + i}s ease-in-out infinite`,
+          animationDelay: `${i * 1.2}s`,
+        }}
+      />
+    ))}
+  </div>
+);
 
 const Index = () => {
   const [step, setStep] = useState<Step>("home");
@@ -15,16 +51,14 @@ const Index = () => {
   const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Search by name
+  // Search by name (submits to queue)
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [searching, setSearching] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [submittingName, setSubmittingName] = useState(false);
 
   // Visitor count
   const [visitorCount, setVisitorCount] = useState(0);
 
-  // Track visit & fetch count
   useEffect(() => {
     const trackVisit = async () => {
       let visitorId = localStorage.getItem("kingdom_visitor_id");
@@ -32,82 +66,44 @@ const Index = () => {
         visitorId = crypto.randomUUID();
         localStorage.setItem("kingdom_visitor_id", visitorId);
       }
-
-      // Record visit
       await supabase.from("site_visits").insert({ visitor_id: visitorId } as any);
-
-      // Get unique visitor count
       const { count } = await supabase
         .from("site_visits")
         .select("visitor_id", { count: "exact", head: true });
-      
       setVisitorCount(count ?? 0);
     };
     trackVisit();
   }, []);
 
-  const handleSearch = async () => {
+  const handleNameSearch = async () => {
     if (!searchQuery.trim() || searchQuery.trim().length < 2) {
-      toast.error("ادخل حرفين على الاقل للبحث");
+      toast.error("ادخل حرفين على الاقل");
       return;
     }
-    setSearching(true);
+    setSubmittingName(true);
     try {
-      // Search in fonts_library
-      const { data: libraryResults } = await supabase
-        .from("fonts_library")
-        .select("*")
-        .or(`font_name.ilike.%${searchQuery}%,font_name_ar.ilike.%${searchQuery}%`)
-        .limit(10);
-
-      // Search in font_dataset
-      const { data: datasetResults } = await supabase
-        .from("font_dataset")
-        .select("*")
-        .ilike("font_name", `%${searchQuery}%`)
-        .limit(10);
-
-      const combined: any[] = [];
-
-      (libraryResults ?? []).forEach((f) => {
-        combined.push({
-          id: f.id,
-          name: f.font_name,
-          nameAr: f.font_name_ar,
-          category: f.category,
-          downloadUrl: f.download_url,
-          previewImage: f.preview_image_url,
-          source: "library",
-        });
-      });
-
-      (datasetResults ?? []).forEach((f) => {
-        const meta = f.metadata_json as any;
-        combined.push({
-          id: f.id,
-          name: f.font_name,
-          nameAr: f.font_name,
-          category: meta?.category ?? "",
-          downloadUrl: meta?.download_url ?? null,
-          previewImage: f.sample_image_url,
-          source: "dataset",
-        });
-      });
-
-      // Remove duplicates by name
-      const unique = combined.filter(
-        (v, i, a) => a.findIndex((t) => t.name.toLowerCase() === v.name.toLowerCase()) === i
-      );
-
-      setSearchResults(unique);
-      if (unique.length === 0) {
-        toast("لم يتم العثور على نتائج لـ \"" + searchQuery + "\"");
+      let uid = localStorage.getItem("kingdom_user_id");
+      if (!uid) {
+        uid = crypto.randomUUID();
+        localStorage.setItem("kingdom_user_id", uid);
       }
+
+      const { error } = await supabase.from("manual_identification_queue").insert({
+        user_uploaded_image: "text_query",
+        status: "pending",
+        user_id: uid,
+        query_text: searchQuery.trim(),
+      } as any);
+
+      if (error) throw error;
+      setStep("name-sent");
+      setSearchQuery("");
+      toast.success("تم ارسال طلبك! سيتم الرد عليه من قبل المشرفين");
     } catch (e) {
       console.error(e);
-      toast.error("حدث خطا اثناء البحث");
+      toast.error("حدث خطا اثناء الارسال");
     } finally {
-      setSearching(false);
+      setSubmittingName(false);
     }
   };
 
@@ -140,7 +136,6 @@ const Index = () => {
     if (!croppedBlob) return;
     setIsLoading(true);
     setStep("submitting");
-
     try {
       const imageUrl = await uploadImageForReview(croppedBlob);
       if (!imageUrl) throw new Error("فشل رفع الصورة");
@@ -158,9 +153,8 @@ const Index = () => {
       } as any);
 
       if (error) throw error;
-
       setStep("done");
-      toast.success("تم ارسال طلبك بنجاح! سيتم اشعارك عند التعرف على الخط");
+      toast.success("تم ارسال طلبك بنجاح!");
     } catch (e) {
       console.error(e);
       toast.error(e instanceof Error ? e.message : "حدث خطا غير متوقع");
@@ -175,31 +169,34 @@ const Index = () => {
     setUploadedImage(null);
     setCroppedImage(null);
     setCroppedBlob(null);
+    setShowSearch(false);
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
+      <FloatingParticles />
 
-      <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6">
+      <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6 relative z-10">
         {/* Home */}
         {step === "home" && (
           <div className="space-y-6 pt-6">
             {/* Hero Section */}
-            <div className="text-center space-y-4 animate-fade-in">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-2 animate-scale-in">
-                <Crown className="w-10 h-10 text-primary" />
+            <div className="text-center space-y-4 animate-fade-in relative">
+              <PulsingRings />
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-2 animate-scale-in relative z-10 hero-icon-glow">
+                <Crown className="w-10 h-10 text-primary animate-gentle-float" />
               </div>
-              <h1 className="text-foreground font-bold text-2xl leading-tight">
+              <h1 className="text-foreground font-bold text-2xl leading-tight relative z-10">
                 مملكة الخطوط
               </h1>
-              <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto">
+              <p className="text-muted-foreground text-sm leading-relaxed max-w-sm mx-auto relative z-10">
                 لا تعرف اسم الخط؟ ارفع صورته وسيتولى المشرفون التعرف عليه وارسال النتيجة اليك
               </p>
             </div>
 
             {/* Visitor Counter */}
             <div className="flex items-center justify-center gap-2 animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border/30 text-xs text-muted-foreground">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border/30 text-xs text-muted-foreground visitor-badge">
                 <Users className="w-3.5 h-3.5 text-primary" />
                 <span>{visitorCount.toLocaleString("ar-SA")} زائر</span>
               </div>
@@ -208,12 +205,16 @@ const Index = () => {
             {/* Features */}
             <div className="grid grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
               {[
-                { icon: Upload, label: "ارفع صورة" },
-                { icon: Eye, label: "نحلل الخط" },
-                { icon: Feather, label: "نرسل النتيجة" },
+                { icon: Upload, label: "ارفع صورة", delay: 0 },
+                { icon: Eye, label: "نحلل الخط", delay: 0.1 },
+                { icon: Feather, label: "نرسل النتيجة", delay: 0.2 },
               ].map((item, i) => (
-                <div key={i} className="flex flex-col items-center gap-2 py-4 px-2 rounded-xl bg-card border border-border/30">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <div
+                  key={i}
+                  className="flex flex-col items-center gap-2 py-4 px-2 rounded-xl bg-card border border-border/30 feature-card"
+                  style={{ animationDelay: `${0.3 + item.delay}s` }}
+                >
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center feature-icon">
                     <item.icon className="w-5 h-5 text-primary" />
                   </div>
                   <span className="text-foreground text-xs font-medium">{item.label}</span>
@@ -225,7 +226,7 @@ const Index = () => {
             <div className="space-y-3 animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
               <button
                 onClick={() => setStep("upload")}
-                className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl"
+                className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
                 <Upload className="w-5 h-5" />
                 ارسال طلب تعرف على خط
@@ -240,68 +241,33 @@ const Index = () => {
               </button>
             </div>
 
-            {/* Search Section */}
+            {/* Search by Name Section */}
             {showSearch && (
               <div className="space-y-3 animate-fade-in">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                    placeholder="ادخل اسم الخط..."
-                    className="flex-1 bg-card border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-                  />
-                  <button
-                    onClick={handleSearch}
-                    disabled={searching}
-                    className="btn-primary-interactive px-4 py-2.5 rounded-xl flex items-center gap-2"
-                  >
-                    {searching ? (
-                      <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                    ) : (
-                      <Search className="w-4 h-4" />
-                    )}
-                  </button>
-                </div>
-
-                {/* Search Results */}
-                {searchResults.length > 0 && (
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs text-muted-foreground">{searchResults.length} نتيجة</p>
-                      <button onClick={() => { setSearchResults([]); setSearchQuery(""); }} className="text-xs text-muted-foreground hover:text-foreground transition-colors">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                    {searchResults.map((font) => (
-                      <div key={font.id} className="flex items-center gap-3 bg-card border border-border/50 rounded-xl px-4 py-3">
-                        {font.previewImage && (
-                          <img src={font.previewImage} alt={font.name} className="w-10 h-10 rounded-lg object-cover bg-muted shrink-0" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-foreground font-medium text-sm truncate">{font.name}</p>
-                          {font.nameAr !== font.name && (
-                            <p className="text-muted-foreground text-xs truncate">{font.nameAr}</p>
-                          )}
-                          {font.category && (
-                            <span className="text-[10px] text-muted-foreground/70">{font.category}</span>
-                          )}
-                        </div>
-                        {font.downloadUrl && (
-                          <a
-                            href={font.downloadUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="shrink-0 p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                          >
-                            <Download className="w-4 h-4" />
-                          </a>
-                        )}
-                      </div>
-                    ))}
+                <div className="bg-card border border-border/50 rounded-xl p-4 space-y-3">
+                  <p className="text-muted-foreground text-xs">ادخل اسم الخط وسيتم ارسال طلبك للمشرفين</p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleNameSearch()}
+                      placeholder="مثال: Cairo, Tajawal..."
+                      className="flex-1 bg-muted border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    />
+                    <button
+                      onClick={handleNameSearch}
+                      disabled={submittingName}
+                      className="btn-primary-interactive px-4 py-2.5 rounded-xl flex items-center gap-2"
+                    >
+                      {submittingName ? (
+                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                    </button>
                   </div>
-                )}
+                </div>
               </div>
             )}
 
@@ -328,11 +294,7 @@ const Index = () => {
               return (
                 <div key={label} className="flex items-center gap-2">
                   {i > 0 && <div className={`w-8 h-px transition-colors duration-300 ${isActive ? "bg-primary" : "bg-border"}`} />}
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-300 ${
-                      isActive ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"
-                    }`}
-                  >
+                  <span className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all duration-300 ${isActive ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
                     {label}
                   </span>
                 </div>
@@ -352,24 +314,14 @@ const Index = () => {
         {step === "crop" && uploadedImage && (
           <div className="animate-fade-in space-y-4">
             <ImageCropper imageSrc={uploadedImage} onCropComplete={handleCropComplete} />
-
             {croppedImage && (
               <div className="space-y-4 animate-scale-in">
                 <div className="flex justify-center">
                   <div className="rounded-xl overflow-hidden border border-border max-w-xs">
-                    <img
-                      src={croppedImage}
-                      alt="الجزء المقصوص"
-                      className="w-full h-auto max-h-40 object-contain bg-muted"
-                    />
+                    <img src={croppedImage} alt="الجزء المقصوص" className="w-full h-auto max-h-40 object-contain bg-muted" />
                   </div>
                 </div>
-
-                <button
-                  onClick={handleSubmitRequest}
-                  disabled={isLoading}
-                  className="btn-primary-interactive w-full flex items-center justify-center gap-2"
-                >
+                <button onClick={handleSubmitRequest} disabled={isLoading} className="btn-primary-interactive w-full flex items-center justify-center gap-2">
                   <Send className="w-4 h-4" />
                   ارسال للتعرف اليدوي
                 </button>
@@ -386,7 +338,7 @@ const Index = () => {
           </div>
         )}
 
-        {/* Done */}
+        {/* Done (image) */}
         {step === "done" && (
           <div className="space-y-6 animate-fade-in">
             <div className="text-center py-8 space-y-4">
@@ -398,21 +350,39 @@ const Index = () => {
                 سيقوم المشرفون بالتعرف على الخط واشعارك بالنتيجة. يمكنك متابعة حالة طلبك من صفحة طلباتي.
               </p>
             </div>
-
             <div className="flex flex-col gap-3">
-              <Link
-                to="/my-requests"
-                className="btn-primary-interactive w-full flex items-center justify-center gap-2"
-              >
+              <Link to="/my-requests" className="btn-primary-interactive w-full flex items-center justify-center gap-2">
                 <Scroll className="w-4 h-4" />
                 تتبع طلباتي
               </Link>
-              <button
-                onClick={reset}
-                className="btn-outline-interactive w-full flex items-center justify-center gap-2"
-              >
+              <button onClick={reset} className="btn-outline-interactive w-full flex items-center justify-center gap-2">
                 <ArrowRight className="w-4 h-4" />
                 ارسال طلب جديد
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Done (name query) */}
+        {step === "name-sent" && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="text-center py-8 space-y-4">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/15 animate-scale-in">
+                <Type className="w-10 h-10 text-primary" />
+              </div>
+              <h2 className="text-foreground font-bold text-lg">تم ارسال استفسارك</h2>
+              <p className="text-muted-foreground text-sm max-w-sm mx-auto leading-relaxed">
+                سيقوم المشرفون بالبحث عن الخط المطلوب وارسال الرد اليك
+              </p>
+            </div>
+            <div className="flex flex-col gap-3">
+              <Link to="/my-requests" className="btn-primary-interactive w-full flex items-center justify-center gap-2">
+                <Scroll className="w-4 h-4" />
+                تتبع طلباتي
+              </Link>
+              <button onClick={reset} className="btn-outline-interactive w-full flex items-center justify-center gap-2">
+                <ArrowRight className="w-4 h-4" />
+                العودة للرئيسية
               </button>
             </div>
           </div>
