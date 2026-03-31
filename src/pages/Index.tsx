@@ -323,7 +323,37 @@ const Index = () => {
       <Header />
 
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6">
-        {/* Step indicators */}
+        {/* Home: Two main buttons */}
+        {step === "home" && (
+          <div className="opacity-0 animate-scale-in space-y-6 pt-4">
+            <p className="text-center text-muted-foreground text-sm">اختر طريقة البحث عن الخط</p>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setStep("upload")}
+                className="font-card flex flex-col items-center gap-3 py-8 px-4 hover:border-primary/40 transition-colors cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                  <ImageIcon className="w-6 h-6 text-primary" />
+                </div>
+                <span className="text-foreground font-medium text-sm">بحث بالصورة</span>
+                <span className="text-muted-foreground text-xs text-center">ارفع صورة الخط للتعرف عليه</span>
+              </button>
+              <button
+                onClick={() => setStep("nameSearch")}
+                className="font-card flex flex-col items-center gap-3 py-8 px-4 hover:border-primary/40 transition-colors cursor-pointer"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                  <Type className="w-6 h-6 text-secondary" />
+                </div>
+                <span className="text-foreground font-medium text-sm">بحث بالاسم</span>
+                <span className="text-muted-foreground text-xs text-center">ابحث عن خط بكتابة اسمه</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step indicators (only for image search flow) */}
+        {["upload", "crop", "details", "results"].includes(step) && (
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
           {["رفع", "قص", "تفاصيل", "نتائج"].map((label, i) => {
             const steps: Step[] = ["upload", "crop", "details", "results"];
@@ -342,6 +372,7 @@ const Index = () => {
             );
           })}
         </div>
+        )}
 
         {/* Step 1: Upload */}
         {step === "upload" && (
