@@ -26,7 +26,11 @@ const PasswordStrengthBar = ({ strength }: { strength: 'weak' | 'medium' | 'stro
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [authMode, setAuthMode] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
