@@ -244,7 +244,7 @@ const Index = () => {
   };
 
   const reset = () => {
-    setStep("upload");
+    setStep("home");
     setUploadedImage(null);
     setCroppedImage(null);
     setCroppedBlob(null);
@@ -254,6 +254,68 @@ const Index = () => {
     setResults([]);
     setWebResults([]);
     setErrorMsg(null);
+    setNameQuery("");
+    setNameResults([]);
+  };
+
+  const [nameQuery, setNameQuery] = useState("");
+  const [nameResults, setNameResults] = useState<FontResult[]>([]);
+  const [nameLoading, setNameLoading] = useState(false);
+
+  const handleNameSearch = async () => {
+    if (!nameQuery.trim()) return;
+    setNameLoading(true);
+    setNameResults([]);
+    try {
+      const { data, error } = await supabase
+        .from("fonts_library")
+        .select("*");
+      if (error) throw new Error(error.message);
+
+      const { data: allFontFiles } = await supabase
+        .from("font_files")
+        .select("*");
+
+      const fontFilesMap = new Map<string, FontFile[]>();
+      if (allFontFiles) {
+        for (const ff of allFontFiles) {
+          const list = fontFilesMap.get(ff.font_id) || [];
+          list.push({ weight: ff.weight, file_url: ff.file_url });
+          fontFilesMap.set(ff.font_id, list);
+        }
+      }
+
+      const q = nameQuery.trim().toLowerCase();
+      const matched = (data ?? [])
+        .filter((f: any) =>
+          f.font_name?.toLowerCase().includes(q) ||
+          f.font_name_ar?.includes(nameQuery.trim())
+        )
+        .map((f: any) => {
+          const files = fontFilesMap.get(f.id) || [];
+          return {
+            name: f.font_name,
+            nameAr: f.font_name_ar,
+            style: f.style,
+            confidence: 100,
+            isPerfectMatch: true,
+            reason: "مطابقة بالاسم",
+            fileUrl: files.length > 0 ? files[0].file_url : f.download_url,
+            license: f.license,
+            category: f.category,
+            previewImageUrl: f.preview_image_url,
+            fontFiles: files,
+            downloadUrl: f.download_url,
+          } as FontResult;
+        });
+
+      setNameResults(matched);
+      if (matched.length === 0) toast.info("لم يتم العثور على خط بهذا الاسم");
+    } catch (e) {
+      toast.error("حدث خطأ اثناء البحث");
+    } finally {
+      setNameLoading(false);
+    }
   };
 
   return (
