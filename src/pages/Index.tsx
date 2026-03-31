@@ -202,6 +202,7 @@ const Index = () => {
       }
 
       // Phase 5: AI matching
+      let aiResults: FontResult[] = [];
       if (croppedBlob) {
         try {
           const base64 = await fileToBase64(croppedBlob);
