@@ -11,6 +11,7 @@ import AdminQueue from "./pages/AdminQueue";
 import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import AdminRoute from "./components/AdminRoute";
 
 const queryClient = new QueryClient();
 
@@ -22,10 +23,10 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/admin" element={<AdminFonts />} />
-          <Route path="/train" element={<FontTraining />} />
-          <Route path="/admin/brain" element={<ModelBrain />} />
-          <Route path="/admin/queue" element={<AdminQueue />} />
+          <Route path="/admin" element={<AdminRoute><AdminFonts /></AdminRoute>} />
+          <Route path="/train" element={<AdminRoute><FontTraining /></AdminRoute>} />
+          <Route path="/admin/brain" element={<AdminRoute><ModelBrain /></AdminRoute>} />
+          <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
           <Route path="/my-requests" element={<MyRequests />} />
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<NotFound />} />

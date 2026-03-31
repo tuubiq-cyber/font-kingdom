@@ -5,6 +5,7 @@ import UploadZone from "@/components/UploadZone";
 import ImageCropper from "@/components/ImageCropper";
 import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Type } from "lucide-react";
 import { toast } from "sonner";
+import { sanitizeText } from "@/lib/sanitize";
 
 type Step = "home" | "upload" | "crop" | "submitting" | "done" | "name-sent";
 
@@ -76,7 +77,8 @@ const Index = () => {
   }, []);
 
   const handleNameSearch = async () => {
-    if (!searchQuery.trim() || searchQuery.trim().length < 2) {
+    const cleaned = sanitizeText(searchQuery);
+    if (!cleaned || cleaned.length < 2) {
       toast.error("ادخل حرفين على الاقل");
       return;
     }
@@ -92,7 +94,7 @@ const Index = () => {
         user_uploaded_image: "text_query",
         status: "pending",
         user_id: uid,
-        query_text: searchQuery.trim(),
+        query_text: cleaned,
       } as any);
 
       if (error) throw error;

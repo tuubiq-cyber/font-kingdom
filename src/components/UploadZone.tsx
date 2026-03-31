@@ -1,5 +1,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Upload, Image as ImageIcon } from "lucide-react";
+import { validateImageUpload } from "@/lib/sanitize";
+import { toast } from "sonner";
 
 interface UploadZoneProps {
   onImageUpload: (file: File) => void;
@@ -21,14 +23,22 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
       e.preventDefault();
       setIsDragging(false);
       const file = e.dataTransfer.files?.[0];
-      if (file?.type.startsWith("image/")) onImageUpload(file);
+      if (file?.type.startsWith("image/")) {
+        const err = validateImageUpload(file);
+        if (err) { toast.error(err); return; }
+        onImageUpload(file);
+      }
     },
     [onImageUpload]
   );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onImageUpload(file);
+    if (file) {
+      const err = validateImageUpload(file);
+      if (err) { toast.error(err); return; }
+      onImageUpload(file);
+    }
   };
 
   return (
@@ -43,7 +53,7 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png"
         className="hidden"
         onChange={handleChange}
       />
@@ -67,7 +77,7 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
                 اسحب الصورة هنا او اضغط للرفع
               </p>
               <p className="text-muted-foreground text-sm">
-                PNG, JPG, WEBP — حتى 10 ميغابايت
+                JPG, PNG — حتى 5 ميغابايت
               </p>
             </div>
           </>
