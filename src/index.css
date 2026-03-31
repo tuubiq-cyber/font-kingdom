@@ -40,51 +40,51 @@
 
 @layer base {
   :root {
-    --background: 170 45% 5%;
-    --foreground: 35 30% 90%;
+    --background: 0 0% 5%;
+    --foreground: 0 0% 90%;
 
-    --card: 170 40% 7%;
-    --card-foreground: 35 30% 90%;
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 90%;
 
-    --popover: 170 40% 7%;
-    --popover-foreground: 35 30% 90%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 90%;
 
-    --primary: 90 12% 63%;
-    --primary-foreground: 170 45% 5%;
+    --primary: 0 0% 95%;
+    --primary-foreground: 0 0% 5%;
 
-    --secondary: 24 35% 71%;
-    --secondary-foreground: 170 45% 5%;
+    --secondary: 0 0% 70%;
+    --secondary-foreground: 0 0% 5%;
 
-    --muted: 170 30% 12%;
-    --muted-foreground: 35 15% 55%;
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 50%;
 
-    --accent: 20 18% 37%;
-    --accent-foreground: 35 30% 90%;
+    --accent: 0 0% 20%;
+    --accent-foreground: 0 0% 90%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 170 20% 15%;
-    --input: 170 20% 15%;
-    --ring: 90 12% 63%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 95%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --teal: 170 45% 5%;
-    --olive: 90 12% 63%;
-    --sand: 24 35% 71%;
-    --brown: 20 18% 37%;
-    --surface-elevated: 170 35% 9%;
+    --teal: 0 0% 5%;
+    --olive: 0 0% 95%;
+    --sand: 0 0% 70%;
+    --brown: 0 0% 30%;
+    --surface-elevated: 0 0% 10%;
 
-    --sidebar-background: 170 40% 7%;
-    --sidebar-foreground: 35 30% 90%;
-    --sidebar-primary: 90 12% 63%;
-    --sidebar-primary-foreground: 170 45% 5%;
-    --sidebar-accent: 170 30% 12%;
-    --sidebar-accent-foreground: 35 30% 90%;
-    --sidebar-border: 170 20% 15%;
-    --sidebar-ring: 90 12% 63%;
+    --sidebar-background: 0 0% 8%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 0 0% 95%;
+    --sidebar-primary-foreground: 0 0% 5%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 90%;
+    --sidebar-border: 0 0% 18%;
+    --sidebar-ring: 0 0% 95%;
   }
 }
 
