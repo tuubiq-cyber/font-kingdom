@@ -214,7 +214,7 @@ const MyRequests = () => {
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
                               <p className="text-foreground text-sm">
-                                خطاطو المملكة يعملون على تحديد هذا الخط...
+                                المشرفون يعملون على تحديد هذا الخط...
                               </p>
                             </div>
                           ) : item.status === "resolved" && item.user_confirmation === null ? (
