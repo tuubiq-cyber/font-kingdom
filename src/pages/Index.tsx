@@ -256,6 +256,7 @@ const Index = () => {
     setErrorMsg(null);
     setNameQuery("");
     setNameResults([]);
+    setNameWebResults([]);
   };
 
   const [nameQuery, setNameQuery] = useState("");
