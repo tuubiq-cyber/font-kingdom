@@ -112,6 +112,7 @@ const AdminQueue = () => {
     try {
       const downloadUrl = downloadUrlInput[item.id]?.trim() || null;
       const fontFile = fontFileInput[item.id] || null;
+      const notes = notesInput[item.id]?.trim() || null;
 
       // Upload font file if provided
       let fontFileUrl: string | null = null;
