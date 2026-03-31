@@ -11,6 +11,7 @@ import {
   Send,
   Eye,
   Link as LinkIcon,
+  FileUp,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
