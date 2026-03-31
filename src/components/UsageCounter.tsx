@@ -75,11 +75,11 @@ const UsageCounter = () => {
       <div className="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-card border border-border/30 text-xs">
         <div className="flex items-center gap-1.5">
           <Zap className="w-3.5 h-3.5 text-primary" />
-          <span className="text-muted-foreground">الطلبات المتبقية:</span>
-          <span className={`font-bold ${remaining === 0 ? "text-destructive" : "text-primary"}`}>
-            {remaining.toLocaleString("ar-SA")}
+          <span className="text-muted-foreground">{t("remainingRequests")}</span>
+          <span className={`font-bold font-serif ${remaining === 0 ? "text-destructive" : "text-primary"}`}>
+            {remaining}
           </span>
-          <span className="text-muted-foreground">/ {REQUEST_LIMIT.toLocaleString("ar-SA")}</span>
+          <span className="text-muted-foreground font-serif">/ {REQUEST_LIMIT}</span>
         </div>
 
         {/* Mini progress bar */}
@@ -93,7 +93,7 @@ const UsageCounter = () => {
         {remaining === 0 && nextReset && (
           <div className="flex items-center gap-1 text-muted-foreground">
             <Clock className="w-3 h-3" />
-            <span>تجديد بعد {nextReset}</span>
+            <span>{t("renewIn")} {nextReset}</span>
           </div>
         )}
       </div>
