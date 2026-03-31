@@ -286,11 +286,17 @@ const Index = () => {
         try {
           const imageUrl = await uploadImageForReview(croppedBlob);
           if (imageUrl) {
+            let uid = localStorage.getItem("kingdom_user_id");
+            if (!uid) {
+              uid = crypto.randomUUID();
+              localStorage.setItem("kingdom_user_id", uid);
+            }
             await supabase.from("manual_identification_queue").insert({
               user_uploaded_image: imageUrl,
               status: "pending",
+              user_id: uid,
             } as any);
-            toast.info("خطاطو المملكة يحللون هذا الخط النادر...", { duration: 5000 });
+            toast.info("خطاطو المملكة يحللون هذا الخط النادر... تابع طلبك من صفحة طلباتي", { duration: 5000 });
           }
         } catch (e) {
           console.warn("Failed to queue for manual review:", e);
