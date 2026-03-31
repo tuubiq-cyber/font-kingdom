@@ -37,16 +37,7 @@ interface FontResult {
 }
 
 type Step = "home" | "upload" | "crop" | "details" | "results" | "nameSearch";
-type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "web" | "ranking";
-
-const stageLabels: Record<ScanStage, string> = {
-  normalizing: "تحليل الصورة وتحسينها",
-  hashing: "انشاء البصمة البصرية",
-  comparing: "مقارنة مع قاعدة البيانات",
-  ai: "تحليل بالذكاء الاصطناعي",
-  web: "بحث عالمي عبر الويب",
-  ranking: "ترتيب النتائج",
-};
+type ScanStage = "normalizing" | "hashing" | "comparing" | "dataset" | "ai" | "web" | "ranking";
 
 const fileToBase64 = (blob: Blob): Promise<string> =>
   new Promise((resolve, reject) => {
