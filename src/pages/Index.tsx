@@ -84,7 +84,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      
 
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6">
         {/* Home */}
