@@ -144,7 +144,7 @@ const MyRequests = () => {
     <div className="min-h-screen">
       
 
-      <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-8 pt-4">
+      <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-8 pt-14">
         <div className="flex items-center justify-between">
           <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
             <Scroll className="w-5 h-5 text-primary" />
@@ -152,7 +152,7 @@ const MyRequests = () => {
           </h1>
           <Link
             to="/"
-            className="btn-outline flex items-center gap-2 text-sm px-4 py-2"
+            className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg hover:bg-muted"
           >
             <ArrowRight className="w-4 h-4" />
             العودة
