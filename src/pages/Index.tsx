@@ -13,6 +13,7 @@ import {
   normalizeImage,
   generatePerceptualHash,
   matchFont,
+  hashSimilarity,
 } from "@/lib/imageProcessing";
 import { searchMultipleFonts, searchFontOnWeb, type WebFontMatch } from "@/lib/webFontSearch";
 
@@ -37,16 +38,7 @@ interface FontResult {
 }
 
 type Step = "home" | "upload" | "crop" | "details" | "results" | "nameSearch";
-type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "web" | "ranking";
-
-const stageLabels: Record<ScanStage, string> = {
-  normalizing: "تحليل الصورة وتحسينها",
-  hashing: "انشاء البصمة البصرية",
-  comparing: "مقارنة مع قاعدة البيانات",
-  ai: "تحليل بالذكاء الاصطناعي",
-  web: "بحث عالمي عبر الويب",
-  ranking: "ترتيب النتائج",
-};
+type ScanStage = "normalizing" | "hashing" | "comparing" | "dataset" | "ai" | "web" | "ranking";
 
 const fileToBase64 = (blob: Blob): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -158,8 +150,58 @@ const Index = () => {
         }
       }
 
-      // Phase 4: AI matching
-      setScanStage("ai");
+      // Phase 4: Search font_dataset (training data)
+      setScanStage("dataset");
+      try {
+        const { data: datasetFonts } = await supabase
+          .from("font_dataset")
+          .select("*")
+          .eq("verified_by_admin", true);
+
+        if (datasetFonts && datasetFonts.length > 0) {
+          for (const ds of datasetFonts) {
+            if (!ds.visual_hash && !ds.sample_image_url) continue;
+
+            let similarity = 0;
+            if (ds.visual_hash) {
+              similarity = hashSimilarity(userHash, ds.visual_hash);
+            } else if (ds.sample_image_url) {
+              try {
+                const { combined } = await matchFont(normalizedUser, userHash, ds.sample_image_url, null);
+                similarity = combined;
+              } catch { /* skip */ }
+            }
+
+            if (similarity > 15) {
+              const meta = (ds.metadata_json as any) || {};
+              const key = ds.font_name.toLowerCase();
+              const existing = visualMatches.find((m) => m.name.toLowerCase() === key);
+              if (existing) {
+                existing.confidence = Math.max(existing.confidence, similarity);
+              } else {
+                visualMatches.push({
+                  name: ds.font_name,
+                  nameAr: ds.font_name,
+                  style: meta.category || "عام",
+                  confidence: similarity,
+                  isPerfectMatch: similarity >= 90,
+                  reason: `ارشيف المملكة · بصمة: ${similarity}%`,
+                  fileUrl: meta.download_url || null,
+                  license: "مجاني",
+                  category: meta.category || "modern",
+                  previewImageUrl: ds.sample_image_url,
+                  fontFiles: [],
+                  downloadUrl: meta.download_url || null,
+                });
+              }
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("Dataset search failed:", e);
+      }
+
+      // Phase 5: AI matching
       let aiResults: FontResult[] = [];
       if (croppedBlob) {
         try {
@@ -227,11 +269,20 @@ const Index = () => {
 
       const finalResults = Array.from(merged.values())
         .sort((a, b) => b.confidence - a.confidence)
-        .slice(0, 8);
+        .slice(0, 8)
+        .map((r) => ({
+          ...r,
+          isPerfectMatch: r.confidence >= 90,
+          reason: r.confidence >= 90
+            ? `تطابق حاسم · ${r.reason || ""}`
+            : r.confidence >= 70
+            ? `اقتراح قريب · ${r.reason || ""}`
+            : r.reason,
+        }));
 
-      // Fallback: if best score < 85%, queue for manual review
+      // Fallback: if best score < 70%, queue for manual review
       const bestScore = finalResults.length > 0 ? finalResults[0].confidence : 0;
-      if (bestScore < 85 && croppedBlob) {
+      if (bestScore < 70 && croppedBlob) {
         try {
           const imageUrl = await uploadImageForReview(croppedBlob);
           if (imageUrl) {
@@ -239,7 +290,7 @@ const Index = () => {
               user_uploaded_image: imageUrl,
               status: "pending",
             } as any);
-            toast.info("الخط غير معروف في مملكتنا بعد. تم ارسال طلبك للمراجعة اليدوية", { duration: 5000 });
+            toast.info("خطاطو المملكة يحللون هذا الخط النادر...", { duration: 5000 });
           }
         } catch (e) {
           console.warn("Failed to queue for manual review:", e);
@@ -476,10 +527,7 @@ const Index = () => {
           <div className="space-y-6">
             {isLoading && (
               <div className="space-y-3">
-                <ScanProgress stage="analyzing" />
-                <p className="text-center text-xs text-muted-foreground animate-pulse">
-                  {stageLabels[scanStage]}
-                </p>
+              <ScanProgress stage={scanStage} />
               </div>
             )}
 

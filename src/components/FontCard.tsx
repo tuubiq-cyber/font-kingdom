@@ -107,20 +107,26 @@ const FontCard = ({
 
   const primaryUrl = fontFiles.length > 0 ? fontFiles[0].file_url : fileUrl || downloadUrl;
   const confidenceColor =
-    confidence >= 95 ? "bg-green-500" :
+    confidence >= 90 ? "bg-green-500" :
     confidence >= 70 ? "bg-olive" :
     confidence >= 40 ? "bg-sand" : "bg-muted-foreground";
+
+  const matchLabel =
+    confidence >= 90 ? "تطابق حاسم" :
+    confidence >= 70 ? "اقتراح قريب" : null;
 
   return (
     <div
       className="font-card opacity-0 animate-fade-up relative"
       style={{ animationDelay: `${index * 100}ms` }}
     >
-      {/* Perfect match badge */}
-      {isPerfectMatch && (
-        <div className="absolute -top-2 -right-2 z-10 bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg">
+      {/* Match type badge */}
+      {(isPerfectMatch || matchLabel) && (
+        <div className={`absolute -top-2 -right-2 z-10 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-lg ${
+          isPerfectMatch ? "bg-green-500" : "bg-primary"
+        }`}>
           <Crown className="w-3 h-3" />
-          تطابق تام
+          {isPerfectMatch ? "تطابق حاسم" : matchLabel}
         </div>
       )}
 

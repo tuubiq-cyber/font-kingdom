@@ -1,28 +1,37 @@
 import { useEffect, useState } from "react";
-import { ScanLine, Sparkles, CheckCircle2 } from "lucide-react";
+import { ScanLine, Sparkles, CheckCircle2, Database, Globe, Brain, BarChart3, Fingerprint } from "lucide-react";
+
+type ScanStage = "normalizing" | "hashing" | "comparing" | "dataset" | "ai" | "web" | "ranking";
 
 interface ScanProgressProps {
-  stage: "uploading" | "analyzing" | "done";
+  stage: ScanStage | "uploading" | "analyzing" | "done";
 }
 
-const stages = [
-  { key: "uploading", label: "رفع الصورة", icon: ScanLine },
-  { key: "analyzing", label: "تحليل الخطوط العربية", icon: Sparkles },
+const stages: { key: string; label: string; icon: React.ElementType }[] = [
+  { key: "normalizing", label: "تحليل الصورة وتحسينها", icon: ScanLine },
+  { key: "hashing", label: "انشاء البصمة البصرية", icon: Fingerprint },
+  { key: "comparing", label: "مقارنة مع مكتبة الخطوط", icon: Database },
+  { key: "dataset", label: "فحص ارشيف المملكة المدرب", icon: Brain },
+  { key: "ai", label: "تحليل بالذكاء الاصطناعي", icon: Sparkles },
+  { key: "web", label: "بحث عالمي عبر الويب", icon: Globe },
+  { key: "ranking", label: "ترتيب النتائج", icon: BarChart3 },
 ];
+
+const stageOrder = stages.map((s) => s.key);
 
 const ScanProgress = ({ stage }: ScanProgressProps) => {
   const [progress, setProgress] = useState(0);
 
-  const currentIdx = stage === "done" ? 3 : stages.findIndex((s) => s.key === stage);
+  // Map legacy stages
+  const mappedStage =
+    stage === "uploading" ? "normalizing" :
+    stage === "analyzing" ? "ai" :
+    stage === "done" ? "done" : stage;
+
+  const currentIdx = mappedStage === "done" ? stages.length : stageOrder.indexOf(mappedStage);
 
   useEffect(() => {
-    const targets: Record<string, number> = {
-      uploading: 20,
-      analyzing: 60,
-      generating: 85,
-      done: 100,
-    };
-    const target = targets[stage] ?? 0;
+    const target = mappedStage === "done" ? 100 : Math.round(((currentIdx + 0.5) / stages.length) * 100);
     const timer = setInterval(() => {
       setProgress((p) => {
         if (p >= target) {
@@ -31,25 +40,28 @@ const ScanProgress = ({ stage }: ScanProgressProps) => {
         }
         return p + 1;
       });
-    }, 40);
+    }, 30);
     return () => clearInterval(timer);
-  }, [stage]);
+  }, [mappedStage, currentIdx]);
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-6 py-8">
+    <div className="w-full max-w-md mx-auto space-y-5 py-6">
+      {/* Header */}
+      <div className="text-center space-y-1">
+        <p className="text-foreground font-semibold text-sm">جاري فحص ارشيف المملكة...</p>
+        <p className="text-muted-foreground text-xs">{progress}%</p>
+      </div>
+
       {/* Progress bar */}
-      <div className="space-y-2">
-        <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-          <div
-            className="h-full bg-olive rounded-full transition-all duration-300 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-        <p className="text-muted-foreground text-xs text-center">{progress}%</p>
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <div
+          className="h-full bg-primary rounded-full transition-all duration-300 ease-out"
+          style={{ width: `${progress}%` }}
+        />
       </div>
 
       {/* Steps */}
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1.5">
         {stages.map((s, i) => {
           const Icon = s.icon;
           const isActive = i === currentIdx;
@@ -58,21 +70,20 @@ const ScanProgress = ({ stage }: ScanProgressProps) => {
           return (
             <div
               key={s.key}
-              className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-300 ${
+              className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-300 ${
                 isActive
-                  ? "bg-olive/10 text-olive"
+                  ? "bg-primary/10 text-primary"
                   : isDone
-                  ? "text-olive/60"
-                  : "text-muted-foreground/40"
+                  ? "text-primary/50"
+                  : "text-muted-foreground/30"
               }`}
             >
-              <div className="relative">
-                <Icon className={`w-4 h-4 ${isActive ? "animate-pulse" : ""}`} />
-              </div>
-              <span className="text-sm font-medium">{s.label}</span>
-              {isDone && (
-                <CheckCircle2 className="w-3.5 h-3.5 text-olive/60 mr-auto" />
+              {isDone ? (
+                <CheckCircle2 className="w-3.5 h-3.5 text-primary/50 shrink-0" />
+              ) : (
+                <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? "animate-pulse" : ""}`} />
               )}
+              <span className="text-xs font-medium">{s.label}</span>
             </div>
           );
         })}
