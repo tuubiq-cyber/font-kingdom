@@ -6,8 +6,15 @@ import ImageCropper from "@/components/ImageCropper";
 import ColorPicker from "@/components/ColorPicker";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
+import WebFontResults from "@/components/WebFontResults";
 import { Send, ArrowRight, Bug } from "lucide-react";
 import { toast } from "sonner";
+import {
+  normalizeImage,
+  generatePerceptualHash,
+  matchFont,
+} from "@/lib/imageProcessing";
+import { searchMultipleFonts, type WebFontMatch } from "@/lib/webFontSearch";
 import {
   normalizeImage,
   generatePerceptualHash,
