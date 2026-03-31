@@ -67,10 +67,11 @@ const Index = () => {
       }
 
       const fonts: FontResult[] = data?.fonts ?? [];
+      setExtractedText(data?.extractedText || null);
       setScanStage("done");
 
       if (fonts.length === 0) {
-        toast.info("لم يتم العثور على خطوط عربية في الصورة");
+        toast.info("لم يتم العثور على الخط في قاعدة البيانات");
       }
       setResults(fonts);
     } catch (e) {
