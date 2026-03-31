@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Clock, Zap } from "lucide-react";
-
+import { useTranslation } from "react-i18next";
 const REQUEST_LIMIT = 5;
 const WINDOW_HOURS = 5;
 
