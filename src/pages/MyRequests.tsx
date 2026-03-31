@@ -239,22 +239,53 @@ const MyRequests = () => {
                               <p className="text-muted-foreground text-xs">
                                 هل هذا هو الخط الصحيح؟
                               </p>
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => handleConfirm(item, true)}
-                                  className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
-                                >
-                                  <ThumbsUp className="w-3.5 h-3.5" />
-                                  نعم، هذا هو الخط
-                                </button>
-                                <button
-                                  onClick={() => handleConfirm(item, false)}
-                                  className="btn-outline flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
-                                >
-                                  <ThumbsDown className="w-3.5 h-3.5" />
-                                  لا، ليس هو
-                                </button>
-                              </div>
+
+                              {rejectingId === item.id ? (
+                                <div className="space-y-2">
+                                  <textarea
+                                    value={rejectMessage}
+                                    onChange={(e) => setRejectMessage(e.target.value)}
+                                    placeholder="اوصف المشكلة للادارة (مثلا: الخط مختلف، اريد خط اعرض...)"
+                                    rows={3}
+                                    className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50 resize-none"
+                                  />
+                                  <div className="flex gap-2">
+                                    <button
+                                      onClick={() => handleConfirm(item, false)}
+                                      className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
+                                    >
+                                      <Send className="w-3.5 h-3.5" />
+                                      ارسال للادارة
+                                    </button>
+                                    <button
+                                      onClick={() => {
+                                        setRejectingId(null);
+                                        setRejectMessage("");
+                                      }}
+                                      className="btn-outline flex items-center justify-center gap-1.5 text-xs py-2 px-3"
+                                    >
+                                      الغاء
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => handleConfirm(item, true)}
+                                    className="btn-primary flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
+                                  >
+                                    <ThumbsUp className="w-3.5 h-3.5" />
+                                    نعم، هذا هو الخط
+                                  </button>
+                                  <button
+                                    onClick={() => setRejectingId(item.id)}
+                                    className="btn-outline flex-1 flex items-center justify-center gap-1.5 text-xs py-2"
+                                  >
+                                    <MessageSquare className="w-3.5 h-3.5" />
+                                    لا، ليس هو
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           ) : null}
 
