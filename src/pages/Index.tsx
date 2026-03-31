@@ -280,7 +280,7 @@ const Index = () => {
         {/* Step indicators */}
         {["upload", "crop"].includes(step) && (
           <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground animate-fade-in">
-            {["رفع", "قص", "ارسال"].map((label, i) => {
+            {[t("stepUpload"), t("stepCrop"), t("stepSend")].map((label, i) => {
               const steps = ["upload", "crop", "submitting"];
               const currentIdx = step === "crop" && croppedBlob ? 2 : steps.indexOf(step);
               const isActive = currentIdx >= i;
