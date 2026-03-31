@@ -1,0 +1,1 @@
+ALTER TABLE public.manual_identification_queue ADD COLUMN query_text text DEFAULT NULL;

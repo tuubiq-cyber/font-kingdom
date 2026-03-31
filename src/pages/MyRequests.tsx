@@ -12,6 +12,7 @@ import {
   Scroll,
   MessageSquare,
   Send,
+  Type,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
@@ -27,6 +28,7 @@ interface RequestItem {
   created_at: string;
   resolved_at: string | null;
   user_id: string | null;
+  query_text: string | null;
 }
 
 const MyRequests = () => {
@@ -200,15 +202,27 @@ const MyRequests = () => {
                   {pending.map((item) => (
                     <div key={item.id} className="font-card space-y-3">
                       <div className="flex items-start gap-3">
-                        <img
-                          src={item.user_uploaded_image}
-                          alt="الصورة المرفوعة"
-                          className="w-16 h-16 rounded-lg object-cover bg-muted border border-border"
-                        />
+                        {item.query_text ? (
+                          <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
+                            <Type className="w-5 h-5 text-muted-foreground" />
+                          </div>
+                        ) : (
+                          <img
+                            src={item.user_uploaded_image}
+                            alt="الصورة المرفوعة"
+                            className="w-16 h-16 rounded-lg object-cover bg-muted border border-border"
+                          />
+                        )}
                         <div className="flex-1 space-y-1">
                           <p className="text-xs text-muted-foreground">
                             {new Date(item.created_at).toLocaleDateString("ar-SA")}
                           </p>
+
+                          {item.query_text && (
+                            <p className="text-foreground text-xs bg-muted/50 rounded px-2 py-1 inline-block">
+                              بحث: {item.query_text}
+                            </p>
+                          )}
 
                           {item.status === "pending" ? (
                             <div className="flex items-center gap-2">

@@ -13,6 +13,7 @@ import {
   Link as LinkIcon,
   FileUp,
   MessageSquare,
+  Type,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -35,6 +36,7 @@ interface QueueItem {
   created_at: string;
   resolved_at: string | null;
   user_id: string | null;
+  query_text: string | null;
 }
 
 const AdminQueue = () => {
@@ -479,12 +481,18 @@ const QueueCard = ({
         </div>
       )}
       <div className="flex items-start gap-3">
-        <img
-          src={item.user_uploaded_image}
-          alt="صورة المستخدم"
-          className="w-20 h-20 rounded-lg object-cover bg-muted cursor-pointer border border-border hover:border-primary/50 transition-colors"
-          onClick={onPreview}
-        />
+        {item.query_text ? (
+          <div className="w-20 h-20 rounded-lg bg-muted border border-border flex items-center justify-center">
+            <Type className="w-6 h-6 text-muted-foreground" />
+          </div>
+        ) : (
+          <img
+            src={item.user_uploaded_image}
+            alt="صورة المستخدم"
+            className="w-20 h-20 rounded-lg object-cover bg-muted cursor-pointer border border-border hover:border-primary/50 transition-colors"
+            onClick={onPreview}
+          />
+        )}
         <div className="flex-1 space-y-2">
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground text-xs">
@@ -498,6 +506,13 @@ const QueueCard = ({
               <Eye className="w-4 h-4" />
             </button>
           </div>
+
+          {item.query_text && (
+            <div className="bg-muted/50 border border-border/30 rounded-lg px-3 py-2">
+              <p className="text-[10px] text-muted-foreground mb-1">استفسار نصي:</p>
+              <p className="text-foreground text-sm font-medium">{item.query_text}</p>
+            </div>
+          )}
 
           <div className="space-y-2">
             {/* Font name with autocomplete */}
