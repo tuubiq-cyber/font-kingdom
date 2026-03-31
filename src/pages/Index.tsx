@@ -13,6 +13,7 @@ import {
   normalizeImage,
   generatePerceptualHash,
   matchFont,
+  hashSimilarity,
 } from "@/lib/imageProcessing";
 import { searchMultipleFonts, searchFontOnWeb, type WebFontMatch } from "@/lib/webFontSearch";
 
