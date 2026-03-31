@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import AdminFonts from "./pages/AdminFonts";
+import FontTraining from "./pages/FontTraining";
+import AdminQueue from "./pages/AdminQueue";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 
