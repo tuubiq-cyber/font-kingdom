@@ -43,9 +43,11 @@ const AdminFonts = () => {
   const [style, setStyle] = useState("Regular");
   const [license, setLicense] = useState("مجاني");
   const [tags, setTags] = useState("");
-  const [fontFile, setFontFile] = useState<File | null>(null);
+  const [fontFiles, setFontFiles] = useState<{ file: File; weight: string }[]>([]);
   const [previewFile, setPreviewFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const weights = ["Thin", "ExtraLight", "Light", "Regular", "Medium", "SemiBold", "Bold", "ExtraBold", "Black"];
 
   useEffect(() => {
     if (!authLoading && !user) navigate("/login");
