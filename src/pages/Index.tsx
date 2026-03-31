@@ -68,6 +68,7 @@ const Index = () => {
   const requireAuth = () => {
     if (!user?.id) {
       toast.error("يجب تسجيل الدخول اولاً لإرسال طلب");
+      navigate("/login");
       return null;
     }
     return user.id;
