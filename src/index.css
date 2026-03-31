@@ -95,7 +95,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Tajawal', 'Noto Sans Arabic', sans-serif;
+    font-family: 'IBM Plex Sans Arabic', sans-serif;
     direction: rtl;
   }
 }
