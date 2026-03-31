@@ -33,6 +33,8 @@ const MyRequests = () => {
   const [requests, setRequests] = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const [rejectMessage, setRejectMessage] = useState("");
 
   useEffect(() => {
     // Get or create anonymous user ID from localStorage
