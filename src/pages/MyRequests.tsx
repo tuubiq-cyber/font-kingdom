@@ -154,7 +154,7 @@ const MyRequests = () => {
 
   return (
     <div className="min-h-screen">
-      <Header />
+      
 
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-8 pt-4">
         <div className="flex items-center justify-between">
