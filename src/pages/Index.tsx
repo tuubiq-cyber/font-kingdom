@@ -47,6 +47,7 @@ const PulsingRings = () => (
 );
 
 const Index = () => {
+  const { user } = useAuth();
   const [step, setStep] = useState<Step>("home");
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [croppedImage, setCroppedImage] = useState<string | null>(null);
@@ -60,6 +61,16 @@ const Index = () => {
 
   // Visitor count
   const [visitorCount, setVisitorCount] = useState(0);
+
+  const getUserId = () => {
+    if (user?.id) return user.id;
+    let id = localStorage.getItem("kingdom_user_id");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("kingdom_user_id", id);
+    }
+    return id;
+  };
 
   useEffect(() => {
     const trackVisit = async () => {
