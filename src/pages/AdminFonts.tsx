@@ -132,6 +132,8 @@ const AdminFonts = () => {
       setTags("");
       setFontFiles([]);
       setPreviewFile(null);
+      setReferenceFile(null);
+      setPreviewFile(null);
       fetchFonts();
     } catch (err) {
       console.error(err);
