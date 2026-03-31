@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, ArrowRight, LogOut } from "lucide-react";
+import { Plus, Trash2, ArrowRight, LogOut, Fingerprint } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { generatePerceptualHash } from "@/lib/imageProcessing";
 
 interface FontRow {
   id: string;
@@ -92,6 +93,17 @@ const AdminFonts = () => {
       if (previewFile) previewUrl = await uploadFile(previewFile, "previews");
       if (referenceFile) referenceUrl = await uploadFile(referenceFile, "references");
 
+      // Auto-generate perceptual hash from reference image
+      let visualHash: string | null = null;
+      if (referenceUrl) {
+        try {
+          visualHash = await generatePerceptualHash(referenceUrl);
+          toast.info("تم انشاء البصمة البصرية تلقائيا");
+        } catch (e) {
+          console.warn("Failed to generate hash:", e);
+        }
+      }
+
       const tagsArr = tags
         .split(",")
         .map((t) => t.trim())
@@ -106,6 +118,7 @@ const AdminFonts = () => {
         download_url: null,
         preview_image_url: previewUrl,
         reference_image_url: referenceUrl,
+        visual_features_hash: visualHash,
         tags: tagsArr.length > 0 ? tagsArr : null,
       } as any).select("id").single();
 
