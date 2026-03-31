@@ -240,51 +240,18 @@ const Index = () => {
 
               <button
                 onClick={() => setShowSearch(!showSearch)}
-                className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-3 text-sm font-bold rounded-xl cta-shimmer"
+                className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
-                <Search className="w-4 h-4" />
+                <Search className="w-5 h-5" />
                 البحث عن خط بالاسم
               </button>
-            </div>
 
-            {/* Search by Name Section */}
-            {showSearch && (
-              <div className="space-y-3 animate-fade-in">
-                <div className="bg-card border border-border/50 rounded-xl p-4 space-y-3">
-                  <p className="text-muted-foreground text-xs">ادخل اسم الخط وسيتم ارسال طلبك للمشرفين</p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={(e) => e.key === "Enter" && handleNameSearch()}
-                      placeholder="مثال: Cairo, Tajawal..."
-                      className="flex-1 bg-muted border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
-                    />
-                    <button
-                      onClick={handleNameSearch}
-                      disabled={submittingName}
-                      className="btn-primary-interactive px-4 py-2.5 rounded-xl flex items-center gap-2"
-                    >
-                      {submittingName ? (
-                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
-                      ) : (
-                        <Send className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* My Requests Link */}
-            <div className="animate-fade-in" style={{ animationDelay: "0.4s", animationFillMode: "both" }}>
               <Link
                 to="/my-requests"
-                className="btn-primary-interactive w-full flex items-center justify-center gap-2 py-3 text-sm font-bold rounded-xl cta-shimmer"
+                className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
-                <Scroll className="w-3.5 h-3.5" />
-                تتبع طلباتي السابقة
+                <Scroll className="w-5 h-5" />
+                سجل طلباتي
               </Link>
             </div>
           </div>
