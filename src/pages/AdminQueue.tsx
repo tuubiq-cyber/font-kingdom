@@ -18,6 +18,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
 
+interface FontRecord {
+  font_name: string;
+  download_url: string | null;
+  font_file_url: string | null;
+}
+
 interface QueueItem {
   id: string;
   user_uploaded_image: string;
