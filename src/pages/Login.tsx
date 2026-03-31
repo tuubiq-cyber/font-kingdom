@@ -422,6 +422,7 @@ const Login = () => {
             )}
           </button>
         </form>
+        )}
 
         {/* Security badge */}
         <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/40">
