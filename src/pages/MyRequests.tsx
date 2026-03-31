@@ -218,6 +218,12 @@ const MyRequests = () => {
                             {new Date(item.created_at).toLocaleDateString("ar-SA")}
                           </p>
 
+                          {item.query_text && (
+                            <p className="text-foreground text-xs bg-muted/50 rounded px-2 py-1 inline-block">
+                              بحث: {item.query_text}
+                            </p>
+                          )}
+
                           {item.status === "pending" ? (
                             <div className="flex items-center gap-2">
                               <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
