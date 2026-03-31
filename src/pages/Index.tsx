@@ -529,14 +529,19 @@ const Index = () => {
             </div>
 
             {nameLoading && (
-              <div className="flex justify-center py-8">
-                <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+              <div className="space-y-3 py-6">
+                <div className="flex justify-center">
+                  <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                </div>
+                <p className="text-center text-xs text-muted-foreground animate-pulse">
+                  {nameStage === "db" ? "بحث في المكتبة الداخلية..." : "بحث عالمي عبر الويب..."}
+                </p>
               </div>
             )}
 
             {!nameLoading && nameResults.length > 0 && (
               <section className="space-y-4 opacity-0 animate-fade-up">
-                <h2 className="text-lg font-semibold text-foreground">نتائج البحث</h2>
+                <h2 className="text-lg font-semibold text-foreground">نتائج من مكتبتنا</h2>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {nameResults.map((font, i) => (
                     <FontCard
@@ -549,6 +554,25 @@ const Index = () => {
                   ))}
                 </div>
               </section>
+            )}
+
+            {!nameLoading && nameWebResults.length > 0 && (
+              <WebFontResults results={nameWebResults} />
+            )}
+
+            {!nameLoading && nameResults.length === 0 && nameWebResults.length === 0 && nameStage === "done" && (
+              <div className="text-center py-8 space-y-4 opacity-0 animate-fade-up">
+                <p className="text-muted-foreground text-sm">لم يتم العثور على الخط</p>
+                <a
+                  href="https://t.me/fontskingdom"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary inline-flex items-center gap-2 text-sm px-6 py-3"
+                >
+                  <Send className="w-4 h-4" />
+                  اطلب الخط عبر تيليجرام
+                </a>
+              </div>
             )}
 
             <button onClick={reset} className="btn-outline w-full flex items-center justify-center gap-2">
