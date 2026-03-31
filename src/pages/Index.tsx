@@ -221,7 +221,7 @@ const Index = () => {
             <div className="flex items-center justify-center gap-2 animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "both" }}>
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border/30 text-xs text-muted-foreground visitor-badge">
                 <Users className="w-3.5 h-3.5 text-primary" />
-                <span>{visitorCount.toLocaleString("ar-SA")} زائر</span>
+                <span><span className="font-serif">{visitorCount.toLocaleString("en-US")}</span> {t("visitors")}</span>
               </div>
             </div>
 
