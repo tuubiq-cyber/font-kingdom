@@ -3,8 +3,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Lock, UserPlus, Crown, ArrowRight } from "lucide-react";
+import { Lock, UserPlus, Crown, ArrowRight, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { loginRateLimiter, validatePassword, sanitizeEmail, isValidEmail } from "@/lib/security";
+
+const PasswordStrengthBar = ({ strength }: { strength: 'weak' | 'medium' | 'strong' }) => {
+  const colors = { weak: 'bg-red-500', medium: 'bg-yellow-500', strong: 'bg-green-500' };
+  const widths = { weak: 'w-1/3', medium: 'w-2/3', strong: 'w-full' };
+  const labels = { weak: 'ضعيفة', medium: 'متوسطة', strong: 'قوية' };
+
+  return (
+    <div className="space-y-1">
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+        <div className={`h-full ${colors[strength]} ${widths[strength]} transition-all duration-300 rounded-full`} />
+      </div>
+      <p className={`text-[10px] font-medium ${strength === 'weak' ? 'text-red-400' : strength === 'medium' ? 'text-yellow-400' : 'text-green-400'}`}>
+        قوة كلمة المرور: {labels[strength]}
+      </p>
+    </div>
+  );
+};
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -13,15 +31,49 @@ const Login = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const navigate = useNavigate();
+
+  const logSecurityEvent = async (action: string, metadata?: Record<string, unknown>) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from("security_logs" as any).insert({
+        user_id: user?.id || null,
+        action,
+        user_agent: navigator.userAgent,
+        metadata: metadata || {},
+      });
+    } catch {
+      // Silent fail for logging
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const cleanEmail = sanitizeEmail(email);
+
+    if (!loginRateLimiter.isAllowed(cleanEmail)) {
+      const remaining = Math.ceil(loginRateLimiter.getRemainingTime(cleanEmail) / 60000);
+      toast.error(`محاولات كثيرة. حاول بعد ${remaining} دقيقة`);
+      await logSecurityEvent("login_rate_limited", { email: cleanEmail });
+      return;
+    }
+
+    if (!isValidEmail(cleanEmail)) {
+      toast.error("بريد إلكتروني غير صالح");
+      return;
+    }
+
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({ email: cleanEmail, password });
+
     if (error) {
       toast.error("بيانات الدخول غير صحيحة");
+      await logSecurityEvent("login_failed", { email: cleanEmail });
     } else {
+      loginRateLimiter.reset(cleanEmail);
+      await logSecurityEvent("login_success", { email: cleanEmail });
       navigate("/");
     }
     setLoading(false);
@@ -29,23 +81,38 @@ const Login = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    const cleanEmail = sanitizeEmail(email);
+
+    if (!isValidEmail(cleanEmail)) {
+      toast.error("بريد إلكتروني غير صالح");
+      return;
+    }
+
     if (password !== confirmPassword) {
       toast.error("كلمتا المرور غير متطابقتين");
       return;
     }
-    if (password.length < 6) {
-      toast.error("كلمة المرور يجب ان تكون 6 احرف على الاقل");
+
+    const validation = validatePassword(password);
+    if (!validation.valid) {
+      setPasswordErrors(validation.errors);
+      toast.error("كلمة المرور لا تستوفي الشروط");
       return;
     }
+
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({ email: cleanEmail, password });
     if (error) {
       toast.error(error.message);
+      await logSecurityEvent("signup_failed", { email: cleanEmail, error: error.message });
     } else {
       toast.success("تم انشاء الحساب — تحقق من بريدك الالكتروني للتفعيل");
+      await logSecurityEvent("signup_success", { email: cleanEmail });
       setIsSignUp(false);
       setPassword("");
       setConfirmPassword("");
+      setPasswordErrors([]);
     }
     setLoading(false);
   };
@@ -67,6 +134,8 @@ const Login = () => {
       setSocialLoading(null);
     }
   };
+
+  const passwordValidation = isSignUp && password.length > 0 ? validatePassword(password) : null;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 relative">
@@ -93,7 +162,7 @@ const Login = () => {
         <div className="flex bg-card border border-border/50 rounded-xl p-1">
           <button
             type="button"
-            onClick={() => setIsSignUp(false)}
+            onClick={() => { setIsSignUp(false); setPasswordErrors([]); }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
               !isSignUp ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground"
             }`}
@@ -103,7 +172,7 @@ const Login = () => {
           </button>
           <button
             type="button"
-            onClick={() => setIsSignUp(true)}
+            onClick={() => { setIsSignUp(true); setPasswordErrors([]); }}
             className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
               isSignUp ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground"
             }`}
@@ -171,6 +240,8 @@ const Login = () => {
               placeholder="example@email.com"
               className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
               required
+              maxLength={255}
+              autoComplete="email"
             />
           </div>
 
@@ -179,12 +250,35 @@ const Login = () => {
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (isSignUp && e.target.value.length > 0) {
+                  const v = validatePassword(e.target.value);
+                  setPasswordErrors(v.errors);
+                }
+              }}
               dir="ltr"
               placeholder="••••••••"
               className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
               required
+              maxLength={128}
+              autoComplete={isSignUp ? "new-password" : "current-password"}
             />
+            {/* Password strength indicator */}
+            {passwordValidation && (
+              <div className="space-y-2 animate-fade-in">
+                <PasswordStrengthBar strength={passwordValidation.strength} />
+                {passwordErrors.length > 0 && (
+                  <ul className="space-y-0.5">
+                    {passwordErrors.map((err, i) => (
+                      <li key={i} className="text-[10px] text-red-400 flex items-center gap-1">
+                        <span>•</span> {err}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
 
           {isSignUp && (
@@ -198,6 +292,8 @@ const Login = () => {
                 placeholder="••••••••"
                 className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
                 required
+                maxLength={128}
+                autoComplete="new-password"
               />
            </div>
           )}
@@ -227,6 +323,12 @@ const Login = () => {
             )}
           </button>
         </form>
+
+        {/* Security badge */}
+        <div className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground/40">
+          <ShieldCheck className="w-3 h-3" />
+          <span>محمي بتشفير SSL و RLS</span>
+        </div>
 
         {/* Back link */}
         <div className="text-center">
