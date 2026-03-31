@@ -314,13 +314,24 @@ const AdminFonts = () => {
           </div>
 
           <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">صورة معاينة (مهمة للمطابقة)</label>
+            <label className="text-sm text-muted-foreground">صورة معاينة</label>
             <input
               type="file"
               accept="image/*"
               onChange={(e) => setPreviewFile(e.target.files?.[0] ?? null)}
               className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
             />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-sm text-muted-foreground">صورة مرجعية للمطابقة (كلمة "مملكة" او "الخط" بهذا الخط)</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setReferenceFile(e.target.files?.[0] ?? null)}
+              className="w-full text-sm text-muted-foreground file:ml-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-primary file:text-primary-foreground file:text-sm file:font-medium file:cursor-pointer"
+            />
+            <p className="text-[11px] text-muted-foreground/60">ارفع صورة نص مكتوب بهذا الخط لتحسين دقة المطابقة البصرية</p>
           </div>
 
           <button type="submit" disabled={submitting} className="btn-primary w-full flex items-center justify-center gap-2">
