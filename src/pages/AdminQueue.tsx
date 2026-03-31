@@ -153,6 +153,7 @@ const AdminQueue = () => {
           source: "manual_review",
           download_url: downloadUrl,
           font_file_url: fontFileUrl,
+          admin_notes: notes,
         },
         visual_hash: visualHash,
         verified_by_admin: true,
