@@ -14,7 +14,7 @@ import {
   generatePerceptualHash,
   matchFont,
 } from "@/lib/imageProcessing";
-import { searchMultipleFonts, type WebFontMatch } from "@/lib/webFontSearch";
+import { searchMultipleFonts, searchFontOnWeb, type WebFontMatch } from "@/lib/webFontSearch";
 
 interface FontFile {
   weight: string;
