@@ -15,6 +15,7 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import AdminRoute from "./components/AdminRoute";
 import useNotifications from "./hooks/useNotifications";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 const queryClient = new QueryClient();
 
