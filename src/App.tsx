@@ -12,8 +12,14 @@ import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AdminRoute from "./components/AdminRoute";
+import useNotifications from "./hooks/useNotifications";
 
 const queryClient = new QueryClient();
+
+const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
+  useNotifications();
+  return <>{children}</>;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -21,16 +27,18 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/admin" element={<AdminRoute><AdminFonts /></AdminRoute>} />
-          <Route path="/train" element={<AdminRoute><FontTraining /></AdminRoute>} />
-          <Route path="/admin/brain" element={<AdminRoute><ModelBrain /></AdminRoute>} />
-          <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
-          <Route path="/my-requests" element={<MyRequests />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <NotificationProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/admin" element={<AdminRoute><AdminFonts /></AdminRoute>} />
+            <Route path="/train" element={<AdminRoute><FontTraining /></AdminRoute>} />
+            <Route path="/admin/brain" element={<AdminRoute><ModelBrain /></AdminRoute>} />
+            <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
+            <Route path="/my-requests" element={<MyRequests />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </NotificationProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
