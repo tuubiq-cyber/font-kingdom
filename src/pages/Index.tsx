@@ -62,14 +62,12 @@ const Index = () => {
   // Visitor count
   const [visitorCount, setVisitorCount] = useState(0);
 
-  const getUserId = () => {
-    if (user?.id) return user.id;
-    let id = localStorage.getItem("kingdom_user_id");
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem("kingdom_user_id", id);
+  const requireAuth = () => {
+    if (!user?.id) {
+      toast.error("يجب تسجيل الدخول اولاً لإرسال طلب");
+      return null;
     }
-    return id;
+    return user.id;
   };
 
   useEffect(() => {
