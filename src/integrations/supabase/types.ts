@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      font_dataset: {
+        Row: {
+          created_at: string
+          font_name: string
+          id: string
+          metadata_json: Json | null
+          sample_image_url: string
+          verified_by_admin: boolean | null
+          visual_hash: string | null
+        }
+        Insert: {
+          created_at?: string
+          font_name: string
+          id?: string
+          metadata_json?: Json | null
+          sample_image_url: string
+          verified_by_admin?: boolean | null
+          visual_hash?: string | null
+        }
+        Update: {
+          created_at?: string
+          font_name?: string
+          id?: string
+          metadata_json?: Json | null
+          sample_image_url?: string
+          verified_by_admin?: boolean | null
+          visual_hash?: string | null
+        }
+        Relationships: []
+      }
       font_files: {
         Row: {
           created_at: string
@@ -123,6 +153,47 @@ export type Database = {
           visual_features_hash?: string | null
         }
         Relationships: []
+      }
+      manual_identification_queue: {
+        Row: {
+          assigned_font_id: string | null
+          assigned_font_name: string | null
+          created_at: string
+          id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          user_uploaded_image: string
+        }
+        Insert: {
+          assigned_font_id?: string | null
+          assigned_font_name?: string | null
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          user_uploaded_image: string
+        }
+        Update: {
+          assigned_font_id?: string | null
+          assigned_font_name?: string | null
+          created_at?: string
+          id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
+          user_uploaded_image?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_identification_queue_assigned_font_id_fkey"
+            columns: ["assigned_font_id"]
+            isOneToOne: false
+            referencedRelation: "fonts_library"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
