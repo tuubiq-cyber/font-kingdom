@@ -85,10 +85,7 @@ const AdminFonts = () => {
     setSubmitting(true);
 
     try {
-      let downloadUrl: string | null = null;
       let previewUrl: string | null = null;
-
-      if (fontFile) downloadUrl = await uploadFile(fontFile, "files");
       if (previewFile) previewUrl = await uploadFile(previewFile, "previews");
 
       const tagsArr = tags
@@ -96,16 +93,28 @@ const AdminFonts = () => {
         .map((t) => t.trim())
         .filter(Boolean);
 
-      const { error } = await supabase.from("fonts_library").insert({
+      const { data: fontData, error } = await supabase.from("fonts_library").insert({
         font_name: fontName,
         font_name_ar: fontNameAr,
         category,
         style,
         license,
-        download_url: downloadUrl,
+        download_url: null,
         preview_image_url: previewUrl,
         tags: tagsArr.length > 0 ? tagsArr : null,
-      } as any);
+      } as any).select("id").single();
+
+      if (error) throw error;
+
+      // Upload each font file with its weight
+      for (const ff of fontFiles) {
+        const fileUrl = await uploadFile(ff.file, "files");
+        await supabase.from("font_files" as any).insert({
+          font_id: fontData.id,
+          weight: ff.weight,
+          file_url: fileUrl,
+        } as any);
+      }
 
       if (error) throw error;
 
