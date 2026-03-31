@@ -156,33 +156,48 @@ export type Database = {
       }
       manual_identification_queue: {
         Row: {
+          admin_download_url: string | null
           assigned_font_id: string | null
           assigned_font_name: string | null
           created_at: string
           id: string
+          is_notified: boolean | null
+          needs_correction: boolean | null
           resolved_at: string | null
           resolved_by: string | null
           status: string
+          user_confirmation: boolean | null
+          user_id: string | null
           user_uploaded_image: string
         }
         Insert: {
+          admin_download_url?: string | null
           assigned_font_id?: string | null
           assigned_font_name?: string | null
           created_at?: string
           id?: string
+          is_notified?: boolean | null
+          needs_correction?: boolean | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
+          user_confirmation?: boolean | null
+          user_id?: string | null
           user_uploaded_image: string
         }
         Update: {
+          admin_download_url?: string | null
           assigned_font_id?: string | null
           assigned_font_name?: string | null
           created_at?: string
           id?: string
+          is_notified?: boolean | null
+          needs_correction?: boolean | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
+          user_confirmation?: boolean | null
+          user_id?: string | null
           user_uploaded_image?: string
         }
         Relationships: [
