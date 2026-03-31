@@ -88,7 +88,9 @@ const AdminFonts = () => {
 
     try {
       let previewUrl: string | null = null;
+      let referenceUrl: string | null = null;
       if (previewFile) previewUrl = await uploadFile(previewFile, "previews");
+      if (referenceFile) referenceUrl = await uploadFile(referenceFile, "references");
 
       const tagsArr = tags
         .split(",")
