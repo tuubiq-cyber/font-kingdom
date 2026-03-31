@@ -3,7 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Lock, UserPlus, Mail } from "lucide-react";
+import { Lock, UserPlus, Crown, ArrowRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -68,15 +69,33 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-4">
+    <div className="min-h-screen flex items-center justify-center px-4 relative">
+      {/* Background decoration */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[300px] h-[300px] rounded-full bg-primary/5 blur-3xl" />
+      </div>
+
+      <div className="w-full max-w-sm space-y-6 relative z-10 animate-fade-in">
+        {/* Logo & Branding */}
+        <div className="text-center space-y-3">
+          <Link to="/" className="inline-block">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-1 hero-icon-glow">
+              <Crown className="w-10 h-10 text-primary" />
+            </div>
+          </Link>
+          <h1 className="text-foreground font-bold text-xl">مملكة الخطوط</h1>
+          <p className="text-muted-foreground text-xs">
+            {isSignUp ? "أنشئ حسابك للوصول لجميع الخدمات" : "سجّل دخولك للمتابعة"}
+          </p>
+        </div>
+
         {/* Tabs */}
-        <div className="flex bg-card border border-border/50 rounded-lg p-1">
+        <div className="flex bg-card border border-border/50 rounded-xl p-1">
           <button
             type="button"
             onClick={() => setIsSignUp(false)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-colors ${
-              !isSignUp ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+              !isSignUp ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <Lock className="w-4 h-4" />
@@ -85,8 +104,8 @@ const Login = () => {
           <button
             type="button"
             onClick={() => setIsSignUp(true)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-md text-sm font-medium transition-colors ${
-              isSignUp ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+              isSignUp ? "bg-primary text-primary-foreground shadow-md" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             <UserPlus className="w-4 h-4" />
@@ -95,11 +114,11 @@ const Login = () => {
         </div>
 
         {/* Social Login */}
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           <button
             onClick={() => handleSocialLogin("google")}
             disabled={!!socialLoading}
-            className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-card border border-border/50 text-foreground font-medium text-sm hover:bg-muted transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl bg-card border border-border/40 text-foreground font-medium text-sm hover:bg-muted hover:border-border transition-all duration-200 disabled:opacity-50"
           >
             {socialLoading === "google" ? (
               <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
@@ -117,7 +136,7 @@ const Login = () => {
           <button
             onClick={() => handleSocialLogin("apple")}
             disabled={!!socialLoading}
-            className="w-full flex items-center justify-center gap-3 py-3 rounded-xl bg-card border border-border/50 text-foreground font-medium text-sm hover:bg-muted transition-colors disabled:opacity-50"
+            className="w-full flex items-center justify-center gap-3 py-3.5 rounded-xl bg-card border border-border/40 text-foreground font-medium text-sm hover:bg-muted hover:border-border transition-all duration-200 disabled:opacity-50"
           >
             {socialLoading === "apple" ? (
               <div className="w-4 h-4 border-2 border-foreground/30 border-t-foreground rounded-full animate-spin" />
@@ -132,64 +151,82 @@ const Login = () => {
 
         {/* Divider */}
         <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-border/50" />
-          <span className="text-xs text-muted-foreground">أو</span>
-          <div className="flex-1 h-px bg-border/50" />
+          <div className="flex-1 h-px bg-border/30" />
+          <span className="text-[11px] text-muted-foreground/60 px-2">أو بالبريد الإلكتروني</span>
+          <div className="flex-1 h-px bg-border/30" />
         </div>
 
         {/* Form */}
         <form
           onSubmit={isSignUp ? handleSignUp : handleLogin}
-          className="font-card space-y-5"
+          className="space-y-4"
         >
-          <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">البريد الالكتروني</label>
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground font-medium">البريد الالكتروني</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               dir="ltr"
-              className="w-full bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              placeholder="example@email.com"
+              className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
               required
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-sm text-muted-foreground">كلمة المرور</label>
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground font-medium">كلمة المرور</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               dir="ltr"
-              className="w-full bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+              placeholder="••••••••"
+              className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
               required
             />
           </div>
 
           {isSignUp && (
-            <div className="space-y-1">
-              <label className="text-sm text-muted-foreground">تاكيد كلمة المرور</label>
+            <div className="space-y-1.5 animate-fade-in">
+              <label className="text-xs text-muted-foreground font-medium">تأكيد كلمة المرور</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 dir="ltr"
-                className="w-full bg-muted border border-border rounded-lg px-3 py-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                placeholder="••••••••"
+                className="w-full bg-card border border-border/40 rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all duration-200"
                 required
               />
             </div>
           )}
 
-          <button type="submit" disabled={loading} className="btn-primary w-full">
+          <button
+            type="submit"
+            disabled={loading}
+            className="btn-primary-interactive w-full flex items-center justify-center gap-2 py-3.5 text-sm font-bold rounded-xl cta-shimmer"
+          >
             {loading ? (
-              <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin mx-auto" />
+              <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
             ) : isSignUp ? (
-              "انشاء الحساب"
+              "إنشاء الحساب"
             ) : (
-              "دخول"
+              "تسجيل الدخول"
             )}
           </button>
         </form>
+
+        {/* Back link */}
+        <div className="text-center">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground/60 hover:text-muted-foreground transition-colors"
+          >
+            <ArrowRight className="w-3 h-3" />
+            العودة للرئيسية
+          </Link>
+        </div>
       </div>
     </div>
   );
