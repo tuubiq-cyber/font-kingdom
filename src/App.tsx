@@ -38,6 +38,8 @@ const App = () => (
             <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
             <Route path="/my-requests" element={<MyRequests />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </NotificationProvider>
