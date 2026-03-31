@@ -155,11 +155,14 @@ const Index = () => {
     setIsLoading(true);
     setStep("submitting");
     try {
-      const imageUrl = await uploadImageForReview(croppedBlob);
-      if (!imageUrl) throw new Error("فشل رفع الصورة");
-
       const uid = requireAuth();
       if (!uid) { setStep("crop"); setIsLoading(false); return; }
+
+      const allowed = await checkAndConsume(uid, "image_identification");
+      if (!allowed) { setStep("crop"); setIsLoading(false); return; }
+
+      const imageUrl = await uploadImageForReview(croppedBlob);
+      if (!imageUrl) throw new Error("فشل رفع الصورة");
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: imageUrl,
