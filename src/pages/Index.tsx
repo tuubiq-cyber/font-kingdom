@@ -467,10 +467,7 @@ const Index = () => {
           <div className="space-y-6">
             {isLoading && (
               <div className="space-y-3">
-                <ScanProgress stage="analyzing" />
-                <p className="text-center text-xs text-muted-foreground animate-pulse">
-                  {stageLabels[scanStage]}
-                </p>
+              <ScanProgress stage={scanStage} />
               </div>
             )}
 
