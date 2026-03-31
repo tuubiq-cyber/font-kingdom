@@ -231,9 +231,9 @@ const Index = () => {
             {/* Features */}
             <div className="grid grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
               {[
-                { icon: Upload, label: "ارفع صورة", delay: 0 },
-                { icon: Eye, label: "نحلل الخط", delay: 0.1 },
-                { icon: Feather, label: "نرسل النتيجة", delay: 0.2 },
+                { icon: Upload, label: t("uploadImage"), delay: 0 },
+                { icon: Eye, label: t("analyzeFont"), delay: 0.1 },
+                { icon: Feather, label: t("sendResult"), delay: 0.2 },
               ].map((item, i) => (
                 <div
                   key={i}
