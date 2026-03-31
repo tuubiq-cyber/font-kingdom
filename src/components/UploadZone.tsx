@@ -34,7 +34,11 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onImageUpload(file);
+    if (file) {
+      const err = validateImageUpload(file);
+      if (err) { toast.error(err); return; }
+      onImageUpload(file);
+    }
   };
 
   return (
