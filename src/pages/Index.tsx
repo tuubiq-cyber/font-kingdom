@@ -177,10 +177,10 @@ const Index = () => {
 
       if (error) throw error;
       setStep("done");
-      toast.success("تم ارسال طلبك بنجاح!");
+      toast.success(t("requestSentSuccess"));
     } catch (e) {
       console.error(e);
-      toast.error(e instanceof Error ? e.message : "حدث خطا غير متوقع");
+      toast.error(e instanceof Error ? e.message : t("unexpectedError"));
       setStep("crop");
     } finally {
       setIsLoading(false);
