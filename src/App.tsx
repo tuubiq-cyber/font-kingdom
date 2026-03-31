@@ -39,6 +39,7 @@ const App = () => (
             <Route path="/train" element={<AdminRoute><FontTraining /></AdminRoute>} />
             <Route path="/admin/brain" element={<AdminRoute><ModelBrain /></AdminRoute>} />
             <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
+            <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
             <Route path="/my-requests" element={<MyRequests />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
