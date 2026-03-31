@@ -6,6 +6,7 @@ import ImageCropper from "@/components/ImageCropper";
 import ColorPicker from "@/components/ColorPicker";
 import FontCard from "@/components/FontCard";
 import ScanProgress from "@/components/ScanProgress";
+import WebFontResults from "@/components/WebFontResults";
 import { Send, ArrowRight, Bug } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -13,6 +14,7 @@ import {
   generatePerceptualHash,
   matchFont,
 } from "@/lib/imageProcessing";
+import { searchMultipleFonts, type WebFontMatch } from "@/lib/webFontSearch";
 
 interface FontFile {
   weight: string;
@@ -35,13 +37,14 @@ interface FontResult {
 }
 
 type Step = "upload" | "crop" | "details" | "results";
-type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "ranking";
+type ScanStage = "normalizing" | "hashing" | "comparing" | "ai" | "web" | "ranking";
 
 const stageLabels: Record<ScanStage, string> = {
   normalizing: "تحليل الصورة وتحسينها",
   hashing: "انشاء البصمة البصرية",
   comparing: "مقارنة مع قاعدة البيانات",
   ai: "تحليل بالذكاء الاصطناعي",
+  web: "بحث عالمي عبر الويب",
   ranking: "ترتيب النتائج",
 };
 
@@ -62,6 +65,7 @@ const Index = () => {
   const [textColor, setTextColor] = useState("#000000");
   const [bgColor, setBgColor] = useState("#ffffff");
   const [results, setResults] = useState<FontResult[]>([]);
+  const [webResults, setWebResults] = useState<WebFontMatch[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [scanStage, setScanStage] = useState<ScanStage>("normalizing");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -177,7 +181,27 @@ const Index = () => {
         }
       }
 
-      // Phase 5: Merge & rank
+      // Phase 5: Web search via Puter.js + Perplexity
+      setScanStage("web");
+      let webMatches: WebFontMatch[] = [];
+      try {
+        const fontNamesToSearch = [
+          ...aiResults.map((r) => r.name),
+          ...visualMatches.map((r) => r.name),
+        ].filter(Boolean);
+
+        if (fontNamesToSearch.length > 0) {
+          webMatches = await searchMultipleFonts(
+            [...new Set(fontNamesToSearch)],
+            typedText || ""
+          );
+        }
+      } catch (e) {
+        console.warn("Web search failed:", e);
+      }
+      setWebResults(webMatches);
+
+      // Phase 6: Merge & rank
       setScanStage("ranking");
       const merged = new Map<string, FontResult>();
 
@@ -205,7 +229,7 @@ const Index = () => {
         .sort((a, b) => b.confidence - a.confidence)
         .slice(0, 8);
 
-      if (finalResults.length === 0) {
+      if (finalResults.length === 0 && webMatches.length === 0) {
         toast.info("لم يتم العثور على الخط في قاعدة البيانات");
       }
       setResults(finalResults);
@@ -228,6 +252,7 @@ const Index = () => {
     setTextColor("#000000");
     setBgColor("#ffffff");
     setResults([]);
+    setWebResults([]);
     setErrorMsg(null);
   };
 
@@ -339,7 +364,12 @@ const Index = () => {
               </section>
             )}
 
-            {!isLoading && results.length === 0 && !errorMsg && (
+            {/* Web search results */}
+            {!isLoading && webResults.length > 0 && (
+              <WebFontResults results={webResults} />
+            )}
+
+            {!isLoading && results.length === 0 && webResults.length === 0 && !errorMsg && (
               <div className="text-center py-8 space-y-4 opacity-0 animate-fade-up">
                 <p className="text-muted-foreground text-sm">لم يتم العثور على الخط في مكتبتنا</p>
                 <a
