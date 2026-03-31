@@ -163,6 +163,7 @@ export type Database = {
           id: string
           is_notified: boolean | null
           needs_correction: boolean | null
+          query_text: string | null
           resolved_at: string | null
           resolved_by: string | null
           status: string
@@ -178,6 +179,7 @@ export type Database = {
           id?: string
           is_notified?: boolean | null
           needs_correction?: boolean | null
+          query_text?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
@@ -193,6 +195,7 @@ export type Database = {
           id?: string
           is_notified?: boolean | null
           needs_correction?: boolean | null
+          query_text?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
