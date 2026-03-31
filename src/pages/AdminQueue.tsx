@@ -288,6 +288,8 @@ const AdminQueue = () => {
                   downloadUrl={downloadUrlInput[item.id] || ""}
                   fontFile={fontFileInput[item.id] || null}
                   notes={notesInput[item.id] || ""}
+                  knownFonts={knownFonts}
+                  onAutofill={(f) => handleAutofill(item.id, f)}
                   onFontNameChange={(v) => setFontNameInput((p) => ({ ...p, [item.id]: v }))}
                   onDownloadUrlChange={(v) => setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))}
                   onFontFileChange={(f) => setFontFileInput((p) => ({ ...p, [item.id]: f }))}
