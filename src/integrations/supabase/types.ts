@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      font_files: {
+        Row: {
+          created_at: string
+          file_url: string
+          font_id: string
+          id: string
+          weight: string
+        }
+        Insert: {
+          created_at?: string
+          file_url: string
+          font_id: string
+          id?: string
+          weight?: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string
+          font_id?: string
+          id?: string
+          weight?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "font_files_font_id_fkey"
+            columns: ["font_id"]
+            isOneToOne: false
+            referencedRelation: "fonts_library"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fonts: {
         Row: {
           created_at: string
