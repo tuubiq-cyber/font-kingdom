@@ -84,6 +84,20 @@ const AdminQueue = () => {
     };
   }, [user]);
 
+  const uploadFontFile = async (file: File, fontName: string): Promise<string | null> => {
+    try {
+      const ext = file.name.split('.').pop() || 'ttf';
+      const path = `font-files/${fontName.replace(/\s+/g, '_')}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
+      const { error } = await supabase.storage.from("fonts").upload(path, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from("fonts").getPublicUrl(path);
+      return data.publicUrl;
+    } catch (e) {
+      console.warn("Font file upload failed:", e);
+      return null;
+    }
+  };
+
   const handleResolve = async (item: QueueItem) => {
     const name = fontNameInput[item.id]?.trim();
     if (!name) {
@@ -94,13 +108,23 @@ const AdminQueue = () => {
     setResolvingId(item.id);
     try {
       const downloadUrl = downloadUrlInput[item.id]?.trim() || null;
+      const fontFile = fontFileInput[item.id] || null;
+
+      // Upload font file if provided
+      let fontFileUrl: string | null = null;
+      if (fontFile) {
+        fontFileUrl = await uploadFontFile(fontFile, name);
+        if (!fontFileUrl) {
+          toast.warning("فشل رفع ملف الخط، سيتم المتابعة بدونه");
+        }
+      }
 
       const { error: updateError } = await supabase
         .from("manual_identification_queue")
         .update({
           status: "resolved",
           assigned_font_name: name,
-          admin_download_url: downloadUrl,
+          admin_download_url: fontFileUrl || downloadUrl,
           resolved_by: user!.id,
           resolved_at: new Date().toISOString(),
           needs_correction: false,
@@ -121,7 +145,11 @@ const AdminQueue = () => {
       await supabase.from("font_dataset").insert({
         font_name: name,
         sample_image_url: item.user_uploaded_image,
-        metadata_json: { source: "manual_review", download_url: downloadUrl },
+        metadata_json: {
+          source: "manual_review",
+          download_url: downloadUrl,
+          font_file_url: fontFileUrl,
+        },
         visual_hash: visualHash,
         verified_by_admin: true,
       } as any);
