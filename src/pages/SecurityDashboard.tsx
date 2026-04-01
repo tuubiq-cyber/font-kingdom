@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useSecurityAlerts } from "@/hooks/useSecurityAlerts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowRight, Shield, AlertTriangle, CheckCircle, XCircle, RefreshCw, Info, ShieldAlert, ShieldCheck, Bug } from "lucide-react";
+import { ArrowRight, Shield, AlertTriangle, CheckCircle, XCircle, RefreshCw, Info, ShieldAlert, ShieldCheck, Bug, Bell, BellRing, Eye, EyeOff } from "lucide-react";
 
 interface SecurityLog {
   id: string;
