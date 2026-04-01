@@ -293,6 +293,22 @@ const AdminQueue = () => {
     }
   };
 
+  const handleDeleteAllRejected = async () => {
+    if (!confirm("هل أنت متأكد من حذف جميع الطلبات المرفوضة نهائياً؟")) return;
+    try {
+      const { error } = await supabase
+        .from("manual_identification_queue")
+        .delete()
+        .eq("status", "rejected");
+      if (error) throw error;
+      toast.success("تم حذف جميع الطلبات المرفوضة");
+      fetchQueue();
+    } catch (err) {
+      console.error("Delete all rejected error:", err);
+      toast.error("حدث خطأ أثناء حذف الطلبات");
+    }
+  };
+
 
   if (authLoading) {
     return (
