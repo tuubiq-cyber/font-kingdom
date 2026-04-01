@@ -34,6 +34,7 @@ const useNotifications = () => {
         .not("assigned_font_name", "is", null);
 
       if (resolved && resolved.length > 0) {
+        playNotificationSound();
         for (const item of resolved) {
           const label = item.query_text
             ? `تم الرد على استفسارك "${item.query_text}"`
