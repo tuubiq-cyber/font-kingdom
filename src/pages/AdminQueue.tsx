@@ -121,11 +121,7 @@ const AdminQueue = () => {
 
 
   const fetchQueue = async () => {
-    const { data, error } = await supabase
-      .from("manual_identification_queue")
-      .select("*")
-      .order("needs_correction", { ascending: false })
-      .order("created_at", { ascending: false });
+    const { data, error } = await (supabase.rpc as any)("get_all_queue_items");
     if (!error) setItems((data as unknown as QueueItem[]) ?? []);
     setLoading(false);
   };
