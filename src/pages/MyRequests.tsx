@@ -20,6 +20,7 @@ import {
 import { Link } from "react-router-dom";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
 import { useAuth } from "@/hooks/useAuth";
+import { uploadQueueImage, getQueueImageUrl } from "@/lib/storageUtils";
 
 interface RequestItem {
   id: string;
