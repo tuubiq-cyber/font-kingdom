@@ -101,10 +101,11 @@ const MyRequests = () => {
           sample_image_url: item.user_uploaded_image,
           metadata_json: {
             source: "user_confirmed",
-            download_url: item.admin_download_url,
           },
           visual_hash: visualHash,
-          verified_by_admin: true,
+          verified_by_admin: false,
+          admin_metadata: {},
+          user_id: session?.user?.id,
         } as any);
 
         toast.success("شكرا لتأكيدك! تمت اضافة الخط لارشيف المملكة");
