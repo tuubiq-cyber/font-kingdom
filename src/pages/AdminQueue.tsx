@@ -293,6 +293,22 @@ const AdminQueue = () => {
     }
   };
 
+  const handleDeleteAllRejected = async () => {
+    if (!confirm("هل أنت متأكد من حذف جميع الطلبات المرفوضة نهائياً؟")) return;
+    try {
+      const { error } = await supabase
+        .from("manual_identification_queue")
+        .delete()
+        .eq("status", "rejected");
+      if (error) throw error;
+      toast.success("تم حذف جميع الطلبات المرفوضة");
+      fetchQueue();
+    } catch (err) {
+      console.error("Delete all rejected error:", err);
+      toast.error("حدث خطأ أثناء حذف الطلبات");
+    }
+  };
+
 
   if (authLoading) {
     return (
@@ -444,10 +460,21 @@ const AdminQueue = () => {
         </section>
         {/* Rejected */}
         <section className="space-y-4">
-          <h2 className="text-foreground font-semibold flex items-center gap-2">
-            <X className="w-4 h-4 text-destructive" />
-            طلبات مرفوضة ({rejected.length})
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-foreground font-semibold flex items-center gap-2">
+              <X className="w-4 h-4 text-destructive" />
+              طلبات مرفوضة ({rejected.length})
+            </h2>
+            {rejected.length > 0 && (
+              <button
+                onClick={handleDeleteAllRejected}
+                className="flex items-center gap-1 text-xs text-destructive hover:bg-destructive/10 px-3 py-1.5 rounded-lg transition-colors border border-destructive/20"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                حذف الكل
+              </button>
+            )}
+          </div>
 
           {rejected.length === 0 ? (
             <p className="text-muted-foreground text-sm text-center py-4">
