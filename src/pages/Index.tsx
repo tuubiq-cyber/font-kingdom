@@ -54,7 +54,6 @@ const PulsingRings = () => (
 
 const Index = () => {
   const navigate = useNavigate();
-  const navigate = useNavigate();
   const { checkAndConsume } = useDailyLimit();
   const { t } = useTranslation();
   const [step, setStep] = useState<Step>("home");
