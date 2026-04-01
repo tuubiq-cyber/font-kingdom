@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Type,
   X,
+  RotateCcw,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -251,6 +252,26 @@ const AdminQueue = () => {
       toast.error("حدث خطأ أثناء رفض الطلب");
     }
   };
+  const handleRestore = async (itemId: string) => {
+    try {
+      const { error } = await supabase
+        .from("manual_identification_queue")
+        .update({
+          status: "pending",
+          rejection_reason: null,
+          resolved_at: null,
+          resolved_by: null,
+        } as any)
+        .eq("id", itemId);
+      if (error) throw error;
+      toast.success("تم استعادة الطلب إلى المعلقة");
+      fetchQueue();
+    } catch (err) {
+      console.error("Restore error:", err);
+      toast.error("حدث خطأ أثناء استعادة الطلب");
+    }
+  };
+
 
   if (authLoading) {
     return (
@@ -472,6 +493,14 @@ const AdminQueue = () => {
                         : new Date(item.created_at).toLocaleDateString("ar-SA")}
                     </p>
                   </div>
+                  <button
+                    onClick={() => handleRestore(item.id)}
+                    className="flex items-center gap-1 text-xs text-primary hover:bg-primary/10 px-2 py-1.5 rounded-lg transition-colors shrink-0"
+                    title="استعادة الطلب"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    استعادة
+                  </button>
                 </div>
               ))}
             </div>
