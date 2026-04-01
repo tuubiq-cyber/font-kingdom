@@ -696,13 +696,44 @@ const QueueCard = ({
             )}
           </button>
 
-          <button
-            onClick={onReject}
-            className="w-full py-2 text-sm flex items-center justify-center gap-1.5 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            رفض الطلب
-          </button>
+          {showRejectForm ? (
+            <div className="space-y-2">
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="سبب الرفض (اختياري)"
+                rows={2}
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-destructive/50 resize-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    onReject(rejectReason);
+                    setShowRejectForm(false);
+                    setRejectReason("");
+                  }}
+                  className="flex-1 py-2 text-sm flex items-center justify-center gap-1.5 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  تأكيد الرفض
+                </button>
+                <button
+                  onClick={() => { setShowRejectForm(false); setRejectReason(""); }}
+                  className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowRejectForm(true)}
+              className="w-full py-2 text-sm flex items-center justify-center gap-1.5 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              رفض الطلب
+            </button>
+          )}
         </div>
       </div>
     </div>
