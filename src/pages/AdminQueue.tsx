@@ -252,7 +252,7 @@ const AdminQueue = () => {
           status: "rejected",
           rejection_reason: reason || null,
           resolved_at: new Date().toISOString(),
-          resolved_by: user?.id || null,
+          resolved_by: null,
         } as any)
         .eq("id", itemId);
       if (error) throw error;
