@@ -10,7 +10,7 @@ import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Sea
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
 import { uploadQueueImage } from "@/lib/storageUtils";
-import { useAuth } from "@/hooks/useAuth";
+
 import { useDailyLimit } from "@/hooks/useDailyLimit";
 import { useTranslation } from "react-i18next";
 
