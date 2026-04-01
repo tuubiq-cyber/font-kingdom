@@ -120,14 +120,19 @@ const Index = () => {
     try {
       const vid = getVisitorId();
 
-      const { error } = await supabase.from("manual_identification_queue").insert({
+      const insertData: any = {
         user_uploaded_image: "text_query",
         status: "pending",
         query_text: cleaned,
         is_notified: false,
         needs_correction: false,
-        user_id: user?.id || vid,
-      } as any);
+      };
+      if (user?.id) {
+        insertData.user_id = user.id;
+      } else {
+        insertData.visitor_id = vid;
+      }
+      const { error } = await supabase.from("manual_identification_queue").insert(insertData);
 
       if (error) throw error;
       setStep("name-sent");
@@ -177,13 +182,18 @@ const Index = () => {
       if (!imageUrl) throw new Error(t("uploadFailed"));
 
       const vid = getVisitorId();
-      const { error } = await supabase.from("manual_identification_queue").insert({
+      const insertData: any = {
         user_uploaded_image: imageUrl,
         status: "pending",
         is_notified: false,
         needs_correction: false,
-        user_id: user?.id || vid,
-      } as any);
+      };
+      if (user?.id) {
+        insertData.user_id = user.id;
+      } else {
+        insertData.visitor_id = vid;
+      }
+      const { error } = await supabase.from("manual_identification_queue").insert(insertData);
 
       if (error) throw error;
       setStep("done");
