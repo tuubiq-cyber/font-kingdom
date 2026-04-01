@@ -183,11 +183,7 @@ const Index = () => {
         is_notified: false,
         needs_correction: false,
       };
-      if (user?.id) {
-        insertData.user_id = user.id;
-      } else {
-        insertData.visitor_id = vid;
-      }
+      insertData.visitor_id = vid;
       const { error } = await supabase.from("manual_identification_queue").insert(insertData);
 
       if (error) throw error;
