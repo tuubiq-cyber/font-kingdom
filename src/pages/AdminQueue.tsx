@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   ArrowRight,
-  LogOut,
+  
   CheckCircle,
   Clock,
   Brain,
