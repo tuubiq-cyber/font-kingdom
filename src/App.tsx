@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import AdminFonts from "./pages/AdminFonts";
+import AdminDashboard from "./pages/AdminDashboard";
 import FontTraining from "./pages/FontTraining";
 import ModelBrain from "./pages/ModelBrain";
 import AdminQueue from "./pages/AdminQueue";
@@ -39,7 +40,8 @@ const App = () => (
           <LanguageSwitcher />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/admin" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
+            <Route path="/admin" element={<AuthGuard><AdminRoute><AdminDashboard /></AdminRoute></AuthGuard>} />
+            <Route path="/admin/fonts" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
             <Route path="/train" element={<AuthGuard><AdminRoute><FontTraining /></AdminRoute></AuthGuard>} />
             <Route path="/admin/brain" element={<AuthGuard><AdminRoute><ModelBrain /></AdminRoute></AuthGuard>} />
             <Route path="/admin/queue" element={<AuthGuard><AdminRoute><AdminQueue /></AdminRoute></AuthGuard>} />
