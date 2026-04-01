@@ -157,7 +157,7 @@ const ModelBrain = () => {
     );
   }
 
-  if (!user) return null;
+  
 
   return (
     <div className="min-h-screen">

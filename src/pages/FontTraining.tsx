@@ -111,7 +111,7 @@ const FontTraining = () => {
     );
   }
 
-  if (!user) return null;
+  
 
   return (
     <div className="min-h-screen">
