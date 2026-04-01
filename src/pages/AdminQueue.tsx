@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Type,
   X,
+  Search,
   RotateCcw,
   Trash2,
   ChevronDown,
