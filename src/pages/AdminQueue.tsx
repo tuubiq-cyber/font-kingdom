@@ -252,8 +252,27 @@ const AdminQueue = () => {
       toast.error("حدث خطأ أثناء رفض الطلب");
     }
   };
+  const handleRestore = async (itemId: string) => {
+    try {
+      const { error } = await supabase
+        .from("manual_identification_queue")
+        .update({
+          status: "pending",
+          rejection_reason: null,
+          resolved_at: null,
+          resolved_by: null,
+        } as any)
+        .eq("id", itemId);
+      if (error) throw error;
+      toast.success("تم استعادة الطلب إلى المعلقة");
+      fetchQueue();
+    } catch (err) {
+      console.error("Restore error:", err);
+      toast.error("حدث خطأ أثناء استعادة الطلب");
+    }
+  };
 
-  if (authLoading) {
+
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
