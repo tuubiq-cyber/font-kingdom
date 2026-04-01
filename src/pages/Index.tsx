@@ -53,7 +53,7 @@ const PulsingRings = () => (
 );
 
 const Index = () => {
-  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
   const navigate = useNavigate();
   const { checkAndConsume } = useDailyLimit();
   const { t } = useTranslation();
