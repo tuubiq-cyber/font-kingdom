@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAdmin } from "@/hooks/useAdmin";
+import { useSecurityAlerts } from "@/hooks/useSecurityAlerts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowRight, Shield, AlertTriangle, CheckCircle, XCircle, RefreshCw, Info, ShieldAlert, ShieldCheck, Bug } from "lucide-react";
+import { ArrowRight, Shield, AlertTriangle, CheckCircle, XCircle, RefreshCw, Info, ShieldAlert, ShieldCheck, Bug, Bell, BellRing, Eye, EyeOff } from "lucide-react";
 
 interface SecurityLog {
   id: string;
@@ -73,10 +74,11 @@ const KNOWN_FINDINGS: SecurityFinding[] = [
 const SecurityDashboard = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAdmin();
+  const { activeAlerts, alerts: allAlerts, loading: alertsLoading, dismissAlert, refresh: refreshAlerts } = useSecurityAlerts();
   const [logs, setLogs] = useState<SecurityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "failed" | "success">("all");
-  const [activeTab, setActiveTab] = useState<"logs" | "findings">("findings");
+  const [activeTab, setActiveTab] = useState<"alerts" | "findings" | "logs">("alerts");
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
@@ -203,6 +205,18 @@ const SecurityDashboard = () => {
         {/* Tabs */}
         <div className="flex gap-2 border-b border-border/50 pb-2">
           <Button
+            variant={activeTab === "alerts" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setActiveTab("alerts")}
+            className="gap-2"
+          >
+            {activeAlerts.length > 0 ? <BellRing className="w-4 h-4" /> : <Bell className="w-4 h-4" />}
+            التنبيهات
+            {activeAlerts.length > 0 && (
+              <Badge className="bg-red-500/20 text-red-400 border-red-500/30 text-xs px-1.5">{activeAlerts.length}</Badge>
+            )}
+          </Button>
+          <Button
             variant={activeTab === "findings" ? "default" : "ghost"}
             size="sm"
             onClick={() => setActiveTab("findings")}
@@ -224,6 +238,89 @@ const SecurityDashboard = () => {
             سجلات الدخول
           </Button>
         </div>
+
+        {/* Alerts Tab */}
+        {activeTab === "alerts" && (
+          <div className="space-y-4">
+            <Card className="border-border/50">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <BellRing className="w-5 h-5 text-primary" />
+                    تنبيهات أمنية تلقائية
+                  </CardTitle>
+                  <Button variant="ghost" size="sm" onClick={refreshAlerts} disabled={alertsLoading}>
+                    <RefreshCw className={`w-4 h-4 ${alertsLoading ? "animate-spin" : ""}`} />
+                  </Button>
+                </div>
+                <CardDescription>
+                  يتم فحص سجلات الأمان تلقائياً كل دقيقة للكشف عن أنماط مشبوهة
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {alertsLoading && allAlerts.length === 0 ? (
+                  <div className="flex justify-center py-12">
+                    <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  </div>
+                ) : activeAlerts.length === 0 ? (
+                  <div className="text-center py-12 space-y-2">
+                    <ShieldCheck className="w-12 h-12 text-green-400 mx-auto" />
+                    <p className="text-muted-foreground">لا توجد تنبيهات نشطة — النظام آمن ✅</p>
+                  </div>
+                ) : (
+                  activeAlerts.map((alert) => (
+                    <div
+                      key={alert.id}
+                      className={`flex items-start gap-3 p-4 rounded-lg border ${
+                        alert.severity === "critical"
+                          ? "border-red-500/40 bg-red-500/10 animate-pulse"
+                          : "border-yellow-500/30 bg-yellow-500/5"
+                      }`}
+                    >
+                      <ShieldAlert className={`w-5 h-5 mt-0.5 ${
+                        alert.severity === "critical" ? "text-red-400" : "text-yellow-400"
+                      }`} />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-semibold text-sm">{alert.title}</p>
+                          <Badge
+                            variant="outline"
+                            className={
+                              alert.severity === "critical"
+                                ? "text-red-400 border-red-500/30 text-xs"
+                                : "text-yellow-400 border-yellow-500/30 text-xs"
+                            }
+                          >
+                            {alert.severity === "critical" ? "حرج" : "عالي"}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground leading-relaxed">{alert.description}</p>
+                        <p className="text-xs text-muted-foreground/60 mt-1">
+                          {new Date(alert.detectedAt).toLocaleString("ar-SA")}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => dismissAlert(alert.id)}
+                        className="shrink-0"
+                      >
+                        <EyeOff className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))
+                )}
+
+                {/* Dismissed alerts summary */}
+                {allAlerts.filter(a => a.dismissed).length > 0 && (
+                  <p className="text-xs text-muted-foreground/50 text-center pt-2">
+                    {allAlerts.filter(a => a.dismissed).length} تنبيه تم تجاهله
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
         {/* Findings Tab */}
         {activeTab === "findings" && (

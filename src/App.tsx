@@ -17,12 +17,14 @@ import ResetPassword from "./pages/ResetPassword";
 import AdminRoute from "./components/AdminRoute";
 import AuthGuard from "./components/AuthGuard";
 import useNotifications from "./hooks/useNotifications";
+import { useSecurityAlerts } from "./hooks/useSecurityAlerts";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 
 const queryClient = new QueryClient();
 
 const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   useNotifications();
+  useSecurityAlerts(); // Admin-only: auto-detects suspicious activity
   return <>{children}</>;
 };
 
