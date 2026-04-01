@@ -131,6 +131,7 @@ const AdminQueue = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
     fetchQueue();
   }, [user]);
 
