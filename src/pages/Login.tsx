@@ -146,16 +146,21 @@ const Login = () => {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email: cleanEmail, password });
+    const { data, error } = await supabase.auth.signUp({ email: cleanEmail, password });
     if (error) {
       toast.error(error.message);
       await logSecurityEvent("signup_failed", { email: cleanEmail, error: error.message });
-    } else {
+      setLoading(false);
+    } else if (data.session) {
       toast.success("تم إنشاء الحساب بنجاح");
       await logSecurityEvent("signup_success", { email: cleanEmail });
       navigate("/");
+      setLoading(false);
+    } else {
+      // Email confirmation required - user needs to verify email
+      toast.success("تم إنشاء الحساب! تحقق من بريدك الإلكتروني لتفعيل الحساب");
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleSocialLogin = async (provider: "google" | "apple") => {
