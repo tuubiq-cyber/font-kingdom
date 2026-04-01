@@ -86,11 +86,11 @@ const showRejectedToast = (item: any) => {
   });
 };
 
-const markAsNotified = async (id: string) => {
-  await supabase
-    .from("manual_identification_queue")
-    .update({ is_notified: true } as any)
-    .eq("id", id);
+const markAsNotified = async (id: string, userId: string) => {
+  await supabase.rpc("mark_queue_notified", {
+    _id: id,
+    _user_id: userId,
+  });
 };
 
 /**
@@ -118,7 +118,7 @@ const useNotifications = () => {
         playNotificationSound();
         for (const item of resolved) {
           showResolvedToast(item);
-          await markAsNotified(item.id);
+          await markAsNotified(item.id, userId);
         }
       }
 
@@ -133,7 +133,7 @@ const useNotifications = () => {
         playNotificationSound();
         for (const item of rejected) {
           showRejectedToast(item);
-          await markAsNotified(item.id);
+          await markAsNotified(item.id, userId);
         }
       }
     };
@@ -158,11 +158,11 @@ const useNotifications = () => {
           if (newRecord.status === "resolved" && newRecord.assigned_font_name) {
             playNotificationSound();
             showResolvedToast(newRecord);
-            markAsNotified(newRecord.id);
+            markAsNotified(newRecord.id, userId);
           } else if (newRecord.status === "rejected") {
             playNotificationSound();
             showRejectedToast(newRecord);
-            markAsNotified(newRecord.id);
+            markAsNotified(newRecord.id, userId);
           }
         }
       )

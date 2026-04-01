@@ -396,6 +396,10 @@ export type Database = {
         Args: { p_action: string; p_metadata?: Json }
         Returns: undefined
       }
+      mark_queue_notified: {
+        Args: { _id: string; _user_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
