@@ -236,18 +236,18 @@ const AdminQueue = () => {
 
   const handleReject = async (itemId: string, reason: string) => {
     try {
-      await supabase
+      const { error } = await supabase
         .from("manual_identification_queue")
-        .update({
-          status: "rejected",
-          assigned_font_name: reason || null,
-          resolved_at: new Date().toISOString(),
-        } as any)
+        .delete()
         .eq("id", itemId);
-      toast.success("تم رفض الطلب");
+      if (error) throw error;
+      if (reason) {
+        console.log("سبب الرفض:", reason);
+      }
+      toast.success("تم رفض الطلب وحذفه");
       fetchQueue();
     } catch (err) {
-      console.error(err);
+      console.error("Reject error:", err);
       toast.error("حدث خطأ أثناء رفض الطلب");
     }
   };
