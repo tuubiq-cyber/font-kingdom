@@ -86,8 +86,7 @@ const showRejectedToast = (item: any) => {
   });
 };
 
-const markAsNotified = async (id: string) => {
-  const userId = localStorage.getItem("visitor_id") || "";
+const markAsNotified = async (id: string, userId: string) => {
   await supabase.rpc("mark_queue_notified", {
     _id: id,
     _user_id: userId,
