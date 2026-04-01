@@ -48,6 +48,7 @@ const App = () => (
             <Route path="/admin/security" element={<AuthGuard><AdminRoute><SecurityDashboard /></AdminRoute></AuthGuard>} />
             <Route path="/admin/stats" element={<AuthGuard><AdminRoute><AdminStats /></AdminRoute></AuthGuard>} />
             <Route path="/my-requests" element={<MyRequests />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
