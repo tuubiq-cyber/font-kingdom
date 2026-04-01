@@ -382,6 +382,18 @@ export type Database = {
       }
     }
     Functions: {
+      admin_delete_queue_item: { Args: { _id: string }; Returns: undefined }
+      admin_update_queue_item: {
+        Args: {
+          _admin_download_url?: string
+          _assigned_font_id?: string
+          _assigned_font_name?: string
+          _id: string
+          _rejection_reason?: string
+          _status: string
+        }
+        Returns: undefined
+      }
       check_daily_limit: {
         Args: { _limit?: number; _service_type: string; _user_id: string }
         Returns: boolean
@@ -389,6 +401,33 @@ export type Database = {
       delete_my_pending_item: {
         Args: { _id: string; _visitor_id: string }
         Returns: undefined
+      }
+      get_all_queue_items: {
+        Args: never
+        Returns: {
+          admin_download_url: string | null
+          assigned_font_id: string | null
+          assigned_font_name: string | null
+          created_at: string
+          id: string
+          is_notified: boolean | null
+          needs_correction: boolean | null
+          query_text: string | null
+          rejection_reason: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          user_confirmation: boolean | null
+          user_id: string | null
+          user_uploaded_image: string
+          visitor_id: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "manual_identification_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_my_queue_items: {
         Args: { _visitor_id: string }
