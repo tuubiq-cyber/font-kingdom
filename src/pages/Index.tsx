@@ -155,9 +155,8 @@ const Index = () => {
 
   const uploadImageForReview = async (blob: Blob): Promise<string | null> => {
     try {
-      const userId = (await supabase.auth.getUser()).data.user?.id;
-      if (!userId) return null;
-      const path = `queue/${userId}/${crypto.randomUUID()}.png`;
+      const vid = getVisitorId();
+      const path = `queue/anon/${vid}/${crypto.randomUUID()}.png`;
       const { error } = await supabase.storage.from("fonts").upload(path, blob);
       if (error) throw error;
       const { data: signedData, error: signError } = await supabase.storage.from("fonts").createSignedUrl(path, 60 * 60 * 24 * 365);
