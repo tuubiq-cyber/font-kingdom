@@ -354,8 +354,11 @@ export type Database = {
         }
         Returns: boolean
       }
-      insert_security_log: { Args: { _action: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
+      log_security_event: {
+        Args: { p_action: string; p_metadata?: Json }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
