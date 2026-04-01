@@ -37,12 +37,9 @@ export async function getQueueImageUrl(imageRef: string): Promise<string> {
     return cached.url;
   }
 
-  // Determine which bucket: legacy "queue/..." paths are in fonts bucket
-  const isLegacy = imageRef.startsWith("queue/");
-  const bucket = isLegacy ? "fonts" : QUEUE_BUCKET;
-
+  // All images now live in queue-images bucket
   const { data, error } = await supabase.storage
-    .from(bucket)
+    .from(QUEUE_BUCKET)
     .createSignedUrl(imageRef, SIGNED_URL_DURATION);
 
   if (error || !data?.signedUrl) {
