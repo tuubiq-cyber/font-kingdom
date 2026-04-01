@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -46,7 +46,7 @@ const App = () => (
             <Route path="/admin/security" element={<AuthGuard><AdminRoute><SecurityDashboard /></AdminRoute></AuthGuard>} />
             <Route path="/admin/stats" element={<AuthGuard><AdminRoute><AdminStats /></AdminRoute></AuthGuard>} />
             <Route path="/my-requests" element={<MyRequests />} />
-            <Route path="/login" element={<Login />} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
