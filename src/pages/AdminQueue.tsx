@@ -236,13 +236,15 @@ const AdminQueue = () => {
     try {
       const { error } = await supabase
         .from("manual_identification_queue")
-        .delete()
+        .update({
+          status: "rejected",
+          rejection_reason: reason || null,
+          resolved_at: new Date().toISOString(),
+          resolved_by: user?.id || null,
+        } as any)
         .eq("id", itemId);
       if (error) throw error;
-      if (reason) {
-        console.log("سبب الرفض:", reason);
-      }
-      toast.success("تم رفض الطلب وحذفه");
+      toast.success("تم رفض الطلب");
       fetchQueue();
     } catch (err) {
       console.error("Reject error:", err);
