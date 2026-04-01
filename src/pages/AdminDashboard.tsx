@@ -8,12 +8,10 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
 const pages = [
-  { path: "/admin/fonts", icon: FileText, label: "مكتبة الخطوط", desc: "إدارة وإضافة الخطوط" },
   { path: "/admin/queue", icon: Inbox, label: "طابور الطلبات", desc: "مراجعة طلبات التعرف" },
-  { path: "/admin/stats", icon: BarChart3, label: "الإحصائيات", desc: "زيارات وطلبات واستخدام" },
   { path: "/admin/brain", icon: Brain, label: "عقل النموذج", desc: "بيانات التدريب" },
-  { path: "/train", icon: FileText, label: "تدريب الخطوط", desc: "إضافة عينات تدريب" },
-  { path: "/admin/security", icon: Shield, label: "الأمان", desc: "سجلات وتنبيهات أمنية" },
+  { path: "/admin/fonts", icon: FileText, label: "مكتبة الخطوط", desc: "إدارة وإضافة الخطوط" },
+  { path: "/my-requests", icon: BarChart3, label: "الطلبات", desc: "عرض طلبات المستخدمين" },
 ];
 
 const AdminDashboard = () => {
