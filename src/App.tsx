@@ -12,7 +12,7 @@ import AdminQueue from "./pages/AdminQueue";
 import SecurityDashboard from "./pages/SecurityDashboard";
 import AdminStats from "./pages/AdminStats";
 import MyRequests from "./pages/MyRequests";
-import Login from "./pages/Login";
+import AdminLogin from "./pages/AdminLogin";
 import NotFound from "./pages/NotFound";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
