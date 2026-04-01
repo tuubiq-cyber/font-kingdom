@@ -69,13 +69,13 @@ const Index = () => {
   // Visitor count
   const [visitorCount, setVisitorCount] = useState(0);
 
-  const requireAuth = () => {
-    if (!user?.id) {
-      toast.error(t("mustLoginFirst"));
-      navigate("/login");
-      return null;
+  const getVisitorId = () => {
+    let vid = localStorage.getItem("visitor_id");
+    if (!vid) {
+      vid = crypto.randomUUID();
+      localStorage.setItem("visitor_id", vid);
     }
-    return user.id;
+    return vid;
   };
 
   // Welcome message for new users (first time only)
