@@ -133,7 +133,7 @@ const useNotifications = () => {
         playNotificationSound();
         for (const item of rejected) {
           showRejectedToast(item);
-          await markAsNotified(item.id);
+          await markAsNotified(item.id, userId);
         }
       }
     };
