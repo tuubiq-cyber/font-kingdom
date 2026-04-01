@@ -163,10 +163,17 @@ const AdminQueue = () => {
       return;
     }
 
+    const type = fontTypeInput[item.id] || "free";
+    const downloadUrl = downloadUrlInput[item.id]?.trim() || null;
+
+    if (type === "paid" && !downloadUrl) {
+      toast.error("يرجى إدخال رابط الشراء للخط المدفوع");
+      return;
+    }
+
     setResolvingId(item.id);
     try {
-      const downloadUrl = downloadUrlInput[item.id]?.trim() || null;
-      const fontFile = fontFileInput[item.id] || null;
+      const fontFile = fontTypeInput[item.id] === "paid" ? null : (fontFileInput[item.id] || null);
       const notes = notesInput[item.id]?.trim() || null;
 
       // Upload font file if provided
