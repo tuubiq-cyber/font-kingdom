@@ -1,16 +1,29 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
-};
+const ALLOWED_ORIGINS = [
+  "https://id-preview--71b50102-4c2c-48bb-a91c-eac959ade376.lovable.app",
+  "https://lovable.dev",
+  "http://localhost:5173",
+  "http://localhost:8080",
+];
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get("origin") || "";
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    "Access-Control-Allow-Origin": allowed,
+    "Access-Control-Allow-Headers":
+      "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+  };
+}
+
+const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10MB
 
 // Simple in-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-const RATE_LIMIT = 10; // max requests per window
-const RATE_WINDOW = 60_000; // 1 minute
+const RATE_LIMIT = 10;
+const RATE_WINDOW = 60_000;
 
 function checkRateLimit(ip: string): boolean {
   const now = Date.now();
@@ -25,11 +38,21 @@ function checkRateLimit(ip: string): boolean {
 }
 
 serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req);
+
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Rate limit check
+  // Check content-length before reading body
+  const contentLength = parseInt(req.headers.get("content-length") || "0", 10);
+  if (contentLength > MAX_BODY_SIZE) {
+    return new Response(
+      JSON.stringify({ error: "حجم الطلب كبير جداً (الحد الأقصى 10MB)" }),
+      { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
   const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "unknown";
   if (!checkRateLimit(clientIp)) {
     return new Response(
@@ -46,7 +69,16 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { imageBase64, typedText, textColor, bgColor } = await req.json();
+    // Read and validate body size
+    const bodyText = await req.text();
+    if (bodyText.length > MAX_BODY_SIZE) {
+      return new Response(
+        JSON.stringify({ error: "حجم الطلب كبير جداً" }),
+        { status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const { imageBase64, typedText, textColor, bgColor } = JSON.parse(bodyText);
     if (!imageBase64 || typeof imageBase64 !== "string") {
       return new Response(
         JSON.stringify({ error: "imageBase64 is required" }),
@@ -54,7 +86,14 @@ serve(async (req) => {
       );
     }
 
-    // Get all fonts from fonts_library
+    // Validate base64 image format
+    if (!imageBase64.startsWith("data:image/") && !/^[A-Za-z0-9+/=]+$/.test(imageBase64.slice(0, 100))) {
+      return new Response(
+        JSON.stringify({ error: "صيغة الصورة غير صالحة" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     const { data: dbFonts } = await supabase
       .from("fonts_library")
       .select("font_name, font_name_ar, style, category, download_url, license, preview_image_url, tags");
@@ -170,7 +209,6 @@ Only return the JSON object, nothing else. If no Arabic text is found, return {"
     const extractedText = parsed.extractedText || "";
     const matches = parsed.matches || [];
 
-    // Enrich with DB data
     const dbMap = new Map(fonts.map((f) => [f.font_name.toLowerCase(), f]));
 
     const enrichedFonts = matches.map((match: any) => {
