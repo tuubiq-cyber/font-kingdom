@@ -166,23 +166,13 @@ const MyRequests = () => {
         imageUrl = await uploadQueueImage(resubmitImage, folderPrefix);
       }
 
-      // Reset the rejected request back to pending
-      await supabase
-        .from("manual_identification_queue")
-        .update({
-          status: "pending",
-          rejection_reason: null,
-          resolved_at: null,
-          resolved_by: null,
-          assigned_font_name: null,
-          assigned_font_id: null,
-          admin_download_url: null,
-          is_notified: false,
-          needs_correction: true,
-          user_uploaded_image: imageUrl,
-          query_text: resubmitNote.trim() || item.query_text || null,
-        } as any)
-        .eq("id", item.id);
+      // Use RPC for resubmit (works for both auth and anon)
+      await (supabase.rpc as any)("resubmit_queue_item", {
+        _id: item.id,
+        _visitor_id: userId,
+        _new_image_url: resubmitImage ? imageUrl : null,
+        _new_query_text: resubmitNote.trim() || null,
+      });
 
       setResubmittingId(null);
       setResubmitNote("");
