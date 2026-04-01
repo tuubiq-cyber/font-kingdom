@@ -31,7 +31,6 @@ const AdminStats = () => {
   const [loading, setLoading] = useState(true);
 
   const fetchStats = useCallback(async () => {
-    if (!isAdmin) return;
     setLoading(true);
 
     const today = new Date().toISOString().split("T")[0];
