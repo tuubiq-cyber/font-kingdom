@@ -16,69 +16,16 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    // Get all queue items referencing fonts/queue/
-    const { data: items, error: fetchErr } = await supabase
-      .from("manual_identification_queue")
-      .select("id, user_uploaded_image")
-      .like("user_uploaded_image", "queue/%");
+    // Clean up orphaned files in fonts/queue/
+    const orphans = [
+      "queue/94acc60c-a735-42c0-b82c-824aae922202/0f631eba-0e95-4254-a16d-3177e27b29a6.png",
+      "queue/anon/2f29bc41-93fe-4d4e-82e5-1e9985279908/648df1f0-63d0-4a60-806c-9b6dd86fd3ac.png",
+      "queue/anon/2f29bc41-93fe-4d4e-82e5-1e9985279908/f874ce2f-5460-4256-a525-4505342abd5a.png",
+    ];
 
-    if (fetchErr) throw fetchErr;
-    if (!items || items.length === 0) {
-      return new Response(JSON.stringify({ message: "No legacy images to migrate", migrated: 0 }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    const { data, error } = await supabase.storage.from("fonts").remove(orphans);
 
-    const results: { id: string; old: string; new: string; status: string }[] = [];
-
-    for (const item of items) {
-      const oldPath = item.user_uploaded_image; // e.g. queue/abc.png or queue/anon/uid/file.png
-      const newPath = `legacy/${oldPath.replace("queue/", "")}`; // legacy/abc.png or legacy/anon/uid/file.png
-
-      try {
-        // Download from fonts bucket
-        const { data: fileData, error: dlErr } = await supabase.storage
-          .from("fonts")
-          .download(oldPath);
-
-        if (dlErr || !fileData) {
-          results.push({ id: item.id, old: oldPath, new: newPath, status: `download_failed: ${dlErr?.message}` });
-          continue;
-        }
-
-        // Upload to queue-images bucket
-        const { error: upErr } = await supabase.storage
-          .from("queue-images")
-          .upload(newPath, fileData, { upsert: true });
-
-        if (upErr) {
-          results.push({ id: item.id, old: oldPath, new: newPath, status: `upload_failed: ${upErr.message}` });
-          continue;
-        }
-
-        // Update DB reference
-        const { error: updErr } = await supabase
-          .from("manual_identification_queue")
-          .update({ user_uploaded_image: newPath })
-          .eq("id", item.id);
-
-        if (updErr) {
-          results.push({ id: item.id, old: oldPath, new: newPath, status: `db_update_failed: ${updErr.message}` });
-          continue;
-        }
-
-        // Delete old file from fonts bucket
-        await supabase.storage.from("fonts").remove([oldPath]);
-
-        results.push({ id: item.id, old: oldPath, new: newPath, status: "migrated" });
-      } catch (e) {
-        results.push({ id: item.id, old: oldPath, new: newPath, status: `error: ${e.message}` });
-      }
-    }
-
-    const migrated = results.filter((r) => r.status === "migrated").length;
-
-    return new Response(JSON.stringify({ message: `Migration complete`, migrated, total: items.length, results }), {
+    return new Response(JSON.stringify({ deleted: orphans, result: data, error: error?.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
