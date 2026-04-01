@@ -222,7 +222,8 @@ const AdminQueue = () => {
       try {
         let visualHash: string | null = null;
         try {
-          visualHash = await generatePerceptualHash(item.user_uploaded_image);
+          const resolvedImgUrl = await getQueueImageUrl(item.user_uploaded_image);
+          visualHash = await generatePerceptualHash(resolvedImgUrl);
         } catch {}
         await supabase.from("font_dataset").insert({
           font_name: name,
