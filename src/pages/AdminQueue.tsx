@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -15,6 +15,7 @@ import {
   MessageSquare,
   Type,
   X,
+  Search,
   RotateCcw,
   Trash2,
   ChevronDown,
@@ -61,6 +62,8 @@ const AdminQueue = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
   const [knownFonts, setKnownFonts] = useState<FontRecord[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   // Load previously resolved fonts for autocomplete
   useEffect(() => {
@@ -310,6 +313,31 @@ const AdminQueue = () => {
   };
 
 
+  const pending = items.filter((i) => i.status === "pending");
+  const needsCorrection = pending.filter((i) => i.needs_correction);
+  const normalPending = pending.filter((i) => !i.needs_correction);
+  const resolved = items.filter((i) => i.status === "resolved");
+  const rejected = items.filter((i) => i.status === "rejected");
+
+  const filteredPending = useMemo(() => {
+    let list = normalPending;
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter(
+        (i) =>
+          i.query_text?.toLowerCase().includes(q) ||
+          i.user_id?.toLowerCase().includes(q) ||
+          i.id.toLowerCase().includes(q)
+      );
+    }
+    list = [...list].sort((a, b) => {
+      const da = new Date(a.created_at).getTime();
+      const db = new Date(b.created_at).getTime();
+      return sortOrder === "newest" ? db - da : da - db;
+    });
+    return list;
+  }, [normalPending, searchQuery, sortOrder]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -317,14 +345,6 @@ const AdminQueue = () => {
       </div>
     );
   }
-
-  
-
-  const pending = items.filter((i) => i.status === "pending");
-  const needsCorrection = pending.filter((i) => i.needs_correction);
-  const normalPending = pending.filter((i) => !i.needs_correction);
-  const resolved = items.filter((i) => i.status === "resolved");
-  const rejected = items.filter((i) => i.status === "rejected");
 
   return (
     <div className="min-h-screen">
@@ -398,9 +418,35 @@ const AdminQueue = () => {
         {/* Normal Pending */}
         <section className="space-y-4">
           <h2 className="text-foreground font-semibold flex items-center gap-2">
-            <Clock className="w-4 h-4 text-yellow-500" />
+            <Clock className="w-4 h-4 text-amber-500" />
             طلبات معلقة ({normalPending.length})
           </h2>
+
+          {normalPending.length > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="بحث بالنص أو المعرّف..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pr-9 pl-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  dir="rtl"
+                />
+              </div>
+              <button
+                onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg border border-border bg-card transition-colors shrink-0"
+              >
+                {sortOrder === "newest" ? (
+                  <><ChevronDown className="w-3.5 h-3.5" /> الأحدث</>
+                ) : (
+                  <><ChevronUp className="w-3.5 h-3.5" /> الأقدم</>
+                )}
+              </button>
+            </div>
+          )}
 
           {loading ? (
             <div className="flex justify-center py-8">
@@ -411,9 +457,13 @@ const AdminQueue = () => {
               <CheckCircle className="w-10 h-10 text-primary mx-auto mb-3 opacity-50" />
               <p className="text-muted-foreground text-sm">لا توجد طلبات معلقة</p>
             </div>
+          ) : filteredPending.length === 0 ? (
+            <p className="text-muted-foreground text-sm text-center py-4">
+              لا توجد نتائج مطابقة للبحث
+            </p>
           ) : (
             <div className="space-y-3">
-              {normalPending.map((item) => (
+              {filteredPending.map((item) => (
                 <QueueCard
                   key={item.id}
                   item={item}
