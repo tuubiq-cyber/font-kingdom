@@ -69,13 +69,13 @@ const Index = () => {
   // Visitor count
   const [visitorCount, setVisitorCount] = useState(0);
 
-  const requireAuth = () => {
-    if (!user?.id) {
-      toast.error(t("mustLoginFirst"));
-      navigate("/login");
-      return null;
+  const getVisitorId = () => {
+    let vid = localStorage.getItem("visitor_id");
+    if (!vid) {
+      vid = crypto.randomUUID();
+      localStorage.setItem("visitor_id", vid);
     }
-    return user.id;
+    return vid;
   };
 
   // Welcome message for new users (first time only)
@@ -116,16 +116,11 @@ const Index = () => {
     }
     setSubmittingName(true);
     try {
-      const uid = requireAuth();
-      if (!uid) return;
-
-      const allowed = await checkAndConsume(uid, "name_search");
-      if (!allowed) return;
+      const vid = getVisitorId();
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: "text_query",
         status: "pending",
-        user_id: uid,
         query_text: cleaned,
         is_notified: false,
         needs_correction: false,
@@ -160,9 +155,8 @@ const Index = () => {
 
   const uploadImageForReview = async (blob: Blob): Promise<string | null> => {
     try {
-      const userId = (await supabase.auth.getUser()).data.user?.id;
-      if (!userId) return null;
-      const path = `queue/${userId}/${crypto.randomUUID()}.png`;
+      const vid = getVisitorId();
+      const path = `queue/anon/${vid}/${crypto.randomUUID()}.png`;
       const { error } = await supabase.storage.from("fonts").upload(path, blob);
       if (error) throw error;
       const { data: signedData, error: signError } = await supabase.storage.from("fonts").createSignedUrl(path, 60 * 60 * 24 * 365);
@@ -179,19 +173,12 @@ const Index = () => {
     setIsLoading(true);
     setStep("submitting");
     try {
-      const uid = requireAuth();
-      if (!uid) { setStep("crop"); setIsLoading(false); return; }
-
-      const allowed = await checkAndConsume(uid, "image_identification");
-      if (!allowed) { setStep("crop"); setIsLoading(false); return; }
-
       const imageUrl = await uploadImageForReview(croppedBlob);
       if (!imageUrl) throw new Error(t("uploadFailed"));
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: imageUrl,
         status: "pending",
-        user_id: uid,
         is_notified: false,
         needs_correction: false,
       } as any);
