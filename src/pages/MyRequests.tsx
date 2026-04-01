@@ -43,6 +43,10 @@ const MyRequests = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [rejectingId, setRejectingId] = useState<string | null>(null);
   const [rejectMessage, setRejectMessage] = useState("");
+  const [resubmittingId, setResubmittingId] = useState<string | null>(null);
+  const [resubmitNote, setResubmitNote] = useState("");
+  const [resubmitImage, setResubmitImage] = useState<File | null>(null);
+  const [resubmitting, setResubmitting] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
