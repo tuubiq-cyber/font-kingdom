@@ -166,16 +166,32 @@ const Login = () => {
   const handleSocialLogin = async (provider: "google" | "apple") => {
     setSocialLoading(provider);
     try {
-      const { error } = await lovable.auth.signInWithOAuth(provider, {
+      const result = await lovable.auth.signInWithOAuth(provider, {
         redirect_uri: window.location.origin,
       });
-      if (error) {
-        toast.error("حدث خطأ في تسجيل الدخول");
-        console.error(error);
+      
+      if (result.redirected) {
+        // Browser is redirecting to provider - don't reset loading
+        return;
+      }
+      
+      if (result.error) {
+        const errMsg = result.error instanceof Error ? result.error.message : String(result.error);
+        console.error("OAuth error:", errMsg);
+        
+        if (errMsg.includes("audience") || errMsg.includes("token")) {
+          toast.error("خطأ في إعدادات المصادقة. يرجى المحاولة لاحقاً أو استخدام البريد الإلكتروني");
+        } else {
+          toast.error("حدث خطأ في تسجيل الدخول. حاول مرة أخرى");
+        }
+      } else {
+        // Success - session was set
+        toast.success("تم تسجيل الدخول بنجاح");
+        navigate("/");
       }
     } catch (e) {
-      toast.error("حدث خطأ غير متوقع");
-      console.error(e);
+      console.error("Social login unexpected error:", e);
+      toast.error("حدث خطأ غير متوقع. حاول مرة أخرى");
     } finally {
       setSocialLoading(null);
     }
