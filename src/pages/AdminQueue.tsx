@@ -436,6 +436,47 @@ const AdminQueue = () => {
             </div>
           )}
         </section>
+        {/* Rejected */}
+        <section className="space-y-4">
+          <h2 className="text-foreground font-semibold flex items-center gap-2">
+            <X className="w-4 h-4 text-destructive" />
+            طلبات مرفوضة ({rejected.length})
+          </h2>
+
+          {rejected.length === 0 ? (
+            <p className="text-muted-foreground text-sm text-center py-4">
+              لا توجد طلبات مرفوضة
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {rejected.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-start gap-3 bg-card border border-destructive/20 rounded-lg px-4 py-3"
+                >
+                  <img
+                    src={item.user_uploaded_image}
+                    alt=""
+                    className="w-10 h-10 rounded object-cover bg-muted"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-destructive font-medium text-sm">مرفوض</p>
+                    {item.rejection_reason && (
+                      <p className="text-muted-foreground text-xs mt-1">
+                        السبب: {item.rejection_reason}
+                      </p>
+                    )}
+                    <p className="text-muted-foreground text-xs mt-1">
+                      {item.resolved_at
+                        ? new Date(item.resolved_at).toLocaleDateString("ar-SA")
+                        : new Date(item.created_at).toLocaleDateString("ar-SA")}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </main>
 
       {/* Image preview modal */}
