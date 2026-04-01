@@ -367,7 +367,7 @@ const MyRequests = () => {
                       key={item.id}
                       className="flex items-center gap-3 bg-card border border-border/50 rounded-lg px-4 py-3"
                     >
-                      <img
+                      <QueueImage
                         src={item.user_uploaded_image}
                         alt=""
                         className="w-10 h-10 rounded object-cover bg-muted"
