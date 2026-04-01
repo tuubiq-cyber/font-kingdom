@@ -51,7 +51,6 @@ interface QueueItem {
 }
 
 const AdminQueue = () => {
-  const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
 
   const [items, setItems] = useState<QueueItem[]>([]);
