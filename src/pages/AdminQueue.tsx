@@ -14,6 +14,7 @@ import {
   FileUp,
   MessageSquare,
   Type,
+  X,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -233,6 +234,20 @@ const AdminQueue = () => {
     }
   };
 
+  const handleReject = async (item: QueueItem) => {
+    try {
+      await supabase
+        .from("manual_identification_queue")
+        .delete()
+        .eq("id", item.id);
+      toast.success("تم رفض الطلب وحذفه");
+      fetchQueue();
+    } catch (err) {
+      console.error(err);
+      toast.error("حدث خطأ أثناء رفض الطلب");
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -307,6 +322,7 @@ const AdminQueue = () => {
                   onNotesChange={(v) => setNotesInput((p) => ({ ...p, [item.id]: v }))}
                   onFontTypeChange={(t) => setFontTypeInput((p) => ({ ...p, [item.id]: t }))}
                   onResolve={() => handleResolve(item)}
+                  onReject={() => handleReject(item)}
                   resolving={resolvingId === item.id}
                   onPreview={() => setPreviewImage(item.user_uploaded_image)}
                   isCorrection
@@ -351,6 +367,7 @@ const AdminQueue = () => {
                   onNotesChange={(v) => setNotesInput((p) => ({ ...p, [item.id]: v }))}
                   onFontTypeChange={(t) => setFontTypeInput((p) => ({ ...p, [item.id]: t }))}
                   onResolve={() => handleResolve(item)}
+                  onReject={() => handleReject(item)}
                   resolving={resolvingId === item.id}
                   onPreview={() => setPreviewImage(item.user_uploaded_image)}
                 />
@@ -449,6 +466,7 @@ interface QueueCardProps {
   onNotesChange: (v: string) => void;
   onFontTypeChange: (t: "free" | "paid") => void;
   onResolve: () => void;
+  onReject: () => void;
   resolving: boolean;
   onPreview: () => void;
   isCorrection?: boolean;
@@ -469,6 +487,7 @@ const QueueCard = ({
   onNotesChange,
   onFontTypeChange,
   onResolve,
+  onReject,
   resolving,
   onPreview,
   isCorrection,
@@ -669,6 +688,14 @@ const QueueCard = ({
                 ارسال النتيجة للمستخدم
               </>
             )}
+          </button>
+
+          <button
+            onClick={onReject}
+            className="w-full py-2 text-sm flex items-center justify-center gap-1.5 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <X className="w-4 h-4" />
+            رفض الطلب
           </button>
         </div>
       </div>
