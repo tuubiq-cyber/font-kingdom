@@ -563,47 +563,78 @@ const QueueCard = ({
               )}
             </div>
 
+            {/* Free / Paid toggle */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onFontTypeChange("free")}
+                className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
+                  fontType === "free"
+                    ? "bg-primary/10 border-primary/40 text-primary font-semibold"
+                    : "bg-muted border-border text-muted-foreground"
+                }`}
+              >
+                مجاني
+              </button>
+              <button
+                type="button"
+                onClick={() => onFontTypeChange("paid")}
+                className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
+                  fontType === "paid"
+                    ? "bg-primary/10 border-primary/40 text-primary font-semibold"
+                    : "bg-muted border-border text-muted-foreground"
+                }`}
+              >
+                مدفوع
+              </button>
+            </div>
+
+            {/* Download URL - always shown */}
             <div className="flex items-center gap-1.5">
               <LinkIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
               <input
                 type="url"
                 value={downloadUrl}
                 onChange={(e) => onDownloadUrlChange(e.target.value)}
-                placeholder="رابط التحميل (اختياري)"
+                placeholder={fontType === "paid" ? "رابط الشراء (مطلوب)" : "رابط التحميل (اختياري)"}
                 dir="ltr"
                 className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
               />
             </div>
 
-            {/* Font file upload */}
-            <input
-              id={fileInputId}
-              type="file"
-              accept=".ttf,.otf,.woff,.woff2,.zip"
-              className="hidden"
-              onChange={(e) => {
-                onFontFileChange(e.target.files?.[0] || null);
-                e.target.value = "";
-              }}
-            />
-            <div className="flex items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2 hover:border-primary/30 transition-colors">
-              <FileUp className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span
-                className="text-sm text-muted-foreground flex-1 truncate cursor-pointer"
-                onClick={() => document.getElementById(fileInputId)?.click()}
-              >
-                {fontFile ? fontFile.name : "ارفق ملف الخط (اختياري)"}
-              </span>
-              {fontFile && (
-                <button
-                  type="button"
-                  onClick={() => onFontFileChange(null)}
-                  className="text-xs text-destructive hover:text-destructive/80"
-                >
-                  حذف
-                </button>
-              )}
-            </div>
+            {/* Font file upload - only for free fonts */}
+            {fontType === "free" && (
+              <>
+                <input
+                  id={fileInputId}
+                  type="file"
+                  accept=".ttf,.otf,.woff,.woff2,.zip"
+                  className="hidden"
+                  onChange={(e) => {
+                    onFontFileChange(e.target.files?.[0] || null);
+                    e.target.value = "";
+                  }}
+                />
+                <div className="flex items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2 hover:border-primary/30 transition-colors">
+                  <FileUp className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span
+                    className="text-sm text-muted-foreground flex-1 truncate cursor-pointer"
+                    onClick={() => document.getElementById(fileInputId)?.click()}
+                  >
+                    {fontFile ? fontFile.name : "ارفق ملف الخط (اختياري)"}
+                  </span>
+                  {fontFile && (
+                    <button
+                      type="button"
+                      onClick={() => onFontFileChange(null)}
+                      className="text-xs text-destructive hover:text-destructive/80"
+                    >
+                      حذف
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Notes */}
             <div className="flex items-start gap-1.5">
