@@ -272,7 +272,7 @@ const Index = () => {
                       dir="auto"
                     />
                     <button
-                      onClick={handleNameSubmit}
+                      onClick={handleNameSearch}
                       disabled={submittingName}
                       className="btn-primary px-4 py-3 rounded-xl text-sm font-bold"
                     >
