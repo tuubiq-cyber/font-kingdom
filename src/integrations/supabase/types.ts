@@ -328,7 +328,7 @@ export type Database = {
           created_at?: string | null
           font_name?: string | null
           id?: string | null
-          metadata_json?: never
+          metadata_json?: Json | null
           sample_image_url?: string | null
           verified_by_admin?: boolean | null
           visual_hash?: string | null
@@ -337,7 +337,7 @@ export type Database = {
           created_at?: string | null
           font_name?: string | null
           id?: string | null
-          metadata_json?: never
+          metadata_json?: Json | null
           sample_image_url?: string | null
           verified_by_admin?: boolean | null
           visual_hash?: string | null
