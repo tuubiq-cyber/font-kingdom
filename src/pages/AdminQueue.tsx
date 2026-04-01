@@ -497,6 +497,8 @@ const QueueCard = ({
   isCorrection,
 }: QueueCardProps) => {
   const fileInputId = `file-${item.id}`;
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const suggestions = useMemo(() => {
