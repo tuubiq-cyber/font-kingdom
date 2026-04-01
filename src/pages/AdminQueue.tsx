@@ -254,15 +254,7 @@ const AdminQueue = () => {
   };
   const handleRestore = async (itemId: string) => {
     try {
-      const { error } = await supabase
-        .from("manual_identification_queue")
-        .update({
-          status: "pending",
-          rejection_reason: null,
-          resolved_at: null,
-          resolved_by: null,
-        } as any)
-        .eq("id", itemId);
+      const { error } = await (supabase.rpc as any)("admin_restore_queue_item", { _id: itemId });
       if (error) throw error;
       toast.success("تم استعادة الطلب إلى المعلقة");
       fetchQueue();
