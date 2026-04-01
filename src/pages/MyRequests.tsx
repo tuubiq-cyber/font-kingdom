@@ -51,6 +51,8 @@ const MyRequests = () => {
     const id = localStorage.getItem("visitor_id");
     if (id) {
       setUserId(id);
+    } else {
+      setLoading(false);
     }
   }, [user]);
 
