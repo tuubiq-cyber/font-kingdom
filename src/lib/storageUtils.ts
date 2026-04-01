@@ -28,8 +28,7 @@ export async function getQueueImageUrl(imageRef: string): Promise<string> {
   // If it's a text_query placeholder, return as-is
   if (imageRef === "text_query") return imageRef;
 
-  // If it's already a full public URL from the old fonts bucket, return as-is
-  // (legacy images will still work since fonts bucket is public)
+  // If it's already a full public URL, return as-is
   if (imageRef.startsWith("http")) return imageRef;
 
   // Check cache
@@ -38,17 +37,19 @@ export async function getQueueImageUrl(imageRef: string): Promise<string> {
     return cached.url;
   }
 
-  // Generate signed URL for private bucket path
+  // Determine which bucket: legacy "queue/..." paths are in fonts bucket
+  const isLegacy = imageRef.startsWith("queue/");
+  const bucket = isLegacy ? "fonts" : QUEUE_BUCKET;
+
   const { data, error } = await supabase.storage
-    .from(QUEUE_BUCKET)
+    .from(bucket)
     .createSignedUrl(imageRef, SIGNED_URL_DURATION);
 
   if (error || !data?.signedUrl) {
     console.warn("Failed to get signed URL for:", imageRef, error);
-    return imageRef; // fallback
+    return imageRef;
   }
 
-  // Cache the signed URL (expire 5 min early to be safe)
   SIGNED_URL_CACHE.set(imageRef, {
     url: data.signedUrl,
     expiresAt: Date.now() + (SIGNED_URL_DURATION - 300) * 1000,
