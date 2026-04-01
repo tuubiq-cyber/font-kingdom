@@ -159,9 +159,8 @@ const Index = () => {
       const path = `queue/anon/${vid}/${crypto.randomUUID()}.png`;
       const { error } = await supabase.storage.from("fonts").upload(path, blob);
       if (error) throw error;
-      const { data: signedData, error: signError } = await supabase.storage.from("fonts").createSignedUrl(path, 60 * 60 * 24 * 365);
-      if (signError || !signedData?.signedUrl) throw signError || new Error("Failed to create signed URL");
-      return signedData.signedUrl;
+      const { data: publicData } = supabase.storage.from("fonts").getPublicUrl(path);
+      return publicData.publicUrl;
     } catch (e) {
       console.warn("Upload failed:", e);
       return null;
