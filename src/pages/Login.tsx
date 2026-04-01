@@ -84,16 +84,11 @@ const Login = () => {
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const navigate = useNavigate();
 
-  const logSecurityEvent = async (action: string, metadata?: Record<string, unknown>) => {
+  const logSecurityEvent = async (action: string, _metadata?: Record<string, unknown>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return; // Skip logging if not authenticated (anon policy removed)
-      await supabase.from("security_logs" as any).insert({
-        user_id: user.id,
-        action,
-        user_agent: navigator.userAgent,
-        metadata: metadata || {},
-      });
+      if (!user) return;
+      await supabase.rpc("insert_security_log", { _action: action } as any);
     } catch {
       // Silent fail for logging
     }
