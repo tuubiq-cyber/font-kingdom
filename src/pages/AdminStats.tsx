@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAdmin } from "@/hooks/useAdmin";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -28,12 +27,10 @@ interface Stats {
 
 const AdminStats = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAdmin();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchStats = useCallback(async () => {
-    if (!isAdmin) return;
     setLoading(true);
 
     const today = new Date().toISOString().split("T")[0];
@@ -95,11 +92,11 @@ const AdminStats = () => {
       recentRequestsByDay: [...requestsByDay].map(([date, count]) => ({ date, count })),
     });
     setLoading(false);
-  }, [isAdmin]);
+  }, []);
 
   useEffect(() => {
-    if (isAdmin) fetchStats();
-  }, [isAdmin, fetchStats]);
+    fetchStats();
+  }, [fetchStats]);
 
   const StatCard = ({
     icon: Icon,

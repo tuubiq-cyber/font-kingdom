@@ -100,9 +100,6 @@ const AdminQueue = () => {
     }
   };
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate("/login");
-  }, [user, authLoading, navigate]);
 
   const fetchQueue = async () => {
     const { data, error } = await supabase
@@ -236,7 +233,7 @@ const AdminQueue = () => {
     );
   }
 
-  if (!user) return null;
+  
 
   const pending = items.filter((i) => i.status === "pending");
   const needsCorrection = pending.filter((i) => i.needs_correction);

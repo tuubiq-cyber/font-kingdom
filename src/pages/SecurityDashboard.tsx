@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAdmin } from "@/hooks/useAdmin";
+
 import { useSecurityAlerts } from "@/hooks/useSecurityAlerts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -73,7 +73,7 @@ const KNOWN_FINDINGS: SecurityFinding[] = [
 
 const SecurityDashboard = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAdmin();
+  
   const { activeAlerts, alerts: allAlerts, loading: alertsLoading, dismissAlert, refresh: refreshAlerts } = useSecurityAlerts();
   const [logs, setLogs] = useState<SecurityLog[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,8 +100,8 @@ const SecurityDashboard = () => {
   }, [filter]);
 
   useEffect(() => {
-    if (isAdmin) fetchLogs();
-  }, [isAdmin, filter, fetchLogs]);
+    fetchLogs();
+  }, [filter, fetchLogs]);
 
   const stats = {
     total: logs.length,

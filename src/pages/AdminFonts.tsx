@@ -52,9 +52,6 @@ const AdminFonts = () => {
 
   const weights = ["Thin", "ExtraLight", "Light", "Regular", "Medium", "SemiBold", "Bold", "ExtraBold", "Black"];
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate("/login");
-  }, [user, authLoading, navigate]);
 
   const fetchFonts = async () => {
     const { data, error } = await supabase
@@ -174,7 +171,7 @@ const AdminFonts = () => {
     );
   }
 
-  if (!user) return null;
+  
 
   return (
     <div className="min-h-screen">
