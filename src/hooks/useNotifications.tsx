@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -94,83 +94,79 @@ const markAsNotified = async (id: string, userId: string) => {
 };
 
 /**
- * Uses Supabase Realtime to instantly notify users when their requests
- * are resolved or rejected. Falls back to initial check on mount.
+ * Polls for unnotified resolved/rejected items every 10 seconds.
+ * Uses RPC for anonymous users, direct queries for authenticated.
  */
 const useNotifications = () => {
   const { user } = useAuth();
+  const lastCheckRef = useRef<string | null>(null);
 
   useEffect(() => {
     const userId = user?.id || localStorage.getItem("visitor_id");
     if (!userId) return;
 
-    // Initial check for any unnotified items on mount
-    const checkExisting = async () => {
-      const { data: resolved } = await supabase
-        .from("manual_identification_queue")
-        .select("id, assigned_font_name, query_text")
-        .eq("user_id", userId)
-        .eq("status", "resolved")
-        .eq("is_notified", false)
-        .not("assigned_font_name", "is", null);
+    const checkForNotifications = async () => {
+      try {
+        let resolved: any[] = [];
+        let rejected: any[] = [];
 
-      if (resolved && resolved.length > 0) {
-        playNotificationSound();
+        if (user?.id) {
+          // Authenticated user - direct query (RLS allows)
+          const { data: r } = await supabase
+            .from("manual_identification_queue")
+            .select("id, assigned_font_name, query_text")
+            .eq("user_id", userId)
+            .eq("status", "resolved")
+            .eq("is_notified", false)
+            .not("assigned_font_name", "is", null);
+          resolved = r || [];
+
+          const { data: rj } = await supabase
+            .from("manual_identification_queue")
+            .select("id, query_text, rejection_reason")
+            .eq("user_id", userId)
+            .eq("status", "rejected")
+            .eq("is_notified", false);
+          rejected = rj || [];
+        } else {
+          // Anonymous user - use RPC
+          const { data } = await (supabase.rpc as any)("get_my_queue_items", {
+            _visitor_id: userId,
+          });
+          const items = (data || []) as any[];
+          resolved = items.filter(
+            (i: any) => i.status === "resolved" && !i.is_notified && i.assigned_font_name
+          );
+          rejected = items.filter(
+            (i: any) => i.status === "rejected" && !i.is_notified
+          );
+        }
+
+        if (resolved.length > 0 || rejected.length > 0) {
+          playNotificationSound();
+        }
+
         for (const item of resolved) {
           showResolvedToast(item);
           await markAsNotified(item.id, userId);
         }
-      }
 
-      const { data: rejected } = await supabase
-        .from("manual_identification_queue")
-        .select("id, query_text, rejection_reason")
-        .eq("user_id", userId)
-        .eq("status", "rejected")
-        .eq("is_notified", false);
-
-      if (rejected && rejected.length > 0) {
-        playNotificationSound();
         for (const item of rejected) {
           showRejectedToast(item);
           await markAsNotified(item.id, userId);
         }
+      } catch (e) {
+        console.warn("Notification check failed:", e);
       }
     };
 
-    checkExisting();
+    // Initial check
+    checkForNotifications();
 
-    // Realtime subscription for instant updates
-    const channel = supabase
-      .channel(`notifications-${userId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "manual_identification_queue",
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          const newRecord = payload.new as any;
-          if (newRecord.is_notified) return; // Already notified
+    // Poll every 10 seconds
+    const interval = setInterval(checkForNotifications, 10000);
 
-          if (newRecord.status === "resolved" && newRecord.assigned_font_name) {
-            playNotificationSound();
-            showResolvedToast(newRecord);
-            markAsNotified(newRecord.id, userId);
-          } else if (newRecord.status === "rejected") {
-            playNotificationSound();
-            showRejectedToast(newRecord);
-            markAsNotified(newRecord.id, userId);
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => clearInterval(interval);
   }, [user?.id]);
 };
 
