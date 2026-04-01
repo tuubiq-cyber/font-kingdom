@@ -62,6 +62,8 @@ const AdminQueue = () => {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
   const [knownFonts, setKnownFonts] = useState<FontRecord[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   // Load previously resolved fonts for autocomplete
   useEffect(() => {
