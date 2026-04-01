@@ -470,7 +470,7 @@ interface QueueCardProps {
   onNotesChange: (v: string) => void;
   onFontTypeChange: (t: "free" | "paid") => void;
   onResolve: () => void;
-  onReject: () => void;
+  onReject: (reason: string) => void;
   resolving: boolean;
   onPreview: () => void;
   isCorrection?: boolean;
