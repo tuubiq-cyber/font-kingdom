@@ -73,7 +73,7 @@ const KNOWN_FINDINGS: SecurityFinding[] = [
 
 const SecurityDashboard = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAdmin();
+  
   const { activeAlerts, alerts: allAlerts, loading: alertsLoading, dismissAlert, refresh: refreshAlerts } = useSecurityAlerts();
   const [logs, setLogs] = useState<SecurityLog[]>([]);
   const [loading, setLoading] = useState(true);
