@@ -38,14 +38,14 @@ const App = () => (
         <NotificationProvider>
           <LanguageSwitcher />
           <Routes>
-            <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
+            <Route path="/" element={<Index />} />
             <Route path="/admin" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
             <Route path="/train" element={<AuthGuard><AdminRoute><FontTraining /></AdminRoute></AuthGuard>} />
             <Route path="/admin/brain" element={<AuthGuard><AdminRoute><ModelBrain /></AdminRoute></AuthGuard>} />
             <Route path="/admin/queue" element={<AuthGuard><AdminRoute><AdminQueue /></AdminRoute></AuthGuard>} />
             <Route path="/admin/security" element={<AuthGuard><AdminRoute><SecurityDashboard /></AdminRoute></AuthGuard>} />
             <Route path="/admin/stats" element={<AuthGuard><AdminRoute><AdminStats /></AdminRoute></AuthGuard>} />
-            <Route path="/my-requests" element={<AuthGuard><MyRequests /></AuthGuard>} />
+            <Route path="/my-requests" element={<MyRequests />} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
