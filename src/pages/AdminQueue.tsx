@@ -192,7 +192,7 @@ const AdminQueue = () => {
           status: "resolved",
           assigned_font_name: name,
           admin_download_url: fontFileUrl || downloadUrl,
-          resolved_by: user!.id,
+          resolved_by: user?.id || null,
           resolved_at: new Date().toISOString(),
           needs_correction: false,
           is_notified: true,
@@ -201,28 +201,25 @@ const AdminQueue = () => {
 
       if (updateError) throw updateError;
 
-      // Add to font_dataset for future training
-      let visualHash: string | null = null;
+      // Add to font_dataset for future training (optional, don't block on failure)
       try {
-        visualHash = await generatePerceptualHash(item.user_uploaded_image);
-      } catch (e) {
-        console.warn("Hash failed:", e);
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
-      await supabase.from("font_dataset").insert({
-        font_name: name,
-        sample_image_url: item.user_uploaded_image,
-        metadata_json: {
-          source: "manual_review",
-          download_url: downloadUrl,
-          font_file_url: fontFileUrl,
-          admin_notes: notes,
-        },
-        visual_hash: visualHash,
-        verified_by_admin: true,
-        user_id: session?.user?.id,
-      } as any);
+        let visualHash: string | null = null;
+        try {
+          visualHash = await generatePerceptualHash(item.user_uploaded_image);
+        } catch {}
+        await supabase.from("font_dataset").insert({
+          font_name: name,
+          sample_image_url: item.user_uploaded_image,
+          metadata_json: {
+            source: "manual_review",
+            download_url: downloadUrl,
+            font_file_url: fontFileUrl,
+            admin_notes: notes,
+          },
+          visual_hash: visualHash,
+          verified_by_admin: true,
+        } as any);
+      } catch {}
 
       toast.success("تم ارسال النتيجة للمستخدم واضافة العينة للتدريب");
       fetchQueue();
