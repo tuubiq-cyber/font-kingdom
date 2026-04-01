@@ -280,10 +280,7 @@ const AdminQueue = () => {
   const handleDeleteAllRejected = async () => {
     if (!confirm("هل أنت متأكد من حذف جميع الطلبات المرفوضة نهائياً؟")) return;
     try {
-      const { error } = await supabase
-        .from("manual_identification_queue")
-        .delete()
-        .eq("status", "rejected");
+      const { error } = await (supabase.rpc as any)("admin_delete_all_rejected");
       if (error) throw error;
       toast.success("تم حذف جميع الطلبات المرفوضة");
       fetchQueue();
