@@ -486,6 +486,7 @@ const QueueCard = ({
   onNotesChange,
   onFontTypeChange,
   onResolve,
+  onReject,
   resolving,
   onPreview,
   isCorrection,
