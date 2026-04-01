@@ -420,9 +420,35 @@ const AdminQueue = () => {
         {/* Normal Pending */}
         <section className="space-y-4">
           <h2 className="text-foreground font-semibold flex items-center gap-2">
-            <Clock className="w-4 h-4 text-yellow-500" />
+            <Clock className="w-4 h-4 text-amber-500" />
             طلبات معلقة ({normalPending.length})
           </h2>
+
+          {normalPending.length > 0 && (
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  placeholder="بحث بالنص أو المعرّف..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pr-9 pl-3 py-2 text-sm rounded-lg border border-border bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  dir="rtl"
+                />
+              </div>
+              <button
+                onClick={() => setSortOrder(sortOrder === "newest" ? "oldest" : "newest")}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground px-3 py-2 rounded-lg border border-border bg-card transition-colors shrink-0"
+              >
+                {sortOrder === "newest" ? (
+                  <><ChevronDown className="w-3.5 h-3.5" /> الأحدث</>
+                ) : (
+                  <><ChevronUp className="w-3.5 h-3.5" /> الأقدم</>
+                )}
+              </button>
+            </div>
+          )}
 
           {loading ? (
             <div className="flex justify-center py-8">
@@ -433,9 +459,13 @@ const AdminQueue = () => {
               <CheckCircle className="w-10 h-10 text-primary mx-auto mb-3 opacity-50" />
               <p className="text-muted-foreground text-sm">لا توجد طلبات معلقة</p>
             </div>
+          ) : filteredPending.length === 0 ? (
+            <p className="text-muted-foreground text-sm text-center py-4">
+              لا توجد نتائج مطابقة للبحث
+            </p>
           ) : (
             <div className="space-y-3">
-              {normalPending.map((item) => (
+              {filteredPending.map((item) => (
                 <QueueCard
                   key={item.id}
                   item={item}
