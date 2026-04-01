@@ -9,6 +9,7 @@ import FontTraining from "./pages/FontTraining";
 import ModelBrain from "./pages/ModelBrain";
 import AdminQueue from "./pages/AdminQueue";
 import SecurityDashboard from "./pages/SecurityDashboard";
+import AdminStats from "./pages/AdminStats";
 import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
@@ -43,6 +44,7 @@ const App = () => (
             <Route path="/admin/brain" element={<AuthGuard><AdminRoute><ModelBrain /></AdminRoute></AuthGuard>} />
             <Route path="/admin/queue" element={<AuthGuard><AdminRoute><AdminQueue /></AdminRoute></AuthGuard>} />
             <Route path="/admin/security" element={<AuthGuard><AdminRoute><SecurityDashboard /></AdminRoute></AuthGuard>} />
+            <Route path="/admin/stats" element={<AuthGuard><AdminRoute><AdminStats /></AdminRoute></AuthGuard>} />
             <Route path="/my-requests" element={<AuthGuard><MyRequests /></AuthGuard>} />
             <Route path="/login" element={<Login />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

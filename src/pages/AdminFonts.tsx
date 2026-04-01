@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Plus, Trash2, ArrowRight, LogOut, Fingerprint } from "lucide-react";
+import { Plus, Trash2, ArrowRight, LogOut, Fingerprint, BarChart3 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
@@ -182,6 +182,10 @@ const AdminFonts = () => {
         <div className="container max-w-3xl mx-auto px-4 flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">ادارة مكتبة الخطوط</h1>
           <div className="flex items-center gap-2">
+            <Link to="/admin/stats" className="btn-outline flex items-center gap-2 text-sm px-3 py-2">
+              <BarChart3 className="w-4 h-4" />
+              إحصائيات
+            </Link>
             <Link to="/" className="btn-outline flex items-center gap-2 text-sm px-4 py-2">
               <ArrowRight className="w-4 h-4" />
               الرئيسية
