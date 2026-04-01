@@ -319,6 +319,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      insert_security_log: { Args: { _action: string }; Returns: undefined }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
