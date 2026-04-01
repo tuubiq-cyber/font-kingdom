@@ -429,12 +429,14 @@ interface QueueCardProps {
   downloadUrl: string;
   fontFile: File | null;
   notes: string;
+  fontType: "free" | "paid";
   knownFonts: FontRecord[];
   onAutofill: (font: FontRecord) => void;
   onFontNameChange: (v: string) => void;
   onDownloadUrlChange: (v: string) => void;
   onFontFileChange: (f: File | null) => void;
   onNotesChange: (v: string) => void;
+  onFontTypeChange: (t: "free" | "paid") => void;
   onResolve: () => void;
   resolving: boolean;
   onPreview: () => void;
