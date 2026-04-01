@@ -5,7 +5,7 @@ interface QueueImageProps {
   src: string;
   alt?: string;
   className?: string;
-  onClick?: () => void;
+  onClick?: (e?: React.MouseEvent) => void;
 }
 
 /**
