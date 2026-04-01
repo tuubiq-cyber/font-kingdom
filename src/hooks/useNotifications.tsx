@@ -158,7 +158,7 @@ const useNotifications = () => {
           if (newRecord.status === "resolved" && newRecord.assigned_font_name) {
             playNotificationSound();
             showResolvedToast(newRecord);
-            markAsNotified(newRecord.id);
+            markAsNotified(newRecord.id, userId);
           } else if (newRecord.status === "rejected") {
             playNotificationSound();
             showRejectedToast(newRecord);
