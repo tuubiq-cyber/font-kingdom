@@ -74,10 +74,11 @@ const KNOWN_FINDINGS: SecurityFinding[] = [
 const SecurityDashboard = () => {
   const navigate = useNavigate();
   const { isAdmin } = useAdmin();
+  const { activeAlerts, alerts: allAlerts, loading: alertsLoading, dismissAlert, refresh: refreshAlerts } = useSecurityAlerts();
   const [logs, setLogs] = useState<SecurityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"all" | "failed" | "success">("all");
-  const [activeTab, setActiveTab] = useState<"logs" | "findings">("findings");
+  const [activeTab, setActiveTab] = useState<"alerts" | "findings" | "logs">("alerts");
 
   const fetchLogs = useCallback(async () => {
     setLoading(true);
