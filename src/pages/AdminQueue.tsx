@@ -62,6 +62,11 @@ const AdminQueue = () => {
   const [downloadUrlInput, setDownloadUrlInput] = useState<Record<string, string>>({});
   const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const openPreview = async (imageRef: string) => {
+    const url = await getQueueImageUrl(imageRef);
+    setPreviewImage(url);
+  };
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
   const [knownFonts, setKnownFonts] = useState<FontRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
