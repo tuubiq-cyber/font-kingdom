@@ -40,6 +40,7 @@ export type Database = {
       }
       font_dataset: {
         Row: {
+          admin_metadata: Json | null
           created_at: string
           font_name: string
           id: string
@@ -49,6 +50,7 @@ export type Database = {
           visual_hash: string | null
         }
         Insert: {
+          admin_metadata?: Json | null
           created_at?: string
           font_name: string
           id?: string
@@ -58,6 +60,7 @@ export type Database = {
           visual_hash?: string | null
         }
         Update: {
+          admin_metadata?: Json | null
           created_at?: string
           font_name?: string
           id?: string
@@ -305,7 +308,36 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      font_dataset_public: {
+        Row: {
+          created_at: string | null
+          font_name: string | null
+          id: string | null
+          metadata_json: Json | null
+          sample_image_url: string | null
+          verified_by_admin: boolean | null
+          visual_hash: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          font_name?: string | null
+          id?: string | null
+          metadata_json?: never
+          sample_image_url?: string | null
+          verified_by_admin?: boolean | null
+          visual_hash?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          font_name?: string | null
+          id?: string | null
+          metadata_json?: never
+          sample_image_url?: string | null
+          verified_by_admin?: boolean | null
+          visual_hash?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_daily_limit: {
