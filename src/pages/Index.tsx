@@ -101,10 +101,9 @@ const Index = () => {
         localStorage.setItem("kingdom_visitor_id", visitorId);
       }
       await supabase.from("site_visits").insert({ visitor_id: visitorId } as any);
-      const { count } = await supabase
-        .from("site_visits")
-        .select("visitor_id", { count: "exact", head: true });
-      setVisitorCount(count ?? 0);
+      // Get unique visitor count
+      const { data } = await supabase.rpc("get_unique_visitor_count");
+      setVisitorCount(typeof data === "number" ? data : 0);
     };
     trackVisit();
   }, []);
