@@ -46,6 +46,7 @@ export type Database = {
           id: string
           metadata_json: Json | null
           sample_image_url: string
+          user_id: string | null
           verified_by_admin: boolean | null
           visual_hash: string | null
         }
@@ -56,6 +57,7 @@ export type Database = {
           id?: string
           metadata_json?: Json | null
           sample_image_url: string
+          user_id?: string | null
           verified_by_admin?: boolean | null
           visual_hash?: string | null
         }
@@ -66,6 +68,7 @@ export type Database = {
           id?: string
           metadata_json?: Json | null
           sample_image_url?: string
+          user_id?: string | null
           verified_by_admin?: boolean | null
           visual_hash?: string | null
         }
