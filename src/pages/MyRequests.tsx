@@ -31,6 +31,7 @@ interface RequestItem {
   resolved_at: string | null;
   user_id: string | null;
   query_text: string | null;
+  rejection_reason: string | null;
 }
 
 const MyRequests = () => {
