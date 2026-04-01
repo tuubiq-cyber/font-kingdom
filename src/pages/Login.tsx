@@ -220,6 +220,11 @@ const Login = () => {
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] rounded-full bg-primary/[0.02] blur-[80px]" />
       </div>
 
+      {/* Theme toggle */}
+      <div className="absolute top-4 left-4 z-20">
+        <ThemeToggle />
+      </div>
+
       {/* Scrollable content */}
       <div className="flex-1 flex items-center justify-center px-5 py-8 relative z-10">
         <div className="w-full max-w-[360px] space-y-5 animate-fade-in">
