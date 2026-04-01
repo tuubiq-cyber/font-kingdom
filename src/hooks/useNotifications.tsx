@@ -87,10 +87,11 @@ const showRejectedToast = (item: any) => {
 };
 
 const markAsNotified = async (id: string) => {
-  await supabase
-    .from("manual_identification_queue")
-    .update({ is_notified: true } as any)
-    .eq("id", id);
+  const userId = localStorage.getItem("visitor_id") || "";
+  await supabase.rpc("mark_queue_notified", {
+    _id: id,
+    _user_id: userId,
+  });
 };
 
 /**
