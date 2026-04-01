@@ -406,53 +406,17 @@ const AdminQueue = () => {
         <section className="space-y-4">
           <h2 className="text-foreground font-semibold flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-primary" />
-            طلبات محلولة ({resolved.length})
+            طلبات مكتملة ({resolved.length})
           </h2>
 
           {resolved.length === 0 ? (
             <p className="text-muted-foreground text-sm text-center py-4">
-              لا توجد طلبات محلولة بعد
+              لا توجد طلبات مكتملة بعد
             </p>
           ) : (
             <div className="space-y-2">
               {resolved.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-3 bg-card border border-border/50 rounded-lg px-4 py-3"
-                >
-                  <img
-                    src={item.user_uploaded_image}
-                    alt=""
-                    className="w-10 h-10 rounded object-cover bg-muted"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground font-medium text-sm truncate">
-                      {item.assigned_font_name ?? "غير محدد"}
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      {item.resolved_at
-                        ? new Date(item.resolved_at).toLocaleDateString("ar-SA")
-                        : ""}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {item.user_confirmation === true && (
-                      <span className="text-[10px] bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full">
-                        مؤكد
-                      </span>
-                    )}
-                    {item.user_confirmation === false && (
-                      <span className="text-[10px] bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">
-                        مرفوض
-                      </span>
-                    )}
-                    {item.user_confirmation === null && (
-                      <span className="text-[10px] bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full">
-                        بانتظار الرد
-                      </span>
-                    )}
-                  </div>
-                </div>
+                <ResolvedCard key={item.id} item={item} onPreview={() => setPreviewImage(item.user_uploaded_image)} />
               ))}
             </div>
           )}
