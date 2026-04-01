@@ -144,6 +144,54 @@ const MyRequests = () => {
     }
   };
 
+  const handleResubmit = async (item: RequestItem) => {
+    setResubmitting(true);
+    try {
+      let imageUrl = item.user_uploaded_image;
+
+      // Upload new image if provided
+      if (resubmitImage) {
+        const ext = resubmitImage.name.split(".").pop();
+        const path = `queue/${Date.now()}_resubmit.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from("fonts")
+          .upload(path, resubmitImage);
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from("fonts").getPublicUrl(path);
+        imageUrl = urlData.publicUrl;
+      }
+
+      // Reset the rejected request back to pending
+      await supabase
+        .from("manual_identification_queue")
+        .update({
+          status: "pending",
+          rejection_reason: null,
+          resolved_at: null,
+          resolved_by: null,
+          assigned_font_name: null,
+          assigned_font_id: null,
+          admin_download_url: null,
+          is_notified: false,
+          needs_correction: true,
+          user_uploaded_image: imageUrl,
+          query_text: resubmitNote.trim() || item.query_text || null,
+        } as any)
+        .eq("id", item.id);
+
+      setResubmittingId(null);
+      setResubmitNote("");
+      setResubmitImage(null);
+      toast.success("تم إعادة إرسال الطلب للمراجعة");
+      fetchRequests();
+    } catch (e) {
+      console.error(e);
+      toast.error("حدث خطأ، يرجى المحاولة مجدداً");
+    } finally {
+      setResubmitting(false);
+    }
+  };
+
   const pending = requests.filter(
     (r) => r.status === "pending" || (r.status === "resolved" && r.user_confirmation === null)
   );
