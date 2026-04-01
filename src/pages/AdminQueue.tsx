@@ -110,7 +110,7 @@ const AdminQueue = () => {
       setKnownFonts(Array.from(fontsMap.values()));
     };
     loadKnownFonts();
-  }, [user]);
+  }, []);
 
   const handleAutofill = (itemId: string, font: FontRecord) => {
     setFontNameInput((p) => ({ ...p, [itemId]: font.font_name }));
