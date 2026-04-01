@@ -201,6 +201,7 @@ export type Database = {
           user_confirmation: boolean | null
           user_id: string | null
           user_uploaded_image: string
+          visitor_id: string | null
         }
         Insert: {
           admin_download_url?: string | null
@@ -218,6 +219,7 @@ export type Database = {
           user_confirmation?: boolean | null
           user_id?: string | null
           user_uploaded_image: string
+          visitor_id?: string | null
         }
         Update: {
           admin_download_url?: string | null
@@ -235,6 +237,7 @@ export type Database = {
           user_confirmation?: boolean | null
           user_id?: string | null
           user_uploaded_image?: string
+          visitor_id?: string | null
         }
         Relationships: [
           {
@@ -405,6 +408,7 @@ export type Database = {
           user_confirmation: boolean | null
           user_id: string | null
           user_uploaded_image: string
+          visitor_id: string | null
         }[]
         SetofOptions: {
           from: "*"
