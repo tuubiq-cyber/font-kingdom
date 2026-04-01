@@ -37,7 +37,7 @@ const App = () => (
         <NotificationProvider>
           <LanguageSwitcher />
           <Routes>
-            <Route path="/" element={<Index />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<Index />} />
             <Route path="/admin/fonts" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
             <Route path="/train" element={<AuthGuard><AdminRoute><FontTraining /></AdminRoute></AuthGuard>} />
