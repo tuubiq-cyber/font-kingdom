@@ -45,13 +45,11 @@ const MyRequests = () => {
       setUserId(user.id);
       return;
     }
-    // Fallback for anonymous users
-    let id = localStorage.getItem("kingdom_user_id");
-    if (!id) {
-      id = crypto.randomUUID();
-      localStorage.setItem("kingdom_user_id", id);
+    // Fallback for anonymous users - use same visitor_id as Index page
+    const id = localStorage.getItem("visitor_id");
+    if (id) {
+      setUserId(id);
     }
-    setUserId(id);
   }, [user]);
 
   const fetchRequests = async () => {

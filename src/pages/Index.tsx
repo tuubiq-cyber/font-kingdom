@@ -176,11 +176,13 @@ const Index = () => {
       const imageUrl = await uploadImageForReview(croppedBlob);
       if (!imageUrl) throw new Error(t("uploadFailed"));
 
+      const vid = getVisitorId();
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: imageUrl,
         status: "pending",
         is_notified: false,
         needs_correction: false,
+        user_id: user?.id || vid,
       } as any);
 
       if (error) throw error;
