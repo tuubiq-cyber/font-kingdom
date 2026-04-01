@@ -1,7 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+
+const playNotificationSound = () => {
+  try {
+    const audio = new Audio("/notification.wav");
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+  } catch {}
+};
 
 /**
  * Polls for resolved/rejected requests that haven't been notified yet,
