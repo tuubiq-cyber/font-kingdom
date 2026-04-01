@@ -20,6 +20,8 @@ import {
 import { Link } from "react-router-dom";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
 import { useAuth } from "@/hooks/useAuth";
+import { uploadQueueImage, getQueueImageUrl } from "@/lib/storageUtils";
+import QueueImage from "@/components/QueueImage";
 
 interface RequestItem {
   id: string;
@@ -101,7 +103,8 @@ const MyRequests = () => {
         // Add to font_dataset for future AI accuracy
         let visualHash: string | null = null;
         try {
-          visualHash = await generatePerceptualHash(item.user_uploaded_image);
+          const resolvedImgUrl = await getQueueImageUrl(item.user_uploaded_image);
+          visualHash = await generatePerceptualHash(resolvedImgUrl);
         } catch { /* skip */ }
 
         const { data: { session: sess } } = await supabase.auth.getSession();
@@ -151,14 +154,8 @@ const MyRequests = () => {
 
       // Upload new image if provided
       if (resubmitImage) {
-        const ext = resubmitImage.name.split(".").pop();
-        const path = `queue/${Date.now()}_resubmit.${ext}`;
-        const { error: uploadErr } = await supabase.storage
-          .from("fonts")
-          .upload(path, resubmitImage);
-        if (uploadErr) throw uploadErr;
-        const { data: urlData } = supabase.storage.from("fonts").getPublicUrl(path);
-        imageUrl = urlData.publicUrl;
+        const folderPrefix = `resubmit/${Date.now()}`;
+        imageUrl = await uploadQueueImage(resubmitImage, folderPrefix);
       }
 
       // Reset the rejected request back to pending
@@ -250,7 +247,7 @@ const MyRequests = () => {
                             <Type className="w-5 h-5 text-muted-foreground" />
                           </div>
                         ) : (
-                          <img
+                          <QueueImage
                             src={item.user_uploaded_image}
                             alt="الصورة المرفوعة"
                             className="w-16 h-16 rounded-lg object-cover bg-muted border border-border"
@@ -372,7 +369,7 @@ const MyRequests = () => {
                       key={item.id}
                       className="flex items-center gap-3 bg-card border border-border/50 rounded-lg px-4 py-3"
                     >
-                      <img
+                      <QueueImage
                         src={item.user_uploaded_image}
                         alt=""
                         className="w-10 h-10 rounded object-cover bg-muted"
@@ -418,7 +415,7 @@ const MyRequests = () => {
                             <Type className="w-4 h-4 text-muted-foreground" />
                           </div>
                         ) : (
-                          <img
+                          <QueueImage
                             src={item.user_uploaded_image}
                             alt=""
                             className="w-10 h-10 rounded object-cover bg-muted"

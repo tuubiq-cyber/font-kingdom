@@ -26,6 +26,8 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
+import QueueImage from "@/components/QueueImage";
+import { getQueueImageUrl } from "@/lib/storageUtils";
 
 interface FontRecord {
   font_name: string;
@@ -60,6 +62,11 @@ const AdminQueue = () => {
   const [downloadUrlInput, setDownloadUrlInput] = useState<Record<string, string>>({});
   const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+
+  const openPreview = async (imageRef: string) => {
+    const url = await getQueueImageUrl(imageRef);
+    setPreviewImage(url);
+  };
   const [notesInput, setNotesInput] = useState<Record<string, string>>({});
   const [knownFonts, setKnownFonts] = useState<FontRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -215,7 +222,8 @@ const AdminQueue = () => {
       try {
         let visualHash: string | null = null;
         try {
-          visualHash = await generatePerceptualHash(item.user_uploaded_image);
+          const resolvedImgUrl = await getQueueImageUrl(item.user_uploaded_image);
+          visualHash = await generatePerceptualHash(resolvedImgUrl);
         } catch {}
         await supabase.from("font_dataset").insert({
           font_name: name,
@@ -407,7 +415,7 @@ const AdminQueue = () => {
                   onResolve={() => handleResolve(item)}
                   onReject={(reason) => handleReject(item.id, reason)}
                   resolving={resolvingId === item.id}
-                  onPreview={() => setPreviewImage(item.user_uploaded_image)}
+                  onPreview={() => openPreview(item.user_uploaded_image)}
                   isCorrection
                 />
               ))}
@@ -482,7 +490,7 @@ const AdminQueue = () => {
                   onResolve={() => handleResolve(item)}
                   onReject={(reason) => handleReject(item.id, reason)}
                   resolving={resolvingId === item.id}
-                  onPreview={() => setPreviewImage(item.user_uploaded_image)}
+                  onPreview={() => openPreview(item.user_uploaded_image)}
                 />
               ))}
             </div>
@@ -503,7 +511,7 @@ const AdminQueue = () => {
           ) : (
             <div className="space-y-2">
               {resolved.map((item) => (
-                <ResolvedCard key={item.id} item={item} onPreview={() => setPreviewImage(item.user_uploaded_image)} />
+                <ResolvedCard key={item.id} item={item} onPreview={() => openPreview(item.user_uploaded_image)} />
               ))}
             </div>
           )}
@@ -563,7 +571,7 @@ const AdminQueue = () => {
                   key={item.id}
                   className="flex items-start gap-3 bg-card border border-destructive/20 rounded-lg px-4 py-3"
                 >
-                  <img
+                  <QueueImage
                     src={item.user_uploaded_image}
                     alt=""
                     className="w-10 h-10 rounded object-cover bg-muted"
@@ -696,7 +704,7 @@ const QueueCard = ({
             <Type className="w-6 h-6 text-muted-foreground" />
           </div>
         ) : (
-          <img
+          <QueueImage
             src={item.user_uploaded_image}
             alt="صورة المستخدم"
             className="w-20 h-20 rounded-lg object-cover bg-muted cursor-pointer border border-border hover:border-primary/50 transition-colors"
@@ -919,7 +927,7 @@ const ResolvedCard = ({ item, onPreview }: { item: QueueItem; onPreview: () => v
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-right"
       >
-        <img
+        <QueueImage
           src={item.user_uploaded_image}
           alt=""
           className="w-10 h-10 rounded object-cover bg-muted cursor-pointer"

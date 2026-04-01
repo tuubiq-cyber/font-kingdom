@@ -9,6 +9,7 @@ import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Sea
 
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
+import { uploadQueueImage } from "@/lib/storageUtils";
 import { useAuth } from "@/hooks/useAuth";
 import { useDailyLimit } from "@/hooks/useDailyLimit";
 import { useTranslation } from "react-i18next";
@@ -158,11 +159,9 @@ const Index = () => {
   const uploadImageForReview = async (blob: Blob): Promise<string | null> => {
     try {
       const vid = getVisitorId();
-      const path = `queue/anon/${vid}/${crypto.randomUUID()}.png`;
-      const { error } = await supabase.storage.from("fonts").upload(path, blob);
-      if (error) throw error;
-      const { data: publicData } = supabase.storage.from("fonts").getPublicUrl(path);
-      return publicData.publicUrl;
+      const folderPrefix = `anon/${vid}`;
+      const storagePath = await uploadQueueImage(blob, folderPrefix);
+      return storagePath; // Store the path, not a public URL
     } catch (e) {
       console.warn("Upload failed:", e);
       return null;
