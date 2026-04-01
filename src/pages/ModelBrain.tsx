@@ -48,9 +48,6 @@ const ModelBrain = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"overview" | "dataset" | "history">("overview");
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate("/login");
-  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (!user) return;

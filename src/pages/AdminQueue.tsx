@@ -100,9 +100,6 @@ const AdminQueue = () => {
     }
   };
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate("/login");
-  }, [user, authLoading, navigate]);
 
   const fetchQueue = async () => {
     const { data, error } = await supabase

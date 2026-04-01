@@ -30,9 +30,6 @@ const FontTraining = () => {
     { value: "display", label: "عرض" },
   ];
 
-  useEffect(() => {
-    if (!authLoading && !user) navigate("/login");
-  }, [user, authLoading, navigate]);
 
   const fetchDatasets = async () => {
     const { data, error } = await supabase
