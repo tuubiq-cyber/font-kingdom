@@ -240,15 +240,10 @@ const AdminQueue = () => {
 
   const handleReject = async (itemId: string, reason: string) => {
     try {
-      const { error } = await supabase
-        .from("manual_identification_queue")
-        .update({
-          status: "rejected",
-          rejection_reason: reason || null,
-          resolved_at: new Date().toISOString(),
-          resolved_by: null,
-        } as any)
-        .eq("id", itemId);
+      const { error } = await (supabase.rpc as any)("admin_reject_queue_item", {
+        _id: itemId,
+        _reason: reason || null,
+      });
       if (error) throw error;
       toast.success("تم رفض الطلب");
       fetchQueue();
