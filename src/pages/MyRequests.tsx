@@ -103,7 +103,8 @@ const MyRequests = () => {
         // Add to font_dataset for future AI accuracy
         let visualHash: string | null = null;
         try {
-          visualHash = await generatePerceptualHash(item.user_uploaded_image);
+          const resolvedImgUrl = await getQueueImageUrl(item.user_uploaded_image);
+          visualHash = await generatePerceptualHash(resolvedImgUrl);
         } catch { /* skip */ }
 
         const { data: { session: sess } } = await supabase.auth.getSession();
