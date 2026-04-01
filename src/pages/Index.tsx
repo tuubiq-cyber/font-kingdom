@@ -78,6 +78,19 @@ const Index = () => {
     return user.id;
   };
 
+  // Welcome message for new users (first time only)
+  useEffect(() => {
+    if (!user?.id) return;
+    const welcomeKey = `kingdom_welcomed_${user.id}`;
+    if (!localStorage.getItem(welcomeKey)) {
+      localStorage.setItem(welcomeKey, "1");
+      toast.success("مرحباً بك في مملكة الخطوط! 👑", {
+        description: "يمكنك الآن رفع صورة أو البحث باسم الخط لمعرفته",
+        duration: 6000,
+      });
+    }
+  }, [user?.id]);
+
   useEffect(() => {
     const trackVisit = async () => {
       let visitorId = localStorage.getItem("kingdom_visitor_id");
