@@ -48,6 +48,8 @@ export default {
   querySentDesc: "سيقوم المشرفون بالبحث عن الخط المطلوب وارسال الرد اليك",
   submitting: "جاري ارسال طلبك للمشرفين...",
   sendForReview: "ارسال للتعرف اليدوي",
+  sendWithoutCrop: "إرسال بدون قص",
+  orCropFirst: "أو قص الصورة أولاً",
   croppedImage: "الجزء المقصوص",
   stepUpload: "رفع",
   stepCrop: "قص",
