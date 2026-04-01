@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Lock, UserPlus, Crown, ShieldCheck, Phone, Mail, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
-import ThemeToggle from "@/components/ThemeToggle";
 import { loginRateLimiter, validatePassword, sanitizeEmail, isValidEmail } from "@/lib/security";
 
 const PasswordStrengthBar = ({ strength }: { strength: 'weak' | 'medium' | 'strong' }) => {
