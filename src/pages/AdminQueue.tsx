@@ -329,6 +329,25 @@ const AdminQueue = () => {
   const resolved = items.filter((i) => i.status === "resolved");
   const rejected = items.filter((i) => i.status === "rejected");
 
+  const filteredPending = useMemo(() => {
+    let list = normalPending;
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      list = list.filter(
+        (i) =>
+          i.query_text?.toLowerCase().includes(q) ||
+          i.user_id?.toLowerCase().includes(q) ||
+          i.id.toLowerCase().includes(q)
+      );
+    }
+    list = [...list].sort((a, b) => {
+      const da = new Date(a.created_at).getTime();
+      const db = new Date(b.created_at).getTime();
+      return sortOrder === "newest" ? db - da : da - db;
+    });
+    return list;
+  }, [normalPending, searchQuery, sortOrder]);
+
   return (
     <div className="min-h-screen">
       <header className="py-6 border-b border-border">
