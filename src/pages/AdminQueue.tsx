@@ -73,7 +73,7 @@ const AdminQueue = () => {
 
   // Load previously resolved fonts for autocomplete
   useEffect(() => {
-    if (!user) return;
+    
     const loadKnownFonts = async () => {
       // From font_dataset
       const { data: dataset } = await supabase
