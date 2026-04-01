@@ -87,8 +87,9 @@ const Login = () => {
   const logSecurityEvent = async (action: string, metadata?: Record<string, unknown>) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return; // Skip logging if not authenticated (anon policy removed)
       await supabase.from("security_logs" as any).insert({
-        user_id: user?.id || null,
+        user_id: user.id,
         action,
         user_agent: navigator.userAgent,
         metadata: metadata || {},
