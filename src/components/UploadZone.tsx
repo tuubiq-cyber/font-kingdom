@@ -19,12 +19,12 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
   }, []);
 
   const handleDrop = useCallback(
-    (e: React.DragEvent) => {
+    async (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragging(false);
       const file = e.dataTransfer.files?.[0];
       if (file?.type.startsWith("image/")) {
-        const err = validateImageUpload(file);
+        const err = await validateImageUpload(file);
         if (err) { toast.error(err); return; }
         onImageUpload(file);
       }
@@ -32,10 +32,10 @@ const UploadZone = ({ onImageUpload, isLoading }: UploadZoneProps) => {
     [onImageUpload]
   );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const err = validateImageUpload(file);
+      const err = await validateImageUpload(file);
       if (err) { toast.error(err); return; }
       onImageUpload(file);
     }

@@ -53,8 +53,8 @@ export const validatePassword = (password: string): PasswordValidation => {
   const errors: string[] = [];
   let score = 0;
 
-  if (password.length < 8) {
-    errors.push('8 أحرف على الأقل');
+  if (password.length < 12) {
+    errors.push('12 حرفاً على الأقل');
   } else {
     score++;
   }
