@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Globe } from "lucide-react";
 import { languages, rtlLanguages } from "@/i18n";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
@@ -26,7 +27,8 @@ const LanguageSwitcher = () => {
   };
 
   return (
-    <div ref={ref} className="fixed top-4 left-4 z-50">
+    <div ref={ref} className="fixed top-4 left-4 z-50 flex items-center gap-2">
+      <ThemeToggle />
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-2 px-3 py-2 rounded-xl bg-card border border-border/40 text-foreground text-xs font-medium hover:bg-muted transition-all duration-200"
