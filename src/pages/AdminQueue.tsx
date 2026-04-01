@@ -267,10 +267,7 @@ const AdminQueue = () => {
   const handleDeleteRejected = async (itemId: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا الطلب نهائياً؟")) return;
     try {
-      const { error } = await supabase
-        .from("manual_identification_queue")
-        .delete()
-        .eq("id", itemId);
+      const { error } = await (supabase.rpc as any)("admin_delete_queue_item", { _id: itemId });
       if (error) throw error;
       toast.success("تم حذف الطلب نهائياً");
       fetchQueue();
