@@ -380,6 +380,7 @@ export type Database = {
         Args: { _limit?: number; _service_type: string; _user_id: string }
         Returns: boolean
       }
+      get_unique_visitor_count: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
