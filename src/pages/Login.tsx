@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Lock, UserPlus, Crown, ShieldCheck, Phone, Mail, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
+import ThemeToggle from "@/components/ThemeToggle";
 import { loginRateLimiter, validatePassword, sanitizeEmail, isValidEmail } from "@/lib/security";
 
 const PasswordStrengthBar = ({ strength }: { strength: 'weak' | 'medium' | 'strong' }) => {
@@ -217,6 +218,11 @@ const Login = () => {
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[500px] rounded-full bg-primary/[0.03] blur-[100px]" />
         <div className="absolute bottom-0 right-0 w-[300px] h-[300px] rounded-full bg-primary/[0.02] blur-[80px]" />
+      </div>
+
+      {/* Theme toggle */}
+      <div className="absolute top-4 left-4 z-20">
+        <ThemeToggle />
       </div>
 
       {/* Scrollable content */}
