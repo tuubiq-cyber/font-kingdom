@@ -16,6 +16,10 @@ import {
   Type,
   X,
   RotateCcw,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
