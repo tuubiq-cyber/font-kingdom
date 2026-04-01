@@ -92,11 +92,11 @@ const AdminStats = () => {
       recentRequestsByDay: [...requestsByDay].map(([date, count]) => ({ date, count })),
     });
     setLoading(false);
-  }, [isAdmin]);
+  }, []);
 
   useEffect(() => {
-    if (isAdmin) fetchStats();
-  }, [isAdmin, fetchStats]);
+    fetchStats();
+  }, [fetchStats]);
 
   const StatCard = ({
     icon: Icon,
