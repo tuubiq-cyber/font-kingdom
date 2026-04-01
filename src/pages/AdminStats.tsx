@@ -27,7 +27,6 @@ interface Stats {
 
 const AdminStats = () => {
   const navigate = useNavigate();
-  const { isAdmin } = useAdmin();
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
