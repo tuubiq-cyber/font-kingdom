@@ -266,6 +266,7 @@ const AdminQueue = () => {
   const needsCorrection = pending.filter((i) => i.needs_correction);
   const normalPending = pending.filter((i) => !i.needs_correction);
   const resolved = items.filter((i) => i.status === "resolved");
+  const rejected = items.filter((i) => i.status === "rejected");
 
   return (
     <div className="min-h-screen">
