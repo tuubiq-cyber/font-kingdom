@@ -1,15 +1,55 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
+// Pre-load audio and unlock on first user interaction
+let audioContext: AudioContext | null = null;
+let notificationBuffer: AudioBuffer | null = null;
+
+const initAudio = async () => {
+  if (audioContext) return;
+  try {
+    audioContext = new AudioContext();
+    const response = await fetch("/notification.wav");
+    const arrayBuffer = await response.arrayBuffer();
+    notificationBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  } catch {}
+};
+
 const playNotificationSound = () => {
+  if (audioContext && notificationBuffer) {
+    if (audioContext.state === "suspended") {
+      audioContext.resume();
+    }
+    const source = audioContext.createBufferSource();
+    source.buffer = notificationBuffer;
+    const gain = audioContext.createGain();
+    gain.gain.value = 0.5;
+    source.connect(gain).connect(audioContext.destination);
+    source.start(0);
+    return;
+  }
+  // Fallback
   try {
     const audio = new Audio("/notification.wav");
     audio.volume = 0.5;
     audio.play().catch(() => {});
   } catch {}
 };
+
+// Unlock audio on first user gesture
+if (typeof window !== "undefined") {
+  const unlock = () => {
+    initAudio();
+    window.removeEventListener("click", unlock);
+    window.removeEventListener("touchstart", unlock);
+    window.removeEventListener("keydown", unlock);
+  };
+  window.addEventListener("click", unlock);
+  window.addEventListener("touchstart", unlock);
+  window.addEventListener("keydown", unlock);
+}
 
 /**
  * Polls for resolved/rejected requests that haven't been notified yet,
