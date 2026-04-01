@@ -46,6 +46,7 @@ const AdminQueue = () => {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [fontTypeInput, setFontTypeInput] = useState<Record<string, "free" | "paid">>({});
   const [fontNameInput, setFontNameInput] = useState<Record<string, string>>({});
   const [downloadUrlInput, setDownloadUrlInput] = useState<Record<string, string>>({});
   const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
