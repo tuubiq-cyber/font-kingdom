@@ -75,8 +75,9 @@ const AdminFonts = () => {
     const path = `${folder}/${crypto.randomUUID()}.${ext}`;
     const { error } = await supabase.storage.from("fonts").upload(path, file);
     if (error) throw error;
-    const { data } = supabase.storage.from("fonts").getPublicUrl(path);
-    return data.publicUrl;
+    const { data: signedData, error: signError } = await supabase.storage.from("fonts").createSignedUrl(path, 60 * 60 * 24 * 365);
+    if (signError || !signedData?.signedUrl) throw signError || new Error("Signed URL failed");
+    return signedData.signedUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -149,8 +149,9 @@ const AdminQueue = () => {
       const path = `font-files/${fontName.replace(/\s+/g, '_')}_${crypto.randomUUID().slice(0, 8)}.${ext}`;
       const { error } = await supabase.storage.from("fonts").upload(path, file);
       if (error) throw error;
-      const { data } = supabase.storage.from("fonts").getPublicUrl(path);
-      return data.publicUrl;
+      const { data: signedData, error: signError } = await supabase.storage.from("fonts").createSignedUrl(path, 60 * 60 * 24 * 365);
+      if (signError || !signedData?.signedUrl) throw signError || new Error("Signed URL failed");
+      return signedData.signedUrl;
     } catch (e) {
       console.warn("Font file upload failed:", e);
       return null;
