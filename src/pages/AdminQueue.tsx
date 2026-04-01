@@ -234,13 +234,17 @@ const AdminQueue = () => {
     }
   };
 
-  const handleReject = async (item: QueueItem) => {
+  const handleReject = async (itemId: string, reason: string) => {
     try {
       await supabase
         .from("manual_identification_queue")
-        .delete()
-        .eq("id", item.id);
-      toast.success("تم رفض الطلب وحذفه");
+        .update({
+          status: "rejected",
+          assigned_font_name: reason || null,
+          resolved_at: new Date().toISOString(),
+        } as any)
+        .eq("id", itemId);
+      toast.success("تم رفض الطلب");
       fetchQueue();
     } catch (err) {
       console.error(err);
