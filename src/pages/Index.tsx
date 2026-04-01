@@ -84,10 +84,12 @@ const Index = () => {
     const welcomeKey = `kingdom_welcomed_${user.id}`;
     if (!localStorage.getItem(welcomeKey)) {
       localStorage.setItem(welcomeKey, "1");
-      toast.success("مرحباً بك في مملكة الخطوط! 👑", {
-        description: "يمكنك الآن رفع صورة أو البحث باسم الخط لمعرفته",
-        duration: 6000,
-      });
+      setTimeout(() => {
+        toast.success("مرحباً بك في مملكة الخطوط! 👑", {
+          description: "يمكنك الآن رفع صورة أو البحث باسم الخط لمعرفته",
+          duration: 6000,
+        });
+      }, 1500);
     }
   }, [user?.id]);
 
