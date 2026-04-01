@@ -921,7 +921,7 @@ const ResolvedCard = ({ item, onPreview }: { item: QueueItem; onPreview: () => v
         onClick={() => setExpanded(!expanded)}
         className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-right"
       >
-        <img
+        <QueueImage
           src={item.user_uploaded_image}
           alt=""
           className="w-10 h-10 rounded object-cover bg-muted cursor-pointer"
