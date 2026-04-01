@@ -116,11 +116,7 @@ const Index = () => {
     }
     setSubmittingName(true);
     try {
-      const uid = requireAuth();
-      if (!uid) return;
-
-      const allowed = await checkAndConsume(uid, "name_search");
-      if (!allowed) return;
+      const vid = getVisitorId();
 
       const { error } = await supabase.from("manual_identification_queue").insert({
         user_uploaded_image: "text_query",
