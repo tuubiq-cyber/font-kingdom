@@ -124,6 +124,7 @@ const Index = () => {
         query_text: cleaned,
         is_notified: false,
         needs_correction: false,
+        user_id: user?.id || vid,
       } as any);
 
       if (error) throw error;
