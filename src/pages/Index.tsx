@@ -264,25 +264,6 @@ const Index = () => {
             {/* Usage Counter */}
             <UsageCounter />
 
-            {/* Features */}
-            <div className="grid grid-cols-3 gap-3 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "both" }}>
-              {[
-                { icon: Upload, label: t("uploadImage"), delay: 0 },
-                { icon: Search, label: t("identifyByName"), delay: 0.1 },
-                { icon: Feather, label: t("sendResult"), delay: 0.2 },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="flex flex-col items-center gap-2 py-4 px-2 rounded-xl bg-card border border-border/30 feature-card"
-                  style={{ animationDelay: `${0.3 + item.delay}s` }}
-                >
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center feature-icon">
-                    <item.icon className="w-5 h-5 text-primary" />
-                  </div>
-                  <span className="text-foreground text-xs font-medium">{item.label}</span>
-                </div>
-              ))}
-            </div>
 
             {/* CTA Buttons */}
             <div className="space-y-3 animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "both" }}>
