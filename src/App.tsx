@@ -40,7 +40,8 @@ const App = () => (
           <LanguageSwitcher />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/admin" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
+            <Route path="/admin" element={<AuthGuard><AdminRoute><AdminDashboard /></AdminRoute></AuthGuard>} />
+            <Route path="/admin/fonts" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
             <Route path="/train" element={<AuthGuard><AdminRoute><FontTraining /></AdminRoute></AuthGuard>} />
             <Route path="/admin/brain" element={<AuthGuard><AdminRoute><ModelBrain /></AdminRoute></AuthGuard>} />
             <Route path="/admin/queue" element={<AuthGuard><AdminRoute><AdminQueue /></AdminRoute></AuthGuard>} />
