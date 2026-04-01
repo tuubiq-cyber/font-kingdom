@@ -234,13 +234,17 @@ const AdminQueue = () => {
     }
   };
 
-  const handleReject = async (item: QueueItem) => {
+  const handleReject = async (itemId: string, reason: string) => {
     try {
       await supabase
         .from("manual_identification_queue")
-        .delete()
-        .eq("id", item.id);
-      toast.success("تم رفض الطلب وحذفه");
+        .update({
+          status: "rejected",
+          assigned_font_name: reason || null,
+          resolved_at: new Date().toISOString(),
+        } as any)
+        .eq("id", itemId);
+      toast.success("تم رفض الطلب");
       fetchQueue();
     } catch (err) {
       console.error(err);
@@ -322,7 +326,7 @@ const AdminQueue = () => {
                   onNotesChange={(v) => setNotesInput((p) => ({ ...p, [item.id]: v }))}
                   onFontTypeChange={(t) => setFontTypeInput((p) => ({ ...p, [item.id]: t }))}
                   onResolve={() => handleResolve(item)}
-                  onReject={() => handleReject(item)}
+                  onReject={(reason) => handleReject(item.id, reason)}
                   resolving={resolvingId === item.id}
                   onPreview={() => setPreviewImage(item.user_uploaded_image)}
                   isCorrection
@@ -367,7 +371,7 @@ const AdminQueue = () => {
                   onNotesChange={(v) => setNotesInput((p) => ({ ...p, [item.id]: v }))}
                   onFontTypeChange={(t) => setFontTypeInput((p) => ({ ...p, [item.id]: t }))}
                   onResolve={() => handleResolve(item)}
-                  onReject={() => handleReject(item)}
+                  onReject={(reason) => handleReject(item.id, reason)}
                   resolving={resolvingId === item.id}
                   onPreview={() => setPreviewImage(item.user_uploaded_image)}
                 />
@@ -466,7 +470,7 @@ interface QueueCardProps {
   onNotesChange: (v: string) => void;
   onFontTypeChange: (t: "free" | "paid") => void;
   onResolve: () => void;
-  onReject: () => void;
+  onReject: (reason: string) => void;
   resolving: boolean;
   onPreview: () => void;
   isCorrection?: boolean;
@@ -493,6 +497,8 @@ const QueueCard = ({
   isCorrection,
 }: QueueCardProps) => {
   const fileInputId = `file-${item.id}`;
+  const [showRejectForm, setShowRejectForm] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
 
   const suggestions = useMemo(() => {
@@ -690,13 +696,44 @@ const QueueCard = ({
             )}
           </button>
 
-          <button
-            onClick={onReject}
-            className="w-full py-2 text-sm flex items-center justify-center gap-1.5 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
-          >
-            <X className="w-4 h-4" />
-            رفض الطلب
-          </button>
+          {showRejectForm ? (
+            <div className="space-y-2">
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="سبب الرفض (اختياري)"
+                rows={2}
+                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-destructive/50 resize-none"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    onReject(rejectReason);
+                    setShowRejectForm(false);
+                    setRejectReason("");
+                  }}
+                  className="flex-1 py-2 text-sm flex items-center justify-center gap-1.5 rounded-lg bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                  تأكيد الرفض
+                </button>
+                <button
+                  onClick={() => { setShowRejectForm(false); setRejectReason(""); }}
+                  className="px-4 py-2 text-sm rounded-lg border border-border text-muted-foreground hover:bg-muted transition-colors"
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowRejectForm(true)}
+              className="w-full py-2 text-sm flex items-center justify-center gap-1.5 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+            >
+              <X className="w-4 h-4" />
+              رفض الطلب
+            </button>
+          )}
         </div>
       </div>
     </div>
