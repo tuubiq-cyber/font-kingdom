@@ -204,7 +204,7 @@ const AdminQueue = () => {
           status: "resolved",
           assigned_font_name: name,
           admin_download_url: fontFileUrl || downloadUrl,
-          resolved_by: user?.id || null,
+          resolved_by: null,
           resolved_at: new Date().toISOString(),
           needs_correction: false,
           is_notified: true,
