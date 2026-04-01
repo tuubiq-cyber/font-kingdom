@@ -461,14 +461,24 @@ const AdminQueue = () => {
                         : new Date(item.created_at).toLocaleDateString("ar-SA")}
                     </p>
                   </div>
-                  <button
-                    onClick={() => handleRestore(item.id)}
-                    className="flex items-center gap-1 text-xs text-primary hover:bg-primary/10 px-2 py-1.5 rounded-lg transition-colors shrink-0"
-                    title="استعادة الطلب"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" />
-                    استعادة
-                  </button>
+                  <div className="flex flex-col gap-1 shrink-0">
+                    <button
+                      onClick={() => handleRestore(item.id)}
+                      className="flex items-center gap-1 text-xs text-primary hover:bg-primary/10 px-2 py-1.5 rounded-lg transition-colors"
+                      title="استعادة الطلب"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      استعادة
+                    </button>
+                    <button
+                      onClick={() => handleDeleteRejected(item.id)}
+                      className="flex items-center gap-1 text-xs text-destructive hover:bg-destructive/10 px-2 py-1.5 rounded-lg transition-colors"
+                      title="حذف نهائي"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      حذف
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
