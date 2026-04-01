@@ -205,16 +205,21 @@ const Index = () => {
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6 relative z-10">
         {/* User info & Logout */}
         <div className="flex items-center justify-between pt-3">
-          <span className="text-xs text-muted-foreground truncate max-w-[200px]" dir="ltr">
-            {user?.email || user?.phone || ""}
-          </span>
-          <button
-            onClick={async () => { await signOut(); navigate("/login"); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border/30 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all duration-200"
-          >
-            <LogOut className="w-3.5 h-3.5" />
-            تسجيل الخروج
-          </button>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground truncate max-w-[200px]" dir="ltr">
+              {user?.email || user?.phone || ""}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
+              onClick={async () => { await signOut(); navigate("/login"); }}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border/30 text-xs text-muted-foreground hover:text-destructive hover:border-destructive/30 transition-all duration-200"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              تسجيل الخروج
+            </button>
+          </div>
         </div>
 
         {/* Home */}
