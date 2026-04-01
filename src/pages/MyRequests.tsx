@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Send,
   Type,
+  XCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
