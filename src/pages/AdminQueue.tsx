@@ -113,7 +113,7 @@ const AdminQueue = () => {
   };
 
   useEffect(() => {
-    if (user) fetchQueue();
+    fetchQueue();
   }, [user]);
 
   // Realtime: watch for user confirmations / corrections
