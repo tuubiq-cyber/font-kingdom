@@ -688,6 +688,14 @@ const QueueCard = ({
               </>
             )}
           </button>
+
+          <button
+            onClick={onReject}
+            className="w-full py-2 text-sm flex items-center justify-center gap-1.5 rounded-lg border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
+          >
+            <X className="w-4 h-4" />
+            رفض الطلب
+          </button>
         </div>
       </div>
     </div>
