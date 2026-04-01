@@ -245,7 +245,7 @@ const MyRequests = () => {
                             <Type className="w-5 h-5 text-muted-foreground" />
                           </div>
                         ) : (
-                          <img
+                          <QueueImage
                             src={item.user_uploaded_image}
                             alt="الصورة المرفوعة"
                             className="w-16 h-16 rounded-lg object-cover bg-muted border border-border"
