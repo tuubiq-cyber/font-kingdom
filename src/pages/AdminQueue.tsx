@@ -698,7 +698,7 @@ const QueueCard = ({
             <Type className="w-6 h-6 text-muted-foreground" />
           </div>
         ) : (
-          <img
+          <QueueImage
             src={item.user_uploaded_image}
             alt="صورة المستخدم"
             className="w-20 h-20 rounded-lg object-cover bg-muted cursor-pointer border border-border hover:border-primary/50 transition-colors"
