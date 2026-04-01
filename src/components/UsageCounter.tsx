@@ -35,7 +35,7 @@ const UsageCounter = () => {
       setRemaining(Math.max(0, REQUEST_LIMIT - used));
 
       // Calculate time until oldest request expires (falls out of window)
-      if (data && data.length > 0 && used >= REQUEST_LIMIT) {
+      if (data && data.length > 0) {
         const oldest = new Date(data[0].created_at);
         const expiresAt = new Date(oldest.getTime() + WINDOW_HOURS * 60 * 60 * 1000);
         updateCountdown(expiresAt);
@@ -90,10 +90,10 @@ const UsageCounter = () => {
           />
         </div>
 
-        {remaining === 0 && nextReset && (
-          <div className="flex items-center gap-1 text-muted-foreground">
+        {nextReset && (
+          <div className={`flex items-center gap-1 ${remaining === 0 ? "text-destructive" : "text-muted-foreground"}`}>
             <Clock className="w-3 h-3" />
-            <span>{t("renewIn")} {nextReset}</span>
+            <span className="tabular-nums">{nextReset}</span>
           </div>
         )}
       </div>
