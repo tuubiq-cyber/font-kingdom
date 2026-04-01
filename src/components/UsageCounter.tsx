@@ -90,10 +90,10 @@ const UsageCounter = () => {
           />
         </div>
 
-        {remaining === 0 && nextReset && (
-          <div className="flex items-center gap-1 text-muted-foreground">
+        {nextReset && (
+          <div className={`flex items-center gap-1 ${remaining === 0 ? "text-destructive" : "text-muted-foreground"}`}>
             <Clock className="w-3 h-3" />
-            <span>{t("renewIn")} {nextReset}</span>
+            <span className="tabular-nums">{nextReset}</span>
           </div>
         )}
       </div>
