@@ -35,7 +35,7 @@ const UsageCounter = () => {
       setRemaining(Math.max(0, REQUEST_LIMIT - used));
 
       // Calculate time until oldest request expires (falls out of window)
-      if (data && data.length > 0 && used >= REQUEST_LIMIT) {
+      if (data && data.length > 0) {
         const oldest = new Date(data[0].created_at);
         const expiresAt = new Date(oldest.getTime() + WINDOW_HOURS * 60 * 60 * 1000);
         updateCountdown(expiresAt);
