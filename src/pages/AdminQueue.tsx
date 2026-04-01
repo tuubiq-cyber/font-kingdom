@@ -46,6 +46,7 @@ const AdminQueue = () => {
   const [items, setItems] = useState<QueueItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [resolvingId, setResolvingId] = useState<string | null>(null);
+  const [fontTypeInput, setFontTypeInput] = useState<Record<string, "free" | "paid">>({});
   const [fontNameInput, setFontNameInput] = useState<Record<string, string>>({});
   const [downloadUrlInput, setDownloadUrlInput] = useState<Record<string, string>>({});
   const [fontFileInput, setFontFileInput] = useState<Record<string, File | null>>({});
@@ -162,10 +163,17 @@ const AdminQueue = () => {
       return;
     }
 
+    const type = fontTypeInput[item.id] || "free";
+    const downloadUrl = downloadUrlInput[item.id]?.trim() || null;
+
+    if (type === "paid" && !downloadUrl) {
+      toast.error("يرجى إدخال رابط الشراء للخط المدفوع");
+      return;
+    }
+
     setResolvingId(item.id);
     try {
-      const downloadUrl = downloadUrlInput[item.id]?.trim() || null;
-      const fontFile = fontFileInput[item.id] || null;
+      const fontFile = fontTypeInput[item.id] === "paid" ? null : (fontFileInput[item.id] || null);
       const notes = notesInput[item.id]?.trim() || null;
 
       // Upload font file if provided
@@ -290,12 +298,14 @@ const AdminQueue = () => {
                   downloadUrl={downloadUrlInput[item.id] || ""}
                   fontFile={fontFileInput[item.id] || null}
                   notes={notesInput[item.id] || ""}
+                  fontType={fontTypeInput[item.id] || "free"}
                   knownFonts={knownFonts}
                   onAutofill={(f) => handleAutofill(item.id, f)}
                   onFontNameChange={(v) => setFontNameInput((p) => ({ ...p, [item.id]: v }))}
                   onDownloadUrlChange={(v) => setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))}
                   onFontFileChange={(f) => setFontFileInput((p) => ({ ...p, [item.id]: f }))}
                   onNotesChange={(v) => setNotesInput((p) => ({ ...p, [item.id]: v }))}
+                  onFontTypeChange={(t) => setFontTypeInput((p) => ({ ...p, [item.id]: t }))}
                   onResolve={() => handleResolve(item)}
                   resolving={resolvingId === item.id}
                   onPreview={() => setPreviewImage(item.user_uploaded_image)}
@@ -332,12 +342,14 @@ const AdminQueue = () => {
                   downloadUrl={downloadUrlInput[item.id] || ""}
                   fontFile={fontFileInput[item.id] || null}
                   notes={notesInput[item.id] || ""}
+                  fontType={fontTypeInput[item.id] || "free"}
                   knownFonts={knownFonts}
                   onAutofill={(f) => handleAutofill(item.id, f)}
                   onFontNameChange={(v) => setFontNameInput((p) => ({ ...p, [item.id]: v }))}
                   onDownloadUrlChange={(v) => setDownloadUrlInput((p) => ({ ...p, [item.id]: v }))}
                   onFontFileChange={(f) => setFontFileInput((p) => ({ ...p, [item.id]: f }))}
                   onNotesChange={(v) => setNotesInput((p) => ({ ...p, [item.id]: v }))}
+                  onFontTypeChange={(t) => setFontTypeInput((p) => ({ ...p, [item.id]: t }))}
                   onResolve={() => handleResolve(item)}
                   resolving={resolvingId === item.id}
                   onPreview={() => setPreviewImage(item.user_uploaded_image)}
@@ -428,12 +440,14 @@ interface QueueCardProps {
   downloadUrl: string;
   fontFile: File | null;
   notes: string;
+  fontType: "free" | "paid";
   knownFonts: FontRecord[];
   onAutofill: (font: FontRecord) => void;
   onFontNameChange: (v: string) => void;
   onDownloadUrlChange: (v: string) => void;
   onFontFileChange: (f: File | null) => void;
   onNotesChange: (v: string) => void;
+  onFontTypeChange: (t: "free" | "paid") => void;
   onResolve: () => void;
   resolving: boolean;
   onPreview: () => void;
@@ -446,12 +460,14 @@ const QueueCard = ({
   downloadUrl,
   fontFile,
   notes,
+  fontType,
   knownFonts,
   onAutofill,
   onFontNameChange,
   onDownloadUrlChange,
   onFontFileChange,
   onNotesChange,
+  onFontTypeChange,
   onResolve,
   resolving,
   onPreview,
@@ -554,47 +570,78 @@ const QueueCard = ({
               )}
             </div>
 
+            {/* Free / Paid toggle */}
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onFontTypeChange("free")}
+                className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
+                  fontType === "free"
+                    ? "bg-primary/10 border-primary/40 text-primary font-semibold"
+                    : "bg-muted border-border text-muted-foreground"
+                }`}
+              >
+                مجاني
+              </button>
+              <button
+                type="button"
+                onClick={() => onFontTypeChange("paid")}
+                className={`flex-1 py-1.5 text-xs rounded-lg border transition-colors ${
+                  fontType === "paid"
+                    ? "bg-primary/10 border-primary/40 text-primary font-semibold"
+                    : "bg-muted border-border text-muted-foreground"
+                }`}
+              >
+                مدفوع
+              </button>
+            </div>
+
+            {/* Download URL - always shown */}
             <div className="flex items-center gap-1.5">
               <LinkIcon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
               <input
                 type="url"
                 value={downloadUrl}
                 onChange={(e) => onDownloadUrlChange(e.target.value)}
-                placeholder="رابط التحميل (اختياري)"
+                placeholder={fontType === "paid" ? "رابط الشراء (مطلوب)" : "رابط التحميل (اختياري)"}
                 dir="ltr"
                 className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
               />
             </div>
 
-            {/* Font file upload */}
-            <input
-              id={fileInputId}
-              type="file"
-              accept=".ttf,.otf,.woff,.woff2,.zip"
-              className="hidden"
-              onChange={(e) => {
-                onFontFileChange(e.target.files?.[0] || null);
-                e.target.value = "";
-              }}
-            />
-            <div className="flex items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2 hover:border-primary/30 transition-colors">
-              <FileUp className="w-4 h-4 text-muted-foreground shrink-0" />
-              <span
-                className="text-sm text-muted-foreground flex-1 truncate cursor-pointer"
-                onClick={() => document.getElementById(fileInputId)?.click()}
-              >
-                {fontFile ? fontFile.name : "ارفق ملف الخط (اختياري)"}
-              </span>
-              {fontFile && (
-                <button
-                  type="button"
-                  onClick={() => onFontFileChange(null)}
-                  className="text-xs text-destructive hover:text-destructive/80"
-                >
-                  حذف
-                </button>
-              )}
-            </div>
+            {/* Font file upload - only for free fonts */}
+            {fontType === "free" && (
+              <>
+                <input
+                  id={fileInputId}
+                  type="file"
+                  accept=".ttf,.otf,.woff,.woff2,.zip"
+                  className="hidden"
+                  onChange={(e) => {
+                    onFontFileChange(e.target.files?.[0] || null);
+                    e.target.value = "";
+                  }}
+                />
+                <div className="flex items-center gap-2 bg-muted border border-border rounded-lg px-3 py-2 hover:border-primary/30 transition-colors">
+                  <FileUp className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <span
+                    className="text-sm text-muted-foreground flex-1 truncate cursor-pointer"
+                    onClick={() => document.getElementById(fileInputId)?.click()}
+                  >
+                    {fontFile ? fontFile.name : "ارفق ملف الخط (اختياري)"}
+                  </span>
+                  {fontFile && (
+                    <button
+                      type="button"
+                      onClick={() => onFontFileChange(null)}
+                      className="text-xs text-destructive hover:text-destructive/80"
+                    >
+                      حذف
+                    </button>
+                  )}
+                </div>
+              </>
+            )}
 
             {/* Notes */}
             <div className="flex items-start gap-1.5">
