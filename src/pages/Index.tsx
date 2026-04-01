@@ -322,8 +322,26 @@ const Index = () => {
         {/* Step 2: Crop */}
         {step === "crop" && uploadedImage && (
           <div className="animate-fade-in space-y-4">
+            {/* Skip crop option */}
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={handleSubmitRequest}
+                disabled={isLoading}
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-card border border-border/30 text-foreground text-sm font-medium hover:bg-muted transition-all"
+              >
+                <Send className="w-4 h-4" />
+                {t("sendWithoutCrop") || "إرسال بدون قص"}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-border/20" />
+              <span className="text-[11px] text-muted-foreground/40 select-none">{t("orCropFirst") || "أو قص الصورة أولاً"}</span>
+              <div className="flex-1 h-px bg-border/20" />
+            </div>
+
             <ImageCropper imageSrc={uploadedImage} onCropComplete={handleCropComplete} />
-            {croppedImage && (
+            {croppedImage && croppedImage !== uploadedImage && (
               <div className="space-y-4 animate-scale-in">
                 <div className="flex justify-center">
                   <div className="rounded-xl overflow-hidden border border-border max-w-xs">
