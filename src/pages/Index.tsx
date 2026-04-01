@@ -260,7 +260,32 @@ const Index = () => {
                 {t("identifyByName")}
               </button>
 
-              <Link
+              {showSearch && (
+                <div className="space-y-2 animate-fade-in">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder={t("enterFontName") || "أدخل اسم الخط..."}
+                      className="flex-1 bg-muted border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      dir="auto"
+                    />
+                    <button
+                      onClick={handleNameSubmit}
+                      disabled={submittingName}
+                      className="btn-primary px-4 py-3 rounded-xl text-sm font-bold"
+                    >
+                      {submittingName ? (
+                        <div className="w-4 h-4 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
+
                 to="/my-requests"
                 className="btn-primary-interactive w-full flex items-center justify-center gap-3 py-4 text-base font-bold rounded-xl cta-shimmer"
               >
