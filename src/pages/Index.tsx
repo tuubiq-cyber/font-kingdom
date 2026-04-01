@@ -146,6 +146,9 @@ const Index = () => {
   const handleImageUpload = useCallback((file: File) => {
     const url = URL.createObjectURL(file);
     setUploadedImage(url);
+    // Store the original file as blob for direct submit without cropping
+    setCroppedBlob(file);
+    setCroppedImage(url);
     setStep("crop");
   }, []);
 
