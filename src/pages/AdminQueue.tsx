@@ -152,7 +152,7 @@ const AdminQueue = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, []);
 
   const uploadFontFile = async (file: File, fontName: string): Promise<string | null> => {
     try {
