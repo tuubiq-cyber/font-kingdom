@@ -132,7 +132,6 @@ const AdminQueue = () => {
 
   // Realtime: watch for user confirmations / corrections
   useEffect(() => {
-    if (!user) return;
     const channel = supabase
       .channel("admin-queue-updates")
       .on(
