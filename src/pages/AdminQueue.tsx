@@ -74,6 +74,7 @@ const AdminQueue = () => {
 
   // Load previously resolved fonts for autocomplete
   useEffect(() => {
+    if (!user) return;
     const loadKnownFonts = async () => {
       // From font_dataset
       const { data: dataset } = await supabase
@@ -110,7 +111,7 @@ const AdminQueue = () => {
       setKnownFonts(Array.from(fontsMap.values()));
     };
     loadKnownFonts();
-  }, []);
+  }, [user]);
 
   const handleAutofill = (itemId: string, font: FontRecord) => {
     setFontNameInput((p) => ({ ...p, [itemId]: font.font_name }));
@@ -131,6 +132,7 @@ const AdminQueue = () => {
   };
 
   useEffect(() => {
+    if (!user) return;
     fetchQueue();
   }, [user]);
 
