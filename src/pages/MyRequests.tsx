@@ -66,13 +66,21 @@ const MyRequests = () => {
 
   const fetchRequests = async () => {
     if (!userId) return;
-    const { data, error } = await supabase
-      .from("manual_identification_queue")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-
-    if (!error) setRequests((data as unknown as RequestItem[]) ?? []);
+    
+    // Use RPC for anonymous users, direct query for authenticated
+    if (user?.id) {
+      const { data, error } = await supabase
+        .from("manual_identification_queue")
+        .select("*")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false });
+      if (!error) setRequests((data as unknown as RequestItem[]) ?? []);
+    } else {
+      const { data, error } = await supabase.rpc("get_my_queue_items", {
+        _visitor_id: userId,
+      });
+      if (!error) setRequests((data as unknown as RequestItem[]) ?? []);
+    }
     setLoading(false);
   };
 
