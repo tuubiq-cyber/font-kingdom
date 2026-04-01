@@ -326,7 +326,7 @@ const AdminQueue = () => {
                   onNotesChange={(v) => setNotesInput((p) => ({ ...p, [item.id]: v }))}
                   onFontTypeChange={(t) => setFontTypeInput((p) => ({ ...p, [item.id]: t }))}
                   onResolve={() => handleResolve(item)}
-                  onReject={() => handleReject(item)}
+                  onReject={(reason) => handleReject(item.id, reason)}
                   resolving={resolvingId === item.id}
                   onPreview={() => setPreviewImage(item.user_uploaded_image)}
                   isCorrection
