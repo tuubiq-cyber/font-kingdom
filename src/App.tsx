@@ -9,6 +9,7 @@ import FontTraining from "./pages/FontTraining";
 import ModelBrain from "./pages/ModelBrain";
 import AdminQueue from "./pages/AdminQueue";
 import SecurityDashboard from "./pages/SecurityDashboard";
+import AdminStats from "./pages/AdminStats";
 import MyRequests from "./pages/MyRequests";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
