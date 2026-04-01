@@ -10,7 +10,7 @@ import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Sea
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
 import { uploadQueueImage } from "@/lib/storageUtils";
-import { useAuth } from "@/hooks/useAuth";
+
 import { useDailyLimit } from "@/hooks/useDailyLimit";
 import { useTranslation } from "react-i18next";
 
@@ -53,7 +53,6 @@ const PulsingRings = () => (
 );
 
 const Index = () => {
-  const { user, signOut } = useAuth();
   const navigate = useNavigate();
   const { checkAndConsume } = useDailyLimit();
   const { t } = useTranslation();
@@ -80,10 +79,10 @@ const Index = () => {
     return vid;
   };
 
-  // Welcome message for new users (first time only)
+  // Welcome message for new visitors (first time only)
   useEffect(() => {
-    if (!user?.id) return;
-    const welcomeKey = `kingdom_welcomed_${user.id}`;
+    const vid = getVisitorId();
+    const welcomeKey = `kingdom_welcomed_${vid}`;
     if (!localStorage.getItem(welcomeKey)) {
       localStorage.setItem(welcomeKey, "1");
       setTimeout(() => {
@@ -93,7 +92,7 @@ const Index = () => {
         });
       }, 1500);
     }
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => {
     const trackVisit = async () => {
@@ -127,11 +126,7 @@ const Index = () => {
         is_notified: false,
         needs_correction: false,
       };
-      if (user?.id) {
-        insertData.user_id = user.id;
-      } else {
-        insertData.visitor_id = vid;
-      }
+      insertData.visitor_id = vid;
       const { error } = await supabase.from("manual_identification_queue").insert(insertData);
 
       if (error) throw error;
@@ -188,11 +183,7 @@ const Index = () => {
         is_notified: false,
         needs_correction: false,
       };
-      if (user?.id) {
-        insertData.user_id = user.id;
-      } else {
-        insertData.visitor_id = vid;
-      }
+      insertData.visitor_id = vid;
       const { error } = await supabase.from("manual_identification_queue").insert(insertData);
 
       if (error) throw error;

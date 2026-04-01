@@ -12,8 +12,6 @@ import SecurityDashboard from "./pages/SecurityDashboard";
 import AdminStats from "./pages/AdminStats";
 import MyRequests from "./pages/MyRequests";
 import NotFound from "./pages/NotFound";
-import AdminLogin from "./pages/AdminLogin";
-import AdminRoute from "./components/AdminRoute";
 import useNotifications from "./hooks/useNotifications";
 import { useSecurityAlerts } from "./hooks/useSecurityAlerts";
 
@@ -25,6 +23,9 @@ const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Secret admin path - only those who know this URL can access admin pages
+const ADMIN_SECRET_PATH = "kingdom-control-7x9m2";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -35,15 +36,16 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<Index />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin/fonts" element={<AdminRoute><AdminFonts /></AdminRoute>} />
-            <Route path="/train" element={<AdminRoute><FontTraining /></AdminRoute>} />
-            <Route path="/admin/brain" element={<AdminRoute><ModelBrain /></AdminRoute>} />
-            <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
-            <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
-            <Route path="/admin/stats" element={<AdminRoute><AdminStats /></AdminRoute>} />
             <Route path="/my-requests" element={<MyRequests />} />
-            <Route path="/login" element={<Navigate to="/admin/login" replace />} />
+            
+            {/* Secret admin routes */}
+            <Route path={`/${ADMIN_SECRET_PATH}/queue`} element={<AdminQueue />} />
+            <Route path={`/${ADMIN_SECRET_PATH}/fonts`} element={<AdminFonts />} />
+            <Route path={`/${ADMIN_SECRET_PATH}/brain`} element={<ModelBrain />} />
+            <Route path={`/${ADMIN_SECRET_PATH}/security`} element={<SecurityDashboard />} />
+            <Route path={`/${ADMIN_SECRET_PATH}/stats`} element={<AdminStats />} />
+            <Route path={`/${ADMIN_SECRET_PATH}/train`} element={<FontTraining />} />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </NotificationProvider>

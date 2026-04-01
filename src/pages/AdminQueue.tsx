@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
   ArrowRight,
-  LogOut,
+  
   CheckCircle,
   Clock,
   Brain,
@@ -24,7 +24,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+
 import { generatePerceptualHash } from "@/lib/imageProcessing";
 import QueueImage from "@/components/QueueImage";
 import { getQueueImageUrl } from "@/lib/storageUtils";
@@ -51,7 +51,6 @@ interface QueueItem {
 }
 
 const AdminQueue = () => {
-  const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
 
   const [items, setItems] = useState<QueueItem[]>([]);
@@ -74,7 +73,7 @@ const AdminQueue = () => {
 
   // Load previously resolved fonts for autocomplete
   useEffect(() => {
-    if (!user) return;
+    
     const loadKnownFonts = async () => {
       // From font_dataset
       const { data: dataset } = await supabase
@@ -111,7 +110,7 @@ const AdminQueue = () => {
       setKnownFonts(Array.from(fontsMap.values()));
     };
     loadKnownFonts();
-  }, [user]);
+  }, []);
 
   const handleAutofill = (itemId: string, font: FontRecord) => {
     setFontNameInput((p) => ({ ...p, [itemId]: font.font_name }));
@@ -122,23 +121,17 @@ const AdminQueue = () => {
 
 
   const fetchQueue = async () => {
-    const { data, error } = await supabase
-      .from("manual_identification_queue")
-      .select("*")
-      .order("needs_correction", { ascending: false })
-      .order("created_at", { ascending: false });
+    const { data, error } = await (supabase.rpc as any)("get_all_queue_items");
     if (!error) setItems((data as unknown as QueueItem[]) ?? []);
     setLoading(false);
   };
 
   useEffect(() => {
-    if (!user) return;
     fetchQueue();
-  }, [user]);
+  }, []);
 
   // Realtime: watch for user confirmations / corrections
   useEffect(() => {
-    if (!user) return;
     const channel = supabase
       .channel("admin-queue-updates")
       .on(
@@ -159,7 +152,7 @@ const AdminQueue = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, []);
 
   const uploadFontFile = async (file: File, fontName: string): Promise<string | null> => {
     try {
@@ -205,18 +198,12 @@ const AdminQueue = () => {
         }
       }
 
-      const { error: updateError } = await supabase
-        .from("manual_identification_queue")
-        .update({
-          status: "resolved",
-          assigned_font_name: name,
-          admin_download_url: fontFileUrl || downloadUrl,
-          resolved_by: user?.id || null,
-          resolved_at: new Date().toISOString(),
-          needs_correction: false,
-          is_notified: true,
-        } as any)
-        .eq("id", item.id);
+      const { error: updateError } = await (supabase.rpc as any)("admin_resolve_queue_item", {
+        _id: item.id,
+        _font_name: name,
+        _download_url: downloadUrl || null,
+        _font_file_url: fontFileUrl || null,
+      });
 
       if (updateError) throw updateError;
 
@@ -253,15 +240,10 @@ const AdminQueue = () => {
 
   const handleReject = async (itemId: string, reason: string) => {
     try {
-      const { error } = await supabase
-        .from("manual_identification_queue")
-        .update({
-          status: "rejected",
-          rejection_reason: reason || null,
-          resolved_at: new Date().toISOString(),
-          resolved_by: user?.id || null,
-        } as any)
-        .eq("id", itemId);
+      const { error } = await (supabase.rpc as any)("admin_reject_queue_item", {
+        _id: itemId,
+        _reason: reason || null,
+      });
       if (error) throw error;
       toast.success("تم رفض الطلب");
       fetchQueue();
@@ -272,15 +254,7 @@ const AdminQueue = () => {
   };
   const handleRestore = async (itemId: string) => {
     try {
-      const { error } = await supabase
-        .from("manual_identification_queue")
-        .update({
-          status: "pending",
-          rejection_reason: null,
-          resolved_at: null,
-          resolved_by: null,
-        } as any)
-        .eq("id", itemId);
+      const { error } = await (supabase.rpc as any)("admin_restore_queue_item", { _id: itemId });
       if (error) throw error;
       toast.success("تم استعادة الطلب إلى المعلقة");
       fetchQueue();
@@ -293,10 +267,7 @@ const AdminQueue = () => {
   const handleDeleteRejected = async (itemId: string) => {
     if (!confirm("هل أنت متأكد من حذف هذا الطلب نهائياً؟")) return;
     try {
-      const { error } = await supabase
-        .from("manual_identification_queue")
-        .delete()
-        .eq("id", itemId);
+      const { error } = await (supabase.rpc as any)("admin_delete_queue_item", { _id: itemId });
       if (error) throw error;
       toast.success("تم حذف الطلب نهائياً");
       fetchQueue();
@@ -309,10 +280,7 @@ const AdminQueue = () => {
   const handleDeleteAllRejected = async () => {
     if (!confirm("هل أنت متأكد من حذف جميع الطلبات المرفوضة نهائياً؟")) return;
     try {
-      const { error } = await supabase
-        .from("manual_identification_queue")
-        .delete()
-        .eq("status", "rejected");
+      const { error } = await (supabase.rpc as any)("admin_delete_all_rejected");
       if (error) throw error;
       toast.success("تم حذف جميع الطلبات المرفوضة");
       fetchQueue();
@@ -348,7 +316,7 @@ const AdminQueue = () => {
     return list;
   }, [normalPending, searchQuery, sortOrder]);
 
-  if (authLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -379,12 +347,13 @@ const AdminQueue = () => {
               <Brain className="w-4 h-4" />
               التدريب
             </Link>
-            <button
-              onClick={signOut}
-              className="btn-outline flex items-center gap-2 text-sm px-4 py-2 text-destructive"
+            <Link
+              to="/home"
+              className="btn-outline flex items-center gap-2 text-sm px-4 py-2 text-muted-foreground"
             >
-              <LogOut className="w-4 h-4" />
-            </button>
+              <ArrowRight className="w-4 h-4" />
+              الرئيسية
+            </Link>
           </div>
         </div>
       </header>
