@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { supabase } from "@/integrations/supabase/client";
 import UploadZone from "@/components/UploadZone";
 import UsageCounter from "@/components/UsageCounter";
@@ -207,6 +208,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative">
+      <LanguageSwitcher />
       <FloatingParticles />
 
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6 relative z-10">
