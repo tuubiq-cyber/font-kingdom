@@ -372,12 +372,13 @@ const AdminQueue = () => {
               <Brain className="w-4 h-4" />
               التدريب
             </Link>
-            <button
-              onClick={signOut}
-              className="btn-outline flex items-center gap-2 text-sm px-4 py-2 text-destructive"
+            <Link
+              to="/home"
+              className="btn-outline flex items-center gap-2 text-sm px-4 py-2 text-muted-foreground"
             >
-              <LogOut className="w-4 h-4" />
-            </button>
+              <ArrowRight className="w-4 h-4" />
+              الرئيسية
+            </Link>
           </div>
         </div>
       </header>
