@@ -14,6 +14,8 @@ import {
   Send,
   Type,
   XCircle,
+  RefreshCw,
+  ImagePlus,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
