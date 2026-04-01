@@ -162,7 +162,7 @@ const useNotifications = () => {
           } else if (newRecord.status === "rejected") {
             playNotificationSound();
             showRejectedToast(newRecord);
-            markAsNotified(newRecord.id);
+            markAsNotified(newRecord.id, userId);
           }
         }
       )
