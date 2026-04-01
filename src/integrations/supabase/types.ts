@@ -383,6 +383,36 @@ export type Database = {
         Args: { _limit?: number; _service_type: string; _user_id: string }
         Returns: boolean
       }
+      delete_my_pending_item: {
+        Args: { _id: string; _visitor_id: string }
+        Returns: undefined
+      }
+      get_my_queue_items: {
+        Args: { _visitor_id: string }
+        Returns: {
+          admin_download_url: string | null
+          assigned_font_id: string | null
+          assigned_font_name: string | null
+          created_at: string
+          id: string
+          is_notified: boolean | null
+          needs_correction: boolean | null
+          query_text: string | null
+          rejection_reason: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
+          user_confirmation: boolean | null
+          user_id: string | null
+          user_uploaded_image: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "manual_identification_queue"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_unique_visitor_count: { Args: never; Returns: number }
       has_role: {
         Args: {
@@ -398,6 +428,15 @@ export type Database = {
       }
       mark_queue_notified: {
         Args: { _id: string; _user_id: string }
+        Returns: undefined
+      }
+      resubmit_queue_item: {
+        Args: {
+          _id: string
+          _new_image_url?: string
+          _new_query_text?: string
+          _visitor_id: string
+        }
         Returns: undefined
       }
     }
