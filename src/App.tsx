@@ -38,6 +38,7 @@ const App = () => (
           <LanguageSwitcher />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/home" element={<Index />} />
             <Route path="/admin/fonts" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
             <Route path="/train" element={<AuthGuard><AdminRoute><FontTraining /></AdminRoute></AuthGuard>} />
             <Route path="/admin/brain" element={<AuthGuard><AdminRoute><ModelBrain /></AdminRoute></AuthGuard>} />
