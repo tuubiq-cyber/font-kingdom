@@ -414,7 +414,7 @@ const AdminQueue = () => {
                   onResolve={() => handleResolve(item)}
                   onReject={(reason) => handleReject(item.id, reason)}
                   resolving={resolvingId === item.id}
-                  onPreview={() => setPreviewImage(item.user_uploaded_image)}
+                  onPreview={() => openPreview(item.user_uploaded_image)}
                   isCorrection
                 />
               ))}
@@ -489,7 +489,7 @@ const AdminQueue = () => {
                   onResolve={() => handleResolve(item)}
                   onReject={(reason) => handleReject(item.id, reason)}
                   resolving={resolvingId === item.id}
-                  onPreview={() => setPreviewImage(item.user_uploaded_image)}
+                  onPreview={() => openPreview(item.user_uploaded_image)}
                 />
               ))}
             </div>
@@ -510,7 +510,7 @@ const AdminQueue = () => {
           ) : (
             <div className="space-y-2">
               {resolved.map((item) => (
-                <ResolvedCard key={item.id} item={item} onPreview={() => setPreviewImage(item.user_uploaded_image)} />
+                <ResolvedCard key={item.id} item={item} onPreview={() => openPreview(item.user_uploaded_image)} />
               ))}
             </div>
           )}
