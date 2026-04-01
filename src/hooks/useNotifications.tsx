@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -30,7 +30,6 @@ const playNotificationSound = () => {
     source.start(0);
     return;
   }
-  // Fallback
   try {
     const audio = new Audio("/notification.wav");
     audio.volume = 0.5;
@@ -51,10 +50,52 @@ if (typeof window !== "undefined") {
   window.addEventListener("keydown", unlock);
 }
 
+const showResolvedToast = (item: any) => {
+  const label = item.query_text
+    ? `تم الرد على استفسارك "${item.query_text}"`
+    : "تم التعرف على الخط في طلبك";
+
+  toast.success(label, {
+    description: `الخط: ${item.assigned_font_name}`,
+    duration: 8000,
+    action: {
+      label: "عرض",
+      onClick: () => {
+        window.location.href = "/my-requests";
+      },
+    },
+  });
+};
+
+const showRejectedToast = (item: any) => {
+  const label = item.query_text
+    ? `تم رفض استفسارك "${item.query_text}"`
+    : "تم رفض طلبك";
+
+  toast.error(label, {
+    description: item.rejection_reason
+      ? `السبب: ${item.rejection_reason}`
+      : "يمكنك إرسال طلب جديد",
+    duration: 8000,
+    action: {
+      label: "عرض",
+      onClick: () => {
+        window.location.href = "/my-requests";
+      },
+    },
+  });
+};
+
+const markAsNotified = async (id: string) => {
+  await supabase
+    .from("manual_identification_queue")
+    .update({ is_notified: true } as any)
+    .eq("id", id);
+};
+
 /**
- * Polls for resolved/rejected requests that haven't been notified yet,
- * shows a toast, and marks them as notified.
- * Works for both authenticated users and anonymous visitors.
+ * Uses Supabase Realtime to instantly notify users when their requests
+ * are resolved or rejected. Falls back to initial check on mount.
  */
 const useNotifications = () => {
   const { user } = useAuth();
@@ -63,11 +104,11 @@ const useNotifications = () => {
     const userId = user?.id || localStorage.getItem("visitor_id");
     if (!userId) return;
 
-    const checkForUpdates = async () => {
-      // Check resolved requests
+    // Initial check for any unnotified items on mount
+    const checkExisting = async () => {
       const { data: resolved } = await supabase
         .from("manual_identification_queue")
-        .select("id, assigned_font_name, query_text, is_notified")
+        .select("id, assigned_font_name, query_text")
         .eq("user_id", userId)
         .eq("status", "resolved")
         .eq("is_notified", false)
@@ -76,68 +117,60 @@ const useNotifications = () => {
       if (resolved && resolved.length > 0) {
         playNotificationSound();
         for (const item of resolved) {
-          const label = item.query_text
-            ? `تم الرد على استفسارك "${item.query_text}"`
-            : "تم التعرف على الخط في طلبك";
-
-          toast.success(label, {
-            description: `الخط: ${item.assigned_font_name}`,
-            duration: 8000,
-            action: {
-              label: "عرض",
-              onClick: () => {
-                window.location.href = "/my-requests";
-              },
-            },
-          });
-
-          await supabase
-            .from("manual_identification_queue")
-            .update({ is_notified: true } as any)
-            .eq("id", item.id);
+          showResolvedToast(item);
+          await markAsNotified(item.id);
         }
       }
 
-      // Check rejected requests
       const { data: rejected } = await supabase
         .from("manual_identification_queue")
-        .select("id, query_text, rejection_reason, is_notified")
+        .select("id, query_text, rejection_reason")
         .eq("user_id", userId)
         .eq("status", "rejected")
         .eq("is_notified", false);
 
       if (rejected && rejected.length > 0) {
         playNotificationSound();
-        for (const item of rejected as any[]) {
-          const label = item.query_text
-            ? `تم رفض استفسارك "${item.query_text}"`
-            : "تم رفض طلبك";
-
-          toast.error(label, {
-            description: item.rejection_reason
-              ? `السبب: ${item.rejection_reason}`
-              : "يمكنك إرسال طلب جديد",
-            duration: 8000,
-            action: {
-              label: "عرض",
-              onClick: () => {
-                window.location.href = "/my-requests";
-              },
-            },
-          });
-
-          await supabase
-            .from("manual_identification_queue")
-            .update({ is_notified: true } as any)
-            .eq("id", item.id);
+        for (const item of rejected) {
+          showRejectedToast(item);
+          await markAsNotified(item.id);
         }
       }
     };
 
-    checkForUpdates();
-    const interval = setInterval(checkForUpdates, 10000);
+    checkExisting();
 
-    return () => clearInterval(interval);
+    // Realtime subscription for instant updates
+    const channel = supabase
+      .channel(`notifications-${userId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "manual_identification_queue",
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          const newRecord = payload.new as any;
+          if (newRecord.is_notified) return; // Already notified
+
+          if (newRecord.status === "resolved" && newRecord.assigned_font_name) {
+            playNotificationSound();
+            showResolvedToast(newRecord);
+            markAsNotified(newRecord.id);
+          } else if (newRecord.status === "rejected") {
+            playNotificationSound();
+            showRejectedToast(newRecord);
+            markAsNotified(newRecord.id);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user?.id]);
 };
 
