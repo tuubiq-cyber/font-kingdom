@@ -5,6 +5,7 @@ import UploadZone from "@/components/UploadZone";
 import UsageCounter from "@/components/UsageCounter";
 import ImageCropper from "@/components/ImageCropper";
 import { Send, ArrowRight, Upload, Scroll, CheckCircle, Crown, Feather, Eye, Search, Users, X, Type, LogOut } from "lucide-react";
+import ThemeToggle from "@/components/ThemeToggle";
 import { toast } from "sonner";
 import { sanitizeText } from "@/lib/sanitize";
 import { useAuth } from "@/hooks/useAuth";
