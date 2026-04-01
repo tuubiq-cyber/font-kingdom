@@ -96,15 +96,17 @@ const MyRequests = () => {
           visualHash = await generatePerceptualHash(item.user_uploaded_image);
         } catch { /* skip */ }
 
+        const { data: { session: sess } } = await supabase.auth.getSession();
         await supabase.from("font_dataset").insert({
           font_name: item.assigned_font_name!,
           sample_image_url: item.user_uploaded_image,
           metadata_json: {
             source: "user_confirmed",
-            download_url: item.admin_download_url,
           },
           visual_hash: visualHash,
-          verified_by_admin: true,
+          verified_by_admin: false,
+          admin_metadata: {},
+          user_id: sess?.user?.id,
         } as any);
 
         toast.success("شكرا لتأكيدك! تمت اضافة الخط لارشيف المملكة");

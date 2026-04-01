@@ -80,12 +80,14 @@ const FontTraining = () => {
         download_url: downloadUrl || null,
       };
 
+      const { data: { session } } = await supabase.auth.getSession();
       const { error } = await supabase.from("font_dataset").insert({
         font_name: fontName,
         sample_image_url: sampleUrl,
         metadata_json: metadata,
         visual_hash: visualHash,
         verified_by_admin: true,
+        user_id: session?.user?.id,
       } as any);
 
       if (error) throw error;

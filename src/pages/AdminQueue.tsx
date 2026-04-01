@@ -203,6 +203,7 @@ const AdminQueue = () => {
         console.warn("Hash failed:", e);
       }
 
+      const { data: { session } } = await supabase.auth.getSession();
       await supabase.from("font_dataset").insert({
         font_name: name,
         sample_image_url: item.user_uploaded_image,
@@ -214,6 +215,7 @@ const AdminQueue = () => {
         },
         visual_hash: visualHash,
         verified_by_admin: true,
+        user_id: session?.user?.id,
       } as any);
 
       toast.success("تم ارسال النتيجة للمستخدم واضافة العينة للتدريب");
