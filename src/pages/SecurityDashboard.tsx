@@ -100,8 +100,8 @@ const SecurityDashboard = () => {
   }, [filter]);
 
   useEffect(() => {
-    if (isAdmin) fetchLogs();
-  }, [isAdmin, filter, fetchLogs]);
+    fetchLogs();
+  }, [filter, fetchLogs]);
 
   const stats = {
     total: logs.length,
