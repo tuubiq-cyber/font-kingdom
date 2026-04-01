@@ -233,6 +233,20 @@ const AdminQueue = () => {
     }
   };
 
+  const handleReject = async (item: QueueItem) => {
+    try {
+      await supabase
+        .from("manual_identification_queue")
+        .delete()
+        .eq("id", item.id);
+      toast.success("تم رفض الطلب وحذفه");
+      fetchQueue();
+    } catch (err) {
+      console.error(err);
+      toast.error("حدث خطأ أثناء رفض الطلب");
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
