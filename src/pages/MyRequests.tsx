@@ -13,6 +13,7 @@ import {
   MessageSquare,
   Send,
   Type,
+  XCircle,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { generatePerceptualHash } from "@/lib/imageProcessing";
@@ -30,6 +31,7 @@ interface RequestItem {
   resolved_at: string | null;
   user_id: string | null;
   query_text: string | null;
+  rejection_reason: string | null;
 }
 
 const MyRequests = () => {
@@ -139,6 +141,7 @@ const MyRequests = () => {
   );
   const confirmed = requests.filter((r) => r.user_confirmation === true);
   const rejected = requests.filter((r) => r.user_confirmation === false);
+  const adminRejected = requests.filter((r) => r.status === "rejected");
 
   return (
     <div className="min-h-screen">
@@ -334,6 +337,50 @@ const MyRequests = () => {
                           <Download className="w-4 h-4" />
                         </a>
                       )}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Admin Rejected */}
+            {adminRejected.length > 0 && (
+              <section className="space-y-3">
+                <h2 className="text-foreground font-semibold text-sm flex items-center gap-2">
+                  <XCircle className="w-4 h-4 text-destructive" />
+                  طلبات مرفوضة ({adminRejected.length})
+                </h2>
+                <div className="space-y-2">
+                  {adminRejected.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-start gap-3 bg-card border border-destructive/20 rounded-lg px-4 py-3"
+                    >
+                      {item.query_text ? (
+                        <div className="w-10 h-10 rounded bg-muted border border-border flex items-center justify-center shrink-0">
+                          <Type className="w-4 h-4 text-muted-foreground" />
+                        </div>
+                      ) : (
+                        <img
+                          src={item.user_uploaded_image}
+                          alt=""
+                          className="w-10 h-10 rounded object-cover bg-muted"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0 space-y-1">
+                        <p className="text-destructive font-medium text-sm">مرفوض</p>
+                        {item.query_text && (
+                          <p className="text-muted-foreground text-xs">بحث: {item.query_text}</p>
+                        )}
+                        {item.rejection_reason && (
+                          <p className="text-muted-foreground text-xs bg-destructive/5 rounded px-2 py-1">
+                            السبب: {item.rejection_reason}
+                          </p>
+                        )}
+                        <p className="text-muted-foreground text-[11px]">
+                          {new Date(item.resolved_at || item.created_at).toLocaleDateString("ar-SA")}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
