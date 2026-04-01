@@ -194,6 +194,7 @@ export type Database = {
           is_notified: boolean | null
           needs_correction: boolean | null
           query_text: string | null
+          rejection_reason: string | null
           resolved_at: string | null
           resolved_by: string | null
           status: string
@@ -210,6 +211,7 @@ export type Database = {
           is_notified?: boolean | null
           needs_correction?: boolean | null
           query_text?: string | null
+          rejection_reason?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
@@ -226,6 +228,7 @@ export type Database = {
           is_notified?: boolean | null
           needs_correction?: boolean | null
           query_text?: string | null
+          rejection_reason?: string | null
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
