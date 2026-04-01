@@ -516,13 +516,39 @@ const AdminQueue = () => {
               طلبات مرفوضة ({rejected.length})
             </h2>
             {rejected.length > 0 && (
-              <button
-                onClick={handleDeleteAllRejected}
-                className="flex items-center gap-1 text-xs text-destructive hover:bg-destructive/10 px-3 py-1.5 rounded-lg transition-colors border border-destructive/20"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                حذف الكل
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => {
+                    const headers = ["ID", "النص", "سبب الرفض", "التاريخ"];
+                    const rows = rejected.map((r) => [
+                      r.id,
+                      r.query_text || "",
+                      r.rejection_reason || "",
+                      new Date(r.created_at).toLocaleDateString("ar-SA"),
+                    ]);
+                    const csv = "\uFEFF" + [headers, ...rows].map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
+                    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = "rejected-requests.csv";
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    toast.success("تم تصدير الطلبات المرفوضة");
+                  }}
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:bg-accent px-3 py-1.5 rounded-lg transition-colors border border-border"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  تصدير CSV
+                </button>
+                <button
+                  onClick={handleDeleteAllRejected}
+                  className="flex items-center gap-1 text-xs text-destructive hover:bg-destructive/10 px-3 py-1.5 rounded-lg transition-colors border border-destructive/20"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  حذف الكل
+                </button>
+              </div>
             )}
           </div>
 
