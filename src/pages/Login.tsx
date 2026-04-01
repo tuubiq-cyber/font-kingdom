@@ -155,12 +155,9 @@ const Login = () => {
       toast.error(error.message);
       await logSecurityEvent("signup_failed", { email: cleanEmail, error: error.message });
     } else {
-      toast.success("تم انشاء الحساب — تحقق من بريدك الالكتروني للتفعيل");
+      toast.success("تم إنشاء الحساب بنجاح");
       await logSecurityEvent("signup_success", { email: cleanEmail });
-      setIsSignUp(false);
-      setPassword("");
-      setConfirmPassword("");
-      setPasswordErrors([]);
+      navigate("/");
     }
     setLoading(false);
   };
