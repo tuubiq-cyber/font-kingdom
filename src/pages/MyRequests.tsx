@@ -76,7 +76,7 @@ const MyRequests = () => {
         .order("created_at", { ascending: false });
       if (!error) setRequests((data as unknown as RequestItem[]) ?? []);
     } else {
-      const { data, error } = await supabase.rpc("get_my_queue_items", {
+      const { data, error } = await (supabase.rpc as any)("get_my_queue_items", {
         _visitor_id: userId,
       });
       if (!error) setRequests((data as unknown as RequestItem[]) ?? []);
