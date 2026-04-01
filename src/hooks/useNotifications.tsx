@@ -118,7 +118,7 @@ const useNotifications = () => {
         playNotificationSound();
         for (const item of resolved) {
           showResolvedToast(item);
-          await markAsNotified(item.id);
+          await markAsNotified(item.id, userId);
         }
       }
 
