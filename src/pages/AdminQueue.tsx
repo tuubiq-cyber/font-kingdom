@@ -313,16 +313,6 @@ const AdminQueue = () => {
   };
 
 
-  if (authLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    );
-  }
-
-  
-
   const pending = items.filter((i) => i.status === "pending");
   const needsCorrection = pending.filter((i) => i.needs_correction);
   const normalPending = pending.filter((i) => !i.needs_correction);
@@ -347,6 +337,14 @@ const AdminQueue = () => {
     });
     return list;
   }, [normalPending, searchQuery, sortOrder]);
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen">
