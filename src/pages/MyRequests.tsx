@@ -140,6 +140,7 @@ const MyRequests = () => {
   );
   const confirmed = requests.filter((r) => r.user_confirmation === true);
   const rejected = requests.filter((r) => r.user_confirmation === false);
+  const adminRejected = requests.filter((r) => r.status === "rejected");
 
   return (
     <div className="min-h-screen">
