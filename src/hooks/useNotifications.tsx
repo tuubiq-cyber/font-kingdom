@@ -67,6 +67,7 @@ const useNotifications = () => {
         .eq("is_notified", false);
 
       if (rejected && rejected.length > 0) {
+        playNotificationSound();
         for (const item of rejected as any[]) {
           const label = item.query_text
             ? `تم رفض استفسارك "${item.query_text}"`
