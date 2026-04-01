@@ -208,6 +208,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative">
+      <LanguageSwitcher />
       <FloatingParticles />
 
       <main className="container max-w-2xl mx-auto px-4 pb-16 space-y-6 relative z-10">
