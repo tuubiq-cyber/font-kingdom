@@ -413,7 +413,7 @@ const MyRequests = () => {
                             <Type className="w-4 h-4 text-muted-foreground" />
                           </div>
                         ) : (
-                          <img
+                          <QueueImage
                             src={item.user_uploaded_image}
                             alt=""
                             className="w-10 h-10 rounded object-cover bg-muted"
