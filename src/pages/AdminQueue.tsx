@@ -16,6 +16,7 @@ import {
   Type,
   X,
   RotateCcw,
+  Trash2,
   ChevronDown,
   ChevronUp,
   Download,
