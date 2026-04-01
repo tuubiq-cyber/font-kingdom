@@ -12,19 +12,16 @@ import SecurityDashboard from "./pages/SecurityDashboard";
 import AdminStats from "./pages/AdminStats";
 import MyRequests from "./pages/MyRequests";
 import NotFound from "./pages/NotFound";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
+import AdminLogin from "./pages/AdminLogin";
 import AdminRoute from "./components/AdminRoute";
-import AuthGuard from "./components/AuthGuard";
 import useNotifications from "./hooks/useNotifications";
 import { useSecurityAlerts } from "./hooks/useSecurityAlerts";
-import LanguageSwitcher from "./components/LanguageSwitcher";
 
 const queryClient = new QueryClient();
 
 const NotificationProvider = ({ children }: { children: React.ReactNode }) => {
   useNotifications();
-  useSecurityAlerts(); // Admin-only: auto-detects suspicious activity
+  useSecurityAlerts();
   return <>{children}</>;
 };
 
@@ -35,20 +32,18 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <NotificationProvider>
-          
           <Routes>
             <Route path="/" element={<Navigate to="/home" replace />} />
             <Route path="/home" element={<Index />} />
-            <Route path="/admin/fonts" element={<AuthGuard><AdminRoute><AdminFonts /></AdminRoute></AuthGuard>} />
-            <Route path="/train" element={<AuthGuard><AdminRoute><FontTraining /></AdminRoute></AuthGuard>} />
-            <Route path="/admin/brain" element={<AuthGuard><AdminRoute><ModelBrain /></AdminRoute></AuthGuard>} />
-            <Route path="/admin/queue" element={<AuthGuard><AdminRoute><AdminQueue /></AdminRoute></AuthGuard>} />
-            <Route path="/admin/security" element={<AuthGuard><AdminRoute><SecurityDashboard /></AdminRoute></AuthGuard>} />
-            <Route path="/admin/stats" element={<AuthGuard><AdminRoute><AdminStats /></AdminRoute></AuthGuard>} />
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/admin/fonts" element={<AdminRoute><AdminFonts /></AdminRoute>} />
+            <Route path="/train" element={<AdminRoute><FontTraining /></AdminRoute>} />
+            <Route path="/admin/brain" element={<AdminRoute><ModelBrain /></AdminRoute>} />
+            <Route path="/admin/queue" element={<AdminRoute><AdminQueue /></AdminRoute>} />
+            <Route path="/admin/security" element={<AdminRoute><SecurityDashboard /></AdminRoute>} />
+            <Route path="/admin/stats" element={<AdminRoute><AdminStats /></AdminRoute>} />
             <Route path="/my-requests" element={<MyRequests />} />
-            <Route path="/login" element={<Navigate to="/" replace />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/login" element={<Navigate to="/admin/login" replace />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </NotificationProvider>
