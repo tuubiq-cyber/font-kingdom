@@ -24,7 +24,7 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/hooks/useAuth";
+
 import { generatePerceptualHash } from "@/lib/imageProcessing";
 import QueueImage from "@/components/QueueImage";
 import { getQueueImageUrl } from "@/lib/storageUtils";
