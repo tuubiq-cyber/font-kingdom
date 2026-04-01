@@ -1,7 +1,15 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+
+const playNotificationSound = () => {
+  try {
+    const audio = new Audio("/notification.wav");
+    audio.volume = 0.5;
+    audio.play().catch(() => {});
+  } catch {}
+};
 
 /**
  * Polls for resolved/rejected requests that haven't been notified yet,
@@ -26,6 +34,7 @@ const useNotifications = () => {
         .not("assigned_font_name", "is", null);
 
       if (resolved && resolved.length > 0) {
+        playNotificationSound();
         for (const item of resolved) {
           const label = item.query_text
             ? `تم الرد على استفسارك "${item.query_text}"`
@@ -58,6 +67,7 @@ const useNotifications = () => {
         .eq("is_notified", false);
 
       if (rejected && rejected.length > 0) {
+        playNotificationSound();
         for (const item of rejected as any[]) {
           const label = item.query_text
             ? `تم رفض استفسارك "${item.query_text}"`
