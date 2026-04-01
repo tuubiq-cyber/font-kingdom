@@ -152,14 +152,8 @@ const MyRequests = () => {
 
       // Upload new image if provided
       if (resubmitImage) {
-        const ext = resubmitImage.name.split(".").pop();
-        const path = `queue/${Date.now()}_resubmit.${ext}`;
-        const { error: uploadErr } = await supabase.storage
-          .from("fonts")
-          .upload(path, resubmitImage);
-        if (uploadErr) throw uploadErr;
-        const { data: urlData } = supabase.storage.from("fonts").getPublicUrl(path);
-        imageUrl = urlData.publicUrl;
+        const folderPrefix = `resubmit/${Date.now()}`;
+        imageUrl = await uploadQueueImage(resubmitImage, folderPrefix);
       }
 
       // Reset the rejected request back to pending
