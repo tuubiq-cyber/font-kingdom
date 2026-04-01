@@ -198,18 +198,12 @@ const AdminQueue = () => {
         }
       }
 
-      const { error: updateError } = await supabase
-        .from("manual_identification_queue")
-        .update({
-          status: "resolved",
-          assigned_font_name: name,
-          admin_download_url: fontFileUrl || downloadUrl,
-          resolved_by: null,
-          resolved_at: new Date().toISOString(),
-          needs_correction: false,
-          is_notified: true,
-        } as any)
-        .eq("id", item.id);
+      const { error: updateError } = await (supabase.rpc as any)("admin_resolve_queue_item", {
+        _id: item.id,
+        _font_name: name,
+        _download_url: downloadUrl || null,
+        _font_file_url: fontFileUrl || null,
+      });
 
       if (updateError) throw updateError;
 
