@@ -382,7 +382,22 @@ export type Database = {
       }
     }
     Functions: {
+      admin_delete_all_rejected: { Args: never; Returns: undefined }
       admin_delete_queue_item: { Args: { _id: string }; Returns: undefined }
+      admin_reject_queue_item: {
+        Args: { _id: string; _reason?: string }
+        Returns: undefined
+      }
+      admin_resolve_queue_item: {
+        Args: {
+          _download_url?: string
+          _font_file_url?: string
+          _font_name: string
+          _id: string
+        }
+        Returns: undefined
+      }
+      admin_restore_queue_item: { Args: { _id: string }; Returns: undefined }
       admin_update_queue_item: {
         Args: {
           _admin_download_url?: string
