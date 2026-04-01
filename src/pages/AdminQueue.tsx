@@ -16,6 +16,10 @@ import {
   Type,
   X,
   RotateCcw,
+  ChevronDown,
+  ChevronUp,
+  Download,
+  ExternalLink,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -406,53 +410,17 @@ const AdminQueue = () => {
         <section className="space-y-4">
           <h2 className="text-foreground font-semibold flex items-center gap-2">
             <CheckCircle className="w-4 h-4 text-primary" />
-            طلبات محلولة ({resolved.length})
+            طلبات مكتملة ({resolved.length})
           </h2>
 
           {resolved.length === 0 ? (
             <p className="text-muted-foreground text-sm text-center py-4">
-              لا توجد طلبات محلولة بعد
+              لا توجد طلبات مكتملة بعد
             </p>
           ) : (
             <div className="space-y-2">
               {resolved.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-3 bg-card border border-border/50 rounded-lg px-4 py-3"
-                >
-                  <img
-                    src={item.user_uploaded_image}
-                    alt=""
-                    className="w-10 h-10 rounded object-cover bg-muted"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-foreground font-medium text-sm truncate">
-                      {item.assigned_font_name ?? "غير محدد"}
-                    </p>
-                    <p className="text-muted-foreground text-xs">
-                      {item.resolved_at
-                        ? new Date(item.resolved_at).toLocaleDateString("ar-SA")
-                        : ""}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    {item.user_confirmation === true && (
-                      <span className="text-[10px] bg-green-500/10 text-green-600 px-2 py-0.5 rounded-full">
-                        مؤكد
-                      </span>
-                    )}
-                    {item.user_confirmation === false && (
-                      <span className="text-[10px] bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">
-                        مرفوض
-                      </span>
-                    )}
-                    {item.user_confirmation === null && (
-                      <span className="text-[10px] bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full">
-                        بانتظار الرد
-                      </span>
-                    )}
-                  </div>
-                </div>
+                <ResolvedCard key={item.id} item={item} onPreview={() => setPreviewImage(item.user_uploaded_image)} />
               ))}
             </div>
           )}
@@ -807,6 +775,94 @@ const QueueCard = ({
           )}
         </div>
       </div>
+    </div>
+  );
+};
+
+// ─── Resolved Card Component ────────────────────────────────
+const ResolvedCard = ({ item, onPreview }: { item: QueueItem; onPreview: () => void }) => {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="bg-card border border-border/50 rounded-lg overflow-hidden">
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors text-right"
+      >
+        <img
+          src={item.user_uploaded_image}
+          alt=""
+          className="w-10 h-10 rounded object-cover bg-muted cursor-pointer"
+          onClick={(e) => { e.stopPropagation(); onPreview(); }}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-foreground font-medium text-sm truncate">
+            {item.assigned_font_name ?? "غير محدد"}
+          </p>
+          <p className="text-muted-foreground text-xs">
+            {item.resolved_at ? new Date(item.resolved_at).toLocaleDateString("ar-SA") : ""}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {item.user_confirmation === true && (
+            <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full">مكتمل</span>
+          )}
+          {item.user_confirmation === false && (
+            <span className="text-[10px] bg-destructive/10 text-destructive px-2 py-0.5 rounded-full">مرفوض من المستخدم</span>
+          )}
+          {item.user_confirmation === null && (
+            <span className="text-[10px] bg-yellow-500/10 text-yellow-600 px-2 py-0.5 rounded-full">بانتظار الرد</span>
+          )}
+          {expanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="px-4 pb-4 space-y-3 border-t border-border/30 pt-3">
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div>
+              <p className="text-muted-foreground text-xs mb-1">اسم الخط</p>
+              <p className="text-foreground font-medium">{item.assigned_font_name ?? "—"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs mb-1">تاريخ الحل</p>
+              <p className="text-foreground">{item.resolved_at ? new Date(item.resolved_at).toLocaleString("ar-SA") : "—"}</p>
+            </div>
+          </div>
+
+          {item.admin_download_url && (
+            <div>
+              <p className="text-muted-foreground text-xs mb-1">رابط التحميل</p>
+              <a
+                href={item.admin_download_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary text-sm flex items-center gap-1 hover:underline"
+              >
+                <Download className="w-3.5 h-3.5" />
+                تحميل الخط
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          )}
+
+          {item.query_text && (
+            <div>
+              <p className="text-muted-foreground text-xs mb-1">استفسار المستخدم</p>
+              <p className="text-foreground text-sm bg-muted/50 rounded px-2 py-1">{item.query_text}</p>
+            </div>
+          )}
+
+          <div>
+            <p className="text-muted-foreground text-xs mb-1">حالة تأكيد المستخدم</p>
+            <p className="text-foreground text-sm">
+              {item.user_confirmation === true ? "✅ أكد المستخدم أن الخط صحيح" :
+               item.user_confirmation === false ? "❌ المستخدم رفض النتيجة" :
+               "⏳ بانتظار رد المستخدم"}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
