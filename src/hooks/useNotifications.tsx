@@ -135,7 +135,7 @@ const useNotifications = () => {
     };
 
     checkForUpdates();
-    const interval = setInterval(checkForUpdates, 30000);
+    const interval = setInterval(checkForUpdates, 10000);
 
     return () => clearInterval(interval);
   }, [user?.id]);
