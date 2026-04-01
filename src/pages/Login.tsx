@@ -88,7 +88,7 @@ const Login = () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      await supabase.rpc("log_security_event", { p_action: action, p_metadata: _metadata ?? {} });
+      await supabase.rpc("log_security_event", { p_action: action, p_metadata: (_metadata ?? {}) as Record<string, string> });
     } catch {
       // Silent fail for logging
     }
