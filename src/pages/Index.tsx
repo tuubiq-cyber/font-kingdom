@@ -79,10 +79,10 @@ const Index = () => {
     return vid;
   };
 
-  // Welcome message for new users (first time only)
+  // Welcome message for new visitors (first time only)
   useEffect(() => {
-    if (!user?.id) return;
-    const welcomeKey = `kingdom_welcomed_${user.id}`;
+    const vid = getVisitorId();
+    const welcomeKey = `kingdom_welcomed_${vid}`;
     if (!localStorage.getItem(welcomeKey)) {
       localStorage.setItem(welcomeKey, "1");
       setTimeout(() => {
@@ -92,7 +92,7 @@ const Index = () => {
         });
       }, 1500);
     }
-  }, [user?.id]);
+  }, []);
 
   useEffect(() => {
     const trackVisit = async () => {
